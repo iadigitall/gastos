@@ -11,7 +11,7 @@ const CATEGORIAS = {
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
-const CAT_COLORS = { alimentacao:'#6c63ff', transporte:'#f59e0b', lazer:'#22c55e', saude:'#ef4444', outros:'#94a3b8' };
+const CAT_COLORS = { alimentacao:'#a3e635', transporte:'#38bdf8', lazer:'#f472b6', saude:'#fb923c', outros:'#6b7280' };
 let chartCategories = null, chartMonthly = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -214,7 +214,7 @@ function renderBills() {
     const overdue=!c.paga&&c.vencimento&&c.vencimento<today;
     const meta=c.vencimento?`${overdue?'⚠️ Venceu em: ':'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
     const fixedBadge=c.contaFixaId?'<span class="fixed-badge">🔁 Fixa</span>':'';
-    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>✅ Pago</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">🗑️</button>`:''}</div>`;
+    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>✅</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">🗑️</button>`:''}</div>`;
   }).join('')}</div>`;
 }
 
@@ -295,7 +295,7 @@ function renderHistory() {
   entries.sort(([,a],[,b])=>(b.criadoEm||0)-(a.criadoEm||0));
   container.innerHTML=`<div class="history-inner">${entries.map(([id,g])=>{
     const cat=CATEGORIAS[g.categoria]||CATEGORIAS.outros;
-    return`<div class="history-item"><span class="history-cat-icon">${cat.icon}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}</div></div><div class="history-value">${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">🗑️</button></div>`;
+    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">🗑️</button></div>`;
   }).join('')}</div>`;
 }
 
