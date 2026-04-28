@@ -103,10 +103,24 @@
     <div class="view-header">
       <button id="btn-back-bills" class="btn-back">← Voltar</button>
       <h2>Contas a Pagar</h2>
+      <button id="btn-manage-fixed" class="btn-icon btn-icon-outline" title="Contas Fixas">🔁</button>
       <button id="btn-add-bill" class="btn-icon">➕</button>
     </div>
     <div class="view-content">
       <div id="bills-list"></div>
+    </div>
+  </div>
+
+  <!-- FIXED BILLS -->
+  <div id="view-fixed-bills" class="view">
+    <div class="view-header">
+      <button id="btn-back-fixed" class="btn-back">← Voltar</button>
+      <h2>Contas Fixas</h2>
+      <button id="btn-add-fixed-bill" class="btn-icon">➕</button>
+    </div>
+    <div class="view-content">
+      <p class="view-subtitle">Adicionadas automaticamente todo mês</p>
+      <div id="fixed-bills-list"></div>
     </div>
   </div>
 
@@ -147,6 +161,32 @@
       <span class="nav-label">Histórico</span>
     </button>
   </nav>
+
+  <!-- MODAL: Add Fixed Bill -->
+  <div id="modal-add-fixed-bill" class="modal hidden">
+    <div class="modal-backdrop" data-close="modal-add-fixed-bill"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔁 Nova Conta Fixa</h3>
+        <button class="modal-close" data-close="modal-add-fixed-bill">✕</button>
+      </div>
+      <form id="form-fixed-bill">
+        <div class="form-group">
+          <label for="fixed-name">Nome da conta</label>
+          <input id="fixed-name" type="text" placeholder="Ex: Aluguel, Internet, Energia..." autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="fixed-value">Valor (R$)</label>
+          <input id="fixed-value" type="number" step="0.01" min="0.01" placeholder="0,00" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label for="fixed-day">Dia do vencimento (1–28)</label>
+          <input id="fixed-day" type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric">
+        </div>
+        <button type="submit" class="btn-primary">✅ Salvar Conta Fixa</button>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL: Add Bill -->
   <div id="modal-add-bill" class="modal hidden">

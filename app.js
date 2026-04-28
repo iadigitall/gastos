@@ -8,8 +8,9 @@ const CATEGORIAS = {
   saude:       { icon: '🏥', label: 'Saúde' },
   outros:      { icon: '📦', label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false };
 let db = null, toastTimer = null, currentMonthListener = null;
+const _addingFixed = new Set(), _appliedFixed = new Set();
 
 document.addEventListener('DOMContentLoaded', () => {
   state.mesAtual = getCurrentMonthKey();
@@ -27,9 +28,12 @@ function initFirebase() {
       document.getElementById('offline-banner').classList.toggle('hidden', snap.val() === true);
     });
     subscribeToMonth(state.mesAtual);
+    subscribeToFixedBills();
   } catch (err) {
     console.warn('Firebase:', err.message);
-    state.firebaseOk = false; loadFromLocalStorage(); showSetupMessage(); renderAll();
+    state.firebaseOk = false;
+    loadFromLocalStorage(); loadFixedBillsFromLocalStorage();
+    showSetupMessage(); renderAll();
   }
 }
 
@@ -53,11 +57,50 @@ function subscribeToMonth(key) {
   }, err => { console.error(err); showToast('❌ Erro ao carregar dados'); });
 }
 
+function subscribeToFixedBills() {
+  if (!db) return;
+  db.ref('contasFixas').on('value', snap => {
+    state.contasFixas = snap.val() || {};
+    renderFixedBills();
+    applyFixedBillsToCurrentMonth();
+  }, err => console.error('Erro contasFixas:', err));
+}
+
+async function applyFixedBillsToCurrentMonth() {
+  if (!db) return;
+  for (const [fixaId, fixa] of Object.entries(state.contasFixas)) {
+    if (fixa.ativa === false) continue;
+    if (_appliedFixed.has(fixaId)) continue;
+    if (_addingFixed.has(fixaId)) continue;
+    if (Object.values(state.contas).some(c => c.contaFixaId === fixaId)) {
+      _appliedFixed.add(fixaId); continue;
+    }
+    _addingFixed.add(fixaId);
+    const [year, month] = state.mesAtual.split('-');
+    const dia = Math.min(fixa.diaVencimento || 1, 28);
+    const vencimento = `${year}-${month}-${String(dia).padStart(2, '0')}`;
+    try {
+      await db.ref(`meses/${state.mesAtual}/contas`).push({
+        nome: fixa.nome, valor: fixa.valor, vencimento,
+        paga: false, pagaEm: null, criadoEm: Date.now(), contaFixaId: fixaId
+      });
+      _appliedFixed.add(fixaId);
+    } catch(err) { console.error('Erro ao aplicar conta fixa:', err); }
+    finally { _addingFixed.delete(fixaId); }
+  }
+}
+
 function saveToLocalStorage() {
   try { localStorage.setItem(`nd_${state.mesAtual}`, JSON.stringify({ gastos: state.gastos, contas: state.contas })); } catch(_) {}
 }
 function loadFromLocalStorage() {
   try { const d = JSON.parse(localStorage.getItem(`nd_${state.mesAtual}`) || '{}'); state.gastos = d.gastos||{}; state.contas = d.contas||{}; } catch(_) {}
+}
+function saveFixedBillsToLocalStorage() {
+  try { localStorage.setItem('nd_contasFixas', JSON.stringify(state.contasFixas)); } catch(_) {}
+}
+function loadFixedBillsFromLocalStorage() {
+  try { state.contasFixas = JSON.parse(localStorage.getItem('nd_contasFixas') || '{}'); } catch(_) {}
 }
 
 function getCurrentMonthKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
@@ -99,6 +142,7 @@ function setupForms() {
   }));
   document.getElementById('form-expense').addEventListener('submit',handleAddExpense);
   document.getElementById('form-bill').addEventListener('submit',handleAddBill);
+  document.getElementById('form-fixed-bill').addEventListener('submit',handleAddFixedBill);
   resetDates();
 }
 function resetDates() { const t=todayStr(); const e=document.getElementById('expense-date'),b=document.getElementById('bill-due'); if(e)e.value=t; if(b)b.value=t; }
@@ -142,10 +186,15 @@ async function executeDelete() {
       if(db) await db.ref(`meses/${state.mesAtual}/gastos/${id}`).remove();
       else { delete state.gastos[id]; saveToLocalStorage(); renderAll(); }
       showToast('🗑️ Gasto removido');
-    } else {
+    } else if(type==='conta') {
       if(db) await db.ref(`meses/${state.mesAtual}/contas/${id}`).remove();
       else { delete state.contas[id]; saveToLocalStorage(); renderAll(); }
       showToast('🗑️ Conta removida');
+    } else if(type==='contaFixa') {
+      if(db) await db.ref(`contasFixas/${id}`).remove();
+      else { delete state.contasFixas[id]; saveFixedBillsToLocalStorage(); renderFixedBills(); }
+      _appliedFixed.delete(id);
+      showToast('🗑️ Conta fixa removida');
     }
   } catch(err) { showToast('❌ Erro ao apagar'); }
   state.pendingDeleteId=null; state.pendingDeleteType=null;
@@ -159,7 +208,8 @@ function renderBills() {
   container.innerHTML=`<div class="bills-list-inner">${entries.map(([id,c])=>{
     const overdue=!c.paga&&c.vencimento&&c.vencimento<today;
     const meta=c.vencimento?`${overdue?'⚠️ Venceu em: ':'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
-    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>✅ Pago</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">🗑️</button>`:''}</div>`;
+    const fixedBadge=c.contaFixaId?'<span class="fixed-badge">🔁 Fixa</span>':'';
+    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>✅ Pago</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">🗑️</button>`:''}</div>`;
   }).join('')}</div>`;
 }
 
@@ -195,6 +245,44 @@ async function handleAddBill(e) {
   } catch(err){showToast('❌ Erro ao salvar.');}
 }
 
+function renderFixedBills() {
+  const container=document.getElementById('fixed-bills-list');
+  if(!container) return;
+  const entries=Object.entries(state.contasFixas);
+  if(!entries.length){
+    container.innerHTML=`<div class="empty-state"><span class="empty-icon">🔁</span><p>Nenhuma conta fixa cadastrada</p><p class="empty-sub">Toque no ➕ para adicionar</p></div>`;
+    return;
+  }
+  entries.sort(([,a],[,b])=>(a.nome||'').localeCompare(b.nome||''));
+  container.innerHTML=`<div class="fixed-bills-inner">${entries.map(([id,f])=>{
+    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">🗑️</button></div>`;
+  }).join('')}</div>`;
+}
+
+async function handleAddFixedBill(e) {
+  e.preventDefault();
+  const nome=document.getElementById('fixed-name').value.trim();
+  const value=parseFloat(document.getElementById('fixed-value').value);
+  const day=parseInt(document.getElementById('fixed-day').value);
+  if(!nome) return showToast('❗ Dá um nome pra conta fixa');
+  if(!value||value<=0) return showToast('❗ Coloca o valor certinho');
+  if(!day||day<1||day>28) return showToast('❗ Dia deve ser entre 1 e 28');
+  const entry={nome,valor:value,diaVencimento:day,ativa:true,criadoEm:Date.now()};
+  try {
+    if(db) { await db.ref('contasFixas').push(entry); }
+    else { state.contasFixas[genId()]=entry; saveFixedBillsToLocalStorage(); renderFixedBills(); applyFixedBillsToCurrentMonth(); }
+    closeModal('modal-add-fixed-bill'); document.getElementById('form-fixed-bill').reset();
+    showToast('✅ Conta fixa criada! Adicionada a este mês.');
+  } catch(err){showToast('❌ Erro ao salvar.');}
+}
+
+function confirmDeleteFixedBill(id,nome) {
+  state.pendingDeleteId=id; state.pendingDeleteType='contaFixa';
+  document.querySelector('#modal-confirm-delete .modal-title').textContent='Remover conta fixa?';
+  document.getElementById('delete-item-name').textContent=`"${nome}" não será mais gerada nos próximos meses. As contas já criadas este mês não são afetadas.`;
+  openModal('modal-confirm-delete');
+}
+
 function renderHistory() {
   const container=document.getElementById('history-list');
   const entries=Object.entries(state.gastos);
@@ -219,7 +307,9 @@ async function handleCloseMonth() {
   try {
     if(db){await db.ref(`historico/${key}`).set(arquivo);await db.ref(`meses/${key}`).remove();}
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
-    state.gastos={};state.contas={};closeModal('modal-close-month');showToast('🎉 Mês fechado!');navigateTo('home');renderAll();
+    state.gastos={};state.contas={};
+    _appliedFixed.clear();
+    closeModal('modal-close-month');showToast('🎉 Mês fechado!');navigateTo('home');renderAll();
   } catch(err){showToast('❌ Erro ao fechar o mês');}
 }
 
@@ -243,21 +333,24 @@ function setupNavigation() {
   document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>navigateTo(btn.dataset.view)));
   on('btn-back-expense','click',()=>navigateTo('home')); on('btn-back-bills','click',()=>navigateTo('home'));
   on('btn-back-history','click',()=>navigateTo('home')); on('btn-back-past','click',()=>navigateTo('home'));
+  on('btn-back-fixed','click',()=>navigateTo('bills'));
   on('btn-add-expense','click',()=>navigateTo('add-expense')); on('btn-go-bills','click',()=>navigateTo('bills'));
   on('btn-close-month','click',openCloseMonthModal);
   on('btn-history-months','click',()=>{loadPastMonths();navigateTo('past-months');});
+  on('btn-manage-fixed','click',()=>navigateTo('fixed-bills'));
 }
 
 function navigateTo(viewName) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===viewName));
   const view=document.getElementById(`view-${viewName}`); if(view)view.classList.add('active');
-  document.getElementById('bottom-nav').style.display=['past-months'].includes(viewName)?'none':'';
+  document.getElementById('bottom-nav').style.display=['past-months','fixed-bills'].includes(viewName)?'none':'';
   if(viewName==='add-expense')resetExpenseForm();
 }
 
 function setupModals() {
   on('btn-add-bill','click',()=>{document.getElementById('form-bill').reset();document.getElementById('bill-due').value=todayStr();openModal('modal-add-bill');setTimeout(()=>document.getElementById('bill-name').focus(),300);});
+  on('btn-add-fixed-bill','click',()=>{document.getElementById('form-fixed-bill').reset();openModal('modal-add-fixed-bill');setTimeout(()=>document.getElementById('fixed-name').focus(),300);});
   on('btn-confirm-close','click',handleCloseMonth); on('btn-confirm-delete','click',executeDelete);
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 }
@@ -271,4 +364,4 @@ function showToast(msg,duration=2600){
 function setupOnlineStatus(){window.addEventListener('online',()=>showToast('✅ Conexão restaurada'));window.addEventListener('offline',()=>showToast('📵 Sem conexão'));}
 function registerServiceWorker(){if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
-window.payBill=payBill; window.confirmDeleteExpense=confirmDeleteExpense; window.confirmDeleteBill=confirmDeleteBill;
+window.payBill=payBill; window.confirmDeleteExpense=confirmDeleteExpense; window.confirmDeleteBill=confirmDeleteBill; window.confirmDeleteFixedBill=confirmDeleteFixedBill;
