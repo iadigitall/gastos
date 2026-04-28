@@ -314,6 +314,88 @@ html, body {
 .setup-card h3 { color: var(--primary); margin-bottom: 8px; font-size: 14px; }
 .setup-card code { background: rgba(108,99,255,0.2); padding: 2px 6px; border-radius: 4px; color: var(--primary); }
 
+/* LAYOUT IMPROVEMENTS */
+.app-header {
+  background: linear-gradient(135deg, var(--bg-card) 0%, #1e1e35 100%);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.debt-card {
+  box-shadow: 0 6px 24px rgba(108,99,255,0.25);
+}
+.debt-value { letter-spacing: -1px; }
+
+.stat-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: transform 0.15s;
+}
+
+.bill-item {
+  border-left: 3px solid var(--bills-color);
+  transition: opacity 0.3s, transform 0.15s;
+}
+.bill-item.paid { border-left-color: var(--success); }
+
+.history-item {
+  transition: transform 0.15s;
+}
+
+.nav-btn { position: relative; transition: color 0.15s; }
+.nav-btn.active .nav-icon { transform: translateY(-2px); display: inline-block; transition: transform 0.2s ease; }
+.nav-btn::after {
+  content: ''; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 3px; border-radius: 99px;
+  background: var(--primary); transition: width 0.2s ease;
+}
+.nav-btn.active::after { width: 20px; }
+
+.modal-content {
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* DASHBOARD */
+.dash-month-label {
+  font-size: 15px; font-weight: 700; text-align: center;
+  color: var(--text-muted); padding: 4px 0 2px;
+}
+
+.dash-stats-row { display: flex; flex-direction: column; gap: 8px; }
+
+.dash-stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dash-danger { border-left-color: var(--danger); }
+.dash-bills  { border-left-color: var(--bills-color); }
+.dash-primary{ border-left-color: var(--primary); }
+
+.dash-stat-label { font-size: 13px; color: var(--text-muted); }
+.dash-stat-value { font-size: 18px; font-weight: 700; }
+
+.dash-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.dash-card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.chart-wrap { position: relative; height: 230px; }
+.chart-wrap-tall { height: 200px; }
+
+.chart-empty-msg {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; color: var(--text-muted); font-size: 13px;
+}
+.chart-empty-msg span { font-size: 32px; }
+.chart-empty-msg.hidden { display: none; }
+
 /* FIXED BILLS */
 .btn-icon-outline {
   background: transparent;

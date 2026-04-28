@@ -11,6 +11,8 @@ const CATEGORIAS = {
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
+const CAT_COLORS = { alimentacao:'#6c63ff', transporte:'#f59e0b', lazer:'#22c55e', saude:'#ef4444', outros:'#94a3b8' };
+let chartCategories = null, chartMonthly = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   state.mesAtual = getCurrentMonthKey();
@@ -109,7 +111,10 @@ function formatCurrency(val) { return new Intl.NumberFormat('pt-BR',{style:'curr
 function formatDate(str) { if(!str)return''; const[y,m,d]=str.split('-'); return`${d}/${m}/${y}`; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function genId() { return`${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
-function renderAll() { renderDashboard(); renderBills(); renderHistory(); }
+function renderAll() {
+  renderDashboard(); renderBills(); renderHistory();
+  if (document.getElementById('view-dashboard')?.classList.contains('active')) renderCategoryChart();
+}
 
 function updateHeaderMonth() {
   const d=new Date();
@@ -345,7 +350,8 @@ function navigateTo(viewName) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===viewName));
   const view=document.getElementById(`view-${viewName}`); if(view)view.classList.add('active');
   document.getElementById('bottom-nav').style.display=['past-months','fixed-bills'].includes(viewName)?'none':'';
-  if(viewName==='add-expense')resetExpenseForm();
+  if(viewName==='add-expense') resetExpenseForm();
+  if(viewName==='dashboard') renderDashboardTab();
 }
 
 function setupModals() {
@@ -364,4 +370,87 @@ function showToast(msg,duration=2600){
 function setupOnlineStatus(){window.addEventListener('online',()=>showToast('✅ Conexão restaurada'));window.addEventListener('offline',()=>showToast('📵 Sem conexão'));}
 function registerServiceWorker(){if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
+function renderDashboardTab() {
+  const d=new Date();
+  const el=document.getElementById('dash-month-label');
+  if(el) el.textContent=`${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+  const gastos=Object.values(state.gastos), contas=Object.values(state.contas);
+  const tG=gastos.reduce((s,g)=>s+(g.valor||0),0);
+  const tC=contas.reduce((s,c)=>s+(c.valor||0),0);
+  const elG=document.getElementById('dash-gastos'), elC=document.getElementById('dash-contas'), elT=document.getElementById('dash-total');
+  if(elG) elG.textContent=formatCurrency(tG);
+  if(elC) elC.textContent=formatCurrency(tC);
+  if(elT) elT.textContent=formatCurrency(tG+tC);
+  renderCategoryChart();
+  renderMonthlyChart();
+}
+
+function renderCategoryChart() {
+  const totals={};
+  for(const g of Object.values(state.gastos)){const c=g.categoria||'outros';totals[c]=(totals[c]||0)+(g.valor||0);}
+  const cats=Object.entries(totals).filter(([,v])=>v>0);
+  const empty=document.getElementById('chart-cat-empty');
+  const canvas=document.getElementById('chart-categories');
+  if(!cats.length){
+    if(chartCategories){chartCategories.destroy();chartCategories=null;}
+    if(empty)empty.classList.remove('hidden');
+    if(canvas)canvas.style.display='none';
+    return;
+  }
+  if(empty)empty.classList.add('hidden');
+  if(canvas)canvas.style.display='';
+  if(chartCategories){chartCategories.destroy();chartCategories=null;}
+  if(!canvas)return;
+  const labels=cats.map(([k])=>`${CATEGORIAS[k]?.icon||''} ${CATEGORIAS[k]?.label||k}`);
+  const data=cats.map(([,v])=>v);
+  const colors=cats.map(([k])=>CAT_COLORS[k]||'#94a3b8');
+  chartCategories=new Chart(canvas,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true}},
+      tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)}`}}
+    }}
+  });
+}
+
+async function renderMonthlyChart() {
+  const empty=document.getElementById('chart-monthly-empty');
+  const canvas=document.getElementById('chart-monthly');
+  let historico={};
+  if(db){try{const snap=await db.ref('historico').once('value');historico=snap.val()||{};}catch(e){}}
+  const pastKeys=Object.keys(historico).sort().slice(-5);
+  const allKeys=[...pastKeys,state.mesAtual];
+  if(allKeys.length<=1&&!Object.values(state.gastos).length&&!Object.values(state.contas).length){
+    if(chartMonthly){chartMonthly.destroy();chartMonthly=null;}
+    if(empty)empty.classList.remove('hidden');
+    if(canvas)canvas.style.display='none';
+    return;
+  }
+  if(empty)empty.classList.add('hidden');
+  if(canvas)canvas.style.display='';
+  if(chartMonthly){chartMonthly.destroy();chartMonthly=null;}
+  if(!canvas)return;
+  const labels=allKeys.map(k=>{const[,m]=k.split('-');return MESES[parseInt(m)-1].slice(0,3);});
+  const gastosData=allKeys.map(k=>k===state.mesAtual?Object.values(state.gastos).reduce((s,g)=>s+(g.valor||0),0):(historico[k]?.totalGastos||0));
+  const contasData=allKeys.map(k=>k===state.mesAtual?Object.values(state.contas).reduce((s,c)=>s+(c.valor||0),0):(historico[k]?.totalContas||0));
+  chartMonthly=new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Gastos',data:gastosData,backgroundColor:'rgba(239,68,68,0.85)',borderRadius:6,borderSkipped:false},
+      {label:'Contas',data:contasData,backgroundColor:'rgba(245,158,11,0.85)',borderRadius:6,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{ticks:{color:'#8888aa',font:{size:12}},grid:{color:'rgba(42,42,69,0.6)'}},
+        y:{ticks:{color:'#8888aa',font:{size:11},callback:v=>'R$'+v},grid:{color:'rgba(42,42,69,0.6)'}}
+      },
+      plugins:{
+        legend:{labels:{color:'#f0f0f5',font:{size:12},usePointStyle:true,padding:14}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${formatCurrency(c.raw)}`}}
+      }
+    }
+  });
+}
+
 window.payBill=payBill; window.confirmDeleteExpense=confirmDeleteExpense; window.confirmDeleteBill=confirmDeleteBill; window.confirmDeleteFixedBill=confirmDeleteFixedBill;

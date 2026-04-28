@@ -146,6 +146,48 @@
     </div>
   </div>
 
+  <!-- DASHBOARD -->
+  <div id="view-dashboard" class="view">
+    <div class="view-content">
+      <div class="dash-month-label" id="dash-month-label"></div>
+
+      <div class="dash-stats-row">
+        <div class="dash-stat-card dash-danger">
+          <div class="dash-stat-label">🛍️ Gastos</div>
+          <div class="dash-stat-value danger" id="dash-gastos">R$ 0,00</div>
+        </div>
+        <div class="dash-stat-card dash-bills">
+          <div class="dash-stat-label">📋 Contas</div>
+          <div class="dash-stat-value bills" id="dash-contas">R$ 0,00</div>
+        </div>
+        <div class="dash-stat-card dash-primary">
+          <div class="dash-stat-label">📊 Total</div>
+          <div class="dash-stat-value" id="dash-total">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Gastos por categoria</div>
+        <div class="chart-wrap">
+          <div id="chart-cat-empty" class="chart-empty-msg hidden">
+            <span>📊</span><p>Nenhum gasto lançado ainda</p>
+          </div>
+          <canvas id="chart-categories"></canvas>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">Comparativo mensal</div>
+        <div class="chart-wrap chart-wrap-tall">
+          <div id="chart-monthly-empty" class="chart-empty-msg hidden">
+            <span>📅</span><p>Sem histórico ainda</p>
+          </div>
+          <canvas id="chart-monthly"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav id="bottom-nav" class="bottom-nav">
     <button class="nav-btn active" data-view="home">
@@ -155,6 +197,10 @@
     <button class="nav-btn" data-view="bills">
       <span class="nav-icon">📋</span>
       <span class="nav-label">Contas</span>
+    </button>
+    <button class="nav-btn" data-view="dashboard">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Dashboard</span>
     </button>
     <button class="nav-btn" data-view="history">
       <span class="nav-icon">📜</span>
@@ -250,6 +296,7 @@
 
   <div id="toast" class="toast hidden"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
