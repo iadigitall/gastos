@@ -1,14 +1,11 @@
-// Preencha com os dados do seu projeto Firebase:
-// https://console.firebase.google.com → Configurações do projeto → Seus apps → SDK
-
 const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY_AQUI",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
-  projectId: "SEU_PROJETO",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:000000000000000000000000"
+  apiKey: "AIzaSyChqu5iIVRP23VP-ufZw0glv_8fU6gP7s4",
+  authDomain: "financas-14a3b.firebaseapp.com",
+  databaseURL: "https://financas-14a3b-default-rtdb.firebaseio.com",
+  projectId: "financas-14a3b",
+  storageBucket: "financas-14a3b.firebasestorage.app",
+  messagingSenderId: "41461378465",
+  appId: "1:41461378465:web:58cde4a6ee1c8dcddcefe0"
 };
 
 if (typeof firebase !== 'undefined') {
