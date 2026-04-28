@@ -19,7 +19,7 @@
   <div id="offline-banner" class="hidden">📵 Sem conexão — modo offline</div>
 
   <header class="app-header">
-    <div class="app-title">fin<span>.</span></div>
+    <div class="app-title">💰 Minhas Finanças</div>
     <div id="header-month" class="header-month"></div>
   </header>
 
@@ -27,42 +27,38 @@
   <div id="view-home" class="view active">
     <div class="view-content">
 
-      <!-- Card de Saldo — mesmo layout do Behance -->
       <div id="debt-card" class="debt-card">
-        <div class="debt-card-inner">
-          <div class="debt-left">
-            <div class="debt-label">Saldo Devedor</div>
-            <div id="total-debt" class="debt-value">R$ 0,00</div>
-            <div class="debt-progress">
-              <div class="progress-track"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
-              <div class="progress-info"><span id="paid-amount">R$ 0,00</span> pago · <span id="progress-percent">0</span>%</div>
-            </div>
+        <div class="debt-label">Saldo Devedor</div>
+        <div id="total-debt" class="debt-value">R$ 0,00</div>
+        <div class="progress-container">
+          <div class="progress-track">
+            <div id="progress-bar" class="progress-bar" style="width:0%"></div>
           </div>
-          <div class="debt-sep"></div>
-          <div class="debt-right">
-            <div class="debt-stat">
-              <div class="debt-stat-label">Despesas</div>
-              <div id="stat-expenses" class="debt-stat-value danger">R$ 0,00</div>
-            </div>
-            <div class="debt-stat-divider"></div>
-            <div class="debt-stat">
-              <div class="debt-stat-label">Pendente</div>
-              <div id="stat-pending" class="debt-stat-value bills">R$ 0,00</div>
-            </div>
+          <div class="progress-info">
+            <span id="paid-amount">R$ 0,00</span> pago de <span id="total-amount">R$ 0,00</span>
+            (<span id="progress-percent">0</span>%)
           </div>
         </div>
       </div>
-      <!-- total-amount hidden, mantido para o JS -->
-      <span id="total-amount" style="display:none">R$ 0,00</span>
 
-      <!-- Botões igual ao Behance: outlined + filled -->
-      <div class="action-buttons">
-        <button id="btn-add-expense" class="btn-action btn-expense">+ ADICIONAR GASTO</button>
-        <button id="btn-go-bills" class="btn-action btn-bills">VER CONTAS →</button>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">🛍️ Gastos</div>
+          <div id="stat-expenses" class="stat-value danger">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">⏳ Pendente</div>
+          <div id="stat-pending" class="stat-value bills">R$ 0,00</div>
+        </div>
       </div>
 
-      <button id="btn-close-month" class="btn-secondary">Fechar Mês</button>
-      <button id="btn-history-months" class="btn-link">Ver meses anteriores →</button>
+      <div class="action-buttons">
+        <button id="btn-add-expense" class="btn-action btn-expense">➕ Adicionar Gasto</button>
+        <button id="btn-go-bills" class="btn-action btn-bills">📋 Ver Contas</button>
+      </div>
+
+      <button id="btn-close-month" class="btn-secondary">🗓️ Fechar Mês</button>
+      <button id="btn-history-months" class="btn-link">📅 Ver meses anteriores</button>
 
     </div>
   </div>
@@ -107,24 +103,10 @@
     <div class="view-header">
       <button id="btn-back-bills" class="btn-back">← Voltar</button>
       <h2>Contas a Pagar</h2>
-      <button id="btn-manage-fixed" class="btn-icon btn-icon-outline" title="Contas Fixas">🔁</button>
       <button id="btn-add-bill" class="btn-icon">➕</button>
     </div>
     <div class="view-content">
       <div id="bills-list"></div>
-    </div>
-  </div>
-
-  <!-- FIXED BILLS -->
-  <div id="view-fixed-bills" class="view">
-    <div class="view-header">
-      <button id="btn-back-fixed" class="btn-back">← Voltar</button>
-      <h2>Contas Fixas</h2>
-      <button id="btn-add-fixed-bill" class="btn-icon">➕</button>
-    </div>
-    <div class="view-content">
-      <p class="view-subtitle">Adicionadas automaticamente todo mês</p>
-      <div id="fixed-bills-list"></div>
     </div>
   </div>
 
@@ -150,48 +132,6 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="view-dashboard" class="view">
-    <div class="view-content">
-      <div class="dash-month-label" id="dash-month-label"></div>
-
-      <div class="dash-stats-row">
-        <div class="dash-stat-card dash-danger">
-          <div class="dash-stat-label">🛍️ Gastos</div>
-          <div class="dash-stat-value danger" id="dash-gastos">R$ 0,00</div>
-        </div>
-        <div class="dash-stat-card dash-bills">
-          <div class="dash-stat-label">📋 Contas</div>
-          <div class="dash-stat-value bills" id="dash-contas">R$ 0,00</div>
-        </div>
-        <div class="dash-stat-card dash-primary">
-          <div class="dash-stat-label">📊 Total</div>
-          <div class="dash-stat-value" id="dash-total">R$ 0,00</div>
-        </div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-card-title">Gastos por categoria</div>
-        <div class="chart-wrap">
-          <div id="chart-cat-empty" class="chart-empty-msg hidden">
-            <span>📊</span><p>Nenhum gasto lançado ainda</p>
-          </div>
-          <canvas id="chart-categories"></canvas>
-        </div>
-      </div>
-
-      <div class="dash-card">
-        <div class="dash-card-title">Comparativo mensal</div>
-        <div class="chart-wrap chart-wrap-tall">
-          <div id="chart-monthly-empty" class="chart-empty-msg hidden">
-            <span>📅</span><p>Sem histórico ainda</p>
-          </div>
-          <canvas id="chart-monthly"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- BOTTOM NAV -->
   <nav id="bottom-nav" class="bottom-nav">
     <button class="nav-btn active" data-view="home">
@@ -202,41 +142,11 @@
       <span class="nav-icon">📋</span>
       <span class="nav-label">Contas</span>
     </button>
-    <button class="nav-btn" data-view="dashboard">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Dashboard</span>
-    </button>
     <button class="nav-btn" data-view="history">
       <span class="nav-icon">📜</span>
       <span class="nav-label">Histórico</span>
     </button>
   </nav>
-
-  <!-- MODAL: Add Fixed Bill -->
-  <div id="modal-add-fixed-bill" class="modal hidden">
-    <div class="modal-backdrop" data-close="modal-add-fixed-bill"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>🔁 Nova Conta Fixa</h3>
-        <button class="modal-close" data-close="modal-add-fixed-bill">✕</button>
-      </div>
-      <form id="form-fixed-bill">
-        <div class="form-group">
-          <label for="fixed-name">Nome da conta</label>
-          <input id="fixed-name" type="text" placeholder="Ex: Aluguel, Internet, Energia..." autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="fixed-value">Valor (R$)</label>
-          <input id="fixed-value" type="number" step="0.01" min="0.01" placeholder="0,00" inputmode="decimal">
-        </div>
-        <div class="form-group">
-          <label for="fixed-day">Dia do vencimento (1–28)</label>
-          <input id="fixed-day" type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric">
-        </div>
-        <button type="submit" class="btn-primary">✅ Salvar Conta Fixa</button>
-      </form>
-    </div>
-  </div>
 
   <!-- MODAL: Add Bill -->
   <div id="modal-add-bill" class="modal hidden">
@@ -300,7 +210,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
