@@ -339,7 +339,7 @@ function setupNavigation() {
   on('btn-back-expense','click',()=>navigateTo('home')); on('btn-back-bills','click',()=>navigateTo('home'));
   on('btn-back-history','click',()=>navigateTo('home')); on('btn-back-past','click',()=>navigateTo('home'));
   on('btn-back-fixed','click',()=>navigateTo('bills'));
-  on('btn-add-expense','click',()=>navigateTo('add-expense')); on('btn-go-bills','click',()=>navigateTo('bills'));
+  on('btn-add-expense','click',()=>navigateTo('add-expense')); on('btn-add-expense-header','click',()=>navigateTo('add-expense')); on('btn-go-bills','click',()=>navigateTo('bills'));
   on('btn-close-month','click',openCloseMonthModal);
   on('btn-history-months','click',()=>{loadPastMonths();navigateTo('past-months');});
   on('btn-manage-fixed','click',()=>navigateTo('fixed-bills'));

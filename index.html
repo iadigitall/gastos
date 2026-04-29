@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#6c63ff">
+  <meta name="theme-color" content="#0D0D0D">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,50 +18,67 @@
 
   <div id="offline-banner" class="hidden">📵 Sem conexão — modo offline</div>
 
+  <!-- HEADER igual ao Behance -->
   <header class="app-header">
-    <div class="app-title">fin<span>.</span></div>
-    <div id="header-month" class="header-month"></div>
+    <div class="app-logo">&lt;/&gt;</div>
+    <div class="header-center">
+      <div class="month-nav">
+        <span class="month-nav-label" id="header-month">Outubro, 2024</span>
+        <span class="month-cal">📅</span>
+      </div>
+    </div>
+    <button class="header-add-btn" id="btn-add-expense-header">＋</button>
   </header>
 
   <!-- HOME -->
   <div id="view-home" class="view active">
     <div class="view-content">
 
-      <!-- Card de Saldo — mesmo layout do Behance -->
+      <div class="greeting">Oi! 👋</div>
+
+      <!-- CARD SALDO — layout fiel ao Behance -->
       <div id="debt-card" class="debt-card">
-        <div class="debt-card-inner">
+        <div class="debt-inner">
+          <!-- coluna esquerda: saldo grande -->
           <div class="debt-left">
-            <div class="debt-label">Saldo Devedor</div>
+            <div class="debt-label">Saldo <span class="lbl-arrow">›</span></div>
             <div id="total-debt" class="debt-value">R$ 0,00</div>
-            <div class="debt-progress">
-              <div class="progress-track"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
-              <div class="progress-info"><span id="paid-amount">R$ 0,00</span> pago · <span id="progress-percent">0</span>%</div>
+            <div class="debt-prog-wrap">
+              <div class="progress-track">
+                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+              </div>
+              <div class="progress-info">
+                <span id="progress-percent">0</span>% utilizado
+              </div>
             </div>
           </div>
-          <div class="debt-sep"></div>
+          <!-- separador vertical -->
+          <div class="debt-vsep"></div>
+          <!-- coluna direita: despesas / pendente -->
           <div class="debt-right">
-            <div class="debt-stat">
-              <div class="debt-stat-label">Despesas</div>
-              <div id="stat-expenses" class="debt-stat-value danger">R$ 0,00</div>
+            <div class="debt-right-item">
+              <div class="debt-right-label">Despesas <span class="lbl-arrow">›</span></div>
+              <div id="stat-expenses" class="debt-right-val expense-val">R$ 0,00</div>
             </div>
-            <div class="debt-stat-divider"></div>
-            <div class="debt-stat">
-              <div class="debt-stat-label">Pendente</div>
-              <div id="stat-pending" class="debt-stat-value bills">R$ 0,00</div>
+            <div class="debt-right-sep"></div>
+            <div class="debt-right-item">
+              <div class="debt-right-label">Pendente <span class="lbl-arrow">›</span></div>
+              <div id="stat-pending" class="debt-right-val pending-val">R$ 0,00</div>
             </div>
           </div>
         </div>
+        <!-- botões pill na base do card -->
+        <div class="debt-actions">
+          <button id="btn-go-bills" class="pill-btn pill-green">+ VER CONTAS</button>
+          <button id="btn-add-expense" class="pill-btn pill-pink">− ADICIONAR GASTO</button>
+        </div>
       </div>
-      <!-- total-amount hidden, mantido para o JS -->
+
+      <!-- elementos ocultos mantidos para o JS -->
+      <span id="paid-amount"  style="display:none">R$ 0,00</span>
       <span id="total-amount" style="display:none">R$ 0,00</span>
 
-      <!-- Botões igual ao Behance: outlined + filled -->
-      <div class="action-buttons">
-        <button id="btn-add-expense" class="btn-action btn-expense">+ ADICIONAR GASTO</button>
-        <button id="btn-go-bills" class="btn-action btn-bills">VER CONTAS →</button>
-      </div>
-
-      <button id="btn-close-month" class="btn-secondary">Fechar Mês</button>
+      <button id="btn-close-month" class="btn-ghost">🗓️ Fechar Mês</button>
       <button id="btn-history-months" class="btn-link">Ver meses anteriores →</button>
 
     </div>
@@ -70,7 +87,7 @@
   <!-- ADD EXPENSE -->
   <div id="view-add-expense" class="view">
     <div class="view-header">
-      <button id="btn-back-expense" class="btn-back">← Voltar</button>
+      <button id="btn-back-expense" class="btn-back">‹ Voltar</button>
       <h2>Adicionar Gasto</h2>
     </div>
     <div class="view-content">
@@ -97,7 +114,7 @@
             <button type="button" class="category-btn" data-cat="outros">📦 Outros</button>
           </div>
         </div>
-        <button type="submit" id="btn-submit-expense" class="btn-primary">✅ Confirmar Gasto</button>
+        <button type="submit" id="btn-submit-expense" class="btn-primary">Confirmar Gasto</button>
       </form>
     </div>
   </div>
@@ -105,10 +122,10 @@
   <!-- BILLS -->
   <div id="view-bills" class="view">
     <div class="view-header">
-      <button id="btn-back-bills" class="btn-back">← Voltar</button>
+      <button id="btn-back-bills" class="btn-back">‹ Voltar</button>
       <h2>Contas a Pagar</h2>
-      <button id="btn-manage-fixed" class="btn-icon btn-icon-outline" title="Contas Fixas">🔁</button>
-      <button id="btn-add-bill" class="btn-icon">➕</button>
+      <button id="btn-manage-fixed" class="btn-icon-sm" title="Contas Fixas">🔁</button>
+      <button id="btn-add-bill" class="btn-icon-sm btn-icon-green">＋</button>
     </div>
     <div class="view-content">
       <div id="bills-list"></div>
@@ -118,12 +135,12 @@
   <!-- FIXED BILLS -->
   <div id="view-fixed-bills" class="view">
     <div class="view-header">
-      <button id="btn-back-fixed" class="btn-back">← Voltar</button>
+      <button id="btn-back-fixed" class="btn-back">‹ Voltar</button>
       <h2>Contas Fixas</h2>
-      <button id="btn-add-fixed-bill" class="btn-icon">➕</button>
+      <button id="btn-add-fixed-bill" class="btn-icon-sm btn-icon-green">＋</button>
     </div>
     <div class="view-content">
-      <p class="view-subtitle">Adicionadas automaticamente todo mês</p>
+      <p class="view-subtitle">Geradas automaticamente todo mês</p>
       <div id="fixed-bills-list"></div>
     </div>
   </div>
@@ -131,8 +148,8 @@
   <!-- HISTORY -->
   <div id="view-history" class="view">
     <div class="view-header">
-      <button id="btn-back-history" class="btn-back">← Voltar</button>
-      <h2>Histórico de Gastos</h2>
+      <button id="btn-back-history" class="btn-back">‹ Voltar</button>
+      <h2>Transações</h2>
     </div>
     <div class="view-content">
       <div id="history-list"></div>
@@ -142,7 +159,7 @@
   <!-- PAST MONTHS -->
   <div id="view-past-months" class="view">
     <div class="view-header">
-      <button id="btn-back-past" class="btn-back">← Voltar</button>
+      <button id="btn-back-past" class="btn-back">‹ Voltar</button>
       <h2>Meses Anteriores</h2>
     </div>
     <div class="view-content">
@@ -153,61 +170,68 @@
   <!-- DASHBOARD -->
   <div id="view-dashboard" class="view">
     <div class="view-content">
-      <div class="dash-month-label" id="dash-month-label"></div>
+      <div class="dash-period" id="dash-month-label"></div>
 
-      <div class="dash-stats-row">
-        <div class="dash-stat-card dash-danger">
-          <div class="dash-stat-label">🛍️ Gastos</div>
-          <div class="dash-stat-value danger" id="dash-gastos">R$ 0,00</div>
+      <div class="dash-totals">
+        <div class="dash-total-item">
+          <div class="dash-total-label">Despesas</div>
+          <div class="dash-total-val expense-val" id="dash-gastos">R$ 0,00</div>
         </div>
-        <div class="dash-stat-card dash-bills">
-          <div class="dash-stat-label">📋 Contas</div>
-          <div class="dash-stat-value bills" id="dash-contas">R$ 0,00</div>
+        <div class="dash-total-sep"></div>
+        <div class="dash-total-item">
+          <div class="dash-total-label">Pendente</div>
+          <div class="dash-total-val pending-val" id="dash-contas">R$ 0,00</div>
         </div>
-        <div class="dash-stat-card dash-primary">
-          <div class="dash-stat-label">📊 Total</div>
-          <div class="dash-stat-value" id="dash-total">R$ 0,00</div>
+        <div class="dash-total-sep"></div>
+        <div class="dash-total-item">
+          <div class="dash-total-label">Total</div>
+          <div class="dash-total-val" id="dash-total">R$ 0,00</div>
         </div>
       </div>
 
+      <!-- card Categorias -->
       <div class="dash-card">
-        <div class="dash-card-title">Gastos por categoria</div>
+        <div class="dash-card-header">
+          <span class="dash-card-title">Categorias</span>
+          <span class="dash-ver-tudo">Ver tudo ›</span>
+        </div>
         <div class="chart-wrap">
-          <div id="chart-cat-empty" class="chart-empty-msg hidden">
-            <span>📊</span><p>Nenhum gasto lançado ainda</p>
-          </div>
+          <div id="chart-cat-empty" class="chart-empty-msg hidden"><span>📊</span><p>Nenhum gasto ainda</p></div>
           <canvas id="chart-categories"></canvas>
         </div>
       </div>
 
+      <!-- card Comparação Mensal -->
       <div class="dash-card">
-        <div class="dash-card-title">Comparativo mensal</div>
+        <div class="dash-card-header">
+          <span class="dash-card-title">Comparação Mensal</span>
+          <span class="dash-ver-tudo">Mês x Mês ›</span>
+        </div>
         <div class="chart-wrap chart-wrap-tall">
-          <div id="chart-monthly-empty" class="chart-empty-msg hidden">
-            <span>📅</span><p>Sem histórico ainda</p>
-          </div>
+          <div id="chart-monthly-empty" class="chart-empty-msg hidden"><span>📅</span><p>Sem histórico ainda</p></div>
           <canvas id="chart-monthly"></canvas>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV — ícones estilo sidebar do Behance -->
   <nav id="bottom-nav" class="bottom-nav">
     <button class="nav-btn active" data-view="home">
-      <span class="nav-icon">🏠</span>
+      <div class="nav-icon-wrap"><svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
       <span class="nav-label">Início</span>
     </button>
     <button class="nav-btn" data-view="bills">
-      <span class="nav-icon">📋</span>
+      <div class="nav-icon-wrap"><svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
       <span class="nav-label">Contas</span>
     </button>
     <button class="nav-btn" data-view="dashboard">
-      <span class="nav-icon">📊</span>
+      <div class="nav-icon-wrap"><svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
       <span class="nav-label">Dashboard</span>
     </button>
     <button class="nav-btn" data-view="history">
-      <span class="nav-icon">📜</span>
+      <div class="nav-icon-wrap"><svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
       <span class="nav-label">Histórico</span>
     </button>
   </nav>
@@ -217,7 +241,7 @@
     <div class="modal-backdrop" data-close="modal-add-fixed-bill"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>🔁 Nova Conta Fixa</h3>
+        <h3>Nova Conta Fixa</h3>
         <button class="modal-close" data-close="modal-add-fixed-bill">✕</button>
       </div>
       <form id="form-fixed-bill">
@@ -233,7 +257,7 @@
           <label for="fixed-day">Dia do vencimento (1–28)</label>
           <input id="fixed-day" type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric">
         </div>
-        <button type="submit" class="btn-primary">✅ Salvar Conta Fixa</button>
+        <button type="submit" class="btn-primary">Salvar Conta Fixa</button>
       </form>
     </div>
   </div>
@@ -243,7 +267,7 @@
     <div class="modal-backdrop" data-close="modal-add-bill"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>➕ Nova Conta</h3>
+        <h3>Nova Conta</h3>
         <button class="modal-close" data-close="modal-add-bill">✕</button>
       </div>
       <form id="form-bill">
@@ -259,7 +283,7 @@
           <label for="bill-due">Vencimento</label>
           <input id="bill-due" type="date">
         </div>
-        <button type="submit" class="btn-primary">✅ Adicionar Conta</button>
+        <button type="submit" class="btn-primary">Adicionar Conta</button>
       </form>
     </div>
   </div>
@@ -274,7 +298,7 @@
       <p id="delete-item-name" class="modal-body-text"></p>
       <div class="modal-actions">
         <button data-close="modal-confirm-delete" class="btn-secondary">Cancelar</button>
-        <button id="btn-confirm-delete" class="btn-danger">🗑️ Apagar</button>
+        <button id="btn-confirm-delete" class="btn-danger">Apagar</button>
       </div>
     </div>
   </div>
@@ -284,16 +308,16 @@
     <div class="modal-backdrop" data-close="modal-close-month"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>🗓️ Fechar Mês</h3>
+        <h3>Fechar Mês</h3>
         <button class="modal-close" data-close="modal-close-month">✕</button>
       </div>
       <div id="close-month-warning" class="warning-box hidden">
         ⚠️ Você tem contas pendentes. Ao fechar, elas serão arquivadas como não pagas.
       </div>
-      <p class="modal-body-text">Tem certeza? Os dados serão arquivados no histórico e o mês será zerado.</p>
+      <p class="modal-body-text">Os dados serão arquivados no histórico e o mês será zerado.</p>
       <div class="modal-actions">
         <button data-close="modal-close-month" class="btn-secondary">Cancelar</button>
-        <button id="btn-confirm-close" class="btn-danger">✅ Fechar Mês</button>
+        <button id="btn-confirm-close" class="btn-danger">Fechar Mês</button>
       </div>
     </div>
   </div>
