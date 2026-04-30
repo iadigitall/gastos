@@ -1,17 +1,37 @@
 'use strict';
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const ICO = {
+  cart:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`,
+  car:       (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17H5M17 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M3 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M1 11l4-6h14l4 6v4a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z"/></svg>`,
+  music:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  heart:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  box:       (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  inbox:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`,
+  warning:   (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  bell:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  check:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`,
+  bag:       (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+  clipboard: (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>`,
+  chart:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  calendar:  (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+  repeat:    (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+  settings:  (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  trash:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+};
+
 const CATEGORIAS = {
-  alimentacao: { icon: '🛒', label: 'Alimentação' },
-  transporte:  { icon: '🚗', label: 'Transporte' },
-  lazer:       { icon: '🎉', label: 'Lazer' },
-  saude:       { icon: '🏥', label: 'Saúde' },
-  outros:      { icon: '📦', label: 'Outros' },
+  alimentacao: { icon: (s=26)=>ICO.cart(s),  label: 'Alimentação' },
+  transporte:  { icon: (s=26)=>ICO.car(s),   label: 'Transporte' },
+  lazer:       { icon: (s=26)=>ICO.music(s), label: 'Lazer' },
+  saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
+  outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
 };
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
-const CAT_COLORS = { alimentacao:'#8cc63f', transporte:'#4ade80', lazer:'#a3e635', saude:'#d4f56a', outros:'#4b5563' };
+const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#76db1a', lazer:'#FFFFFF', saude:'#b2fc5d', outros:'#555555' };
 let chartCategories = null, chartMonthly = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,11 +60,11 @@ function initFirebase() {
 }
 
 function showSetupMessage() {
-  const dashboard = document.querySelector('#view-home .view-content');
-  if (document.getElementById('setup-msg')) return;
+  const dashboard = document.querySelector('#view-home .dashboard-grid .dash-left');
+  if (document.getElementById('setup-msg') || !dashboard) return;
   const card = document.createElement('div');
   card.id = 'setup-msg'; card.className = 'setup-card';
-  card.innerHTML = `<h3>⚙️ Configure o Firebase para sincronizar</h3><p>Abra <code>firebase-config.js</code> e preencha com os dados do seu projeto Firebase.</p><p>Enquanto isso o app funciona <strong>só neste aparelho</strong>.</p>`;
+  card.innerHTML = `<h3>${ICO.settings(16)} Configure o Firebase para sincronizar</h3><p>Abra <code>firebase-config.js</code> e preencha com os dados do seu projeto Firebase.</p><p>Enquanto isso o app funciona <strong>só neste aparelho</strong>.</p>`;
   dashboard.prepend(card);
 }
 
@@ -56,7 +76,7 @@ function subscribeToMonth(key) {
     const data = snap.val() || {};
     state.gastos = data.gastos || {}; state.contas = data.contas || {};
     saveToLocalStorage(); renderAll();
-  }, err => { console.error(err); showToast('❌ Erro ao carregar dados'); });
+  }, err => { console.error(err); showToast('Erro ao carregar dados'); });
 }
 
 function subscribeToFixedBills() {
@@ -111,14 +131,28 @@ function formatCurrency(val) { return new Intl.NumberFormat('pt-BR',{style:'curr
 function formatDate(str) { if(!str)return''; const[y,m,d]=str.split('-'); return`${d}/${m}/${y}`; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function genId() { return`${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
+
 function renderAll() {
-  renderDashboard(); renderBills(); renderHistory();
-  if (document.getElementById('view-dashboard')?.classList.contains('active')) renderCategoryChart();
+  renderDashboard();
+  renderBills();
+  renderHistory();
+  renderHomeContas();
+  renderHomeNotifications();
+  renderHomeTransactions();
+  renderCategoryChart();
+  renderMonthlyChart();
 }
 
 function updateHeaderMonth() {
-  const d=new Date();
-  document.getElementById('header-month').textContent=`${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+  const d = new Date();
+  const elNum = document.getElementById('header-month-num');
+  const elName = document.getElementById('header-month-name');
+  const elYear = document.getElementById('header-month-year');
+  if(elNum) elNum.textContent = String(d.getDate()).padStart(2, '0');
+  if(elName) elName.textContent = `${MESES[d.getMonth()]},`;
+  if(elYear) elYear.textContent = d.getFullYear();
+  const oldEl = document.getElementById('header-month');
+  if(oldEl) oldEl.textContent = `${MESES[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
 function renderDashboard() {
@@ -129,7 +163,8 @@ function renderDashboard() {
   const totalPendente=contas.filter(c=>!c.paga).reduce((s,c)=>s+(c.valor||0),0);
   const saldoDevedor=totalGastos+totalPendente;
   const totalGeral=totalGastos+totalContas;
-  const pct=totalGeral>0?Math.min(100,Math.round((totalPago/totalGeral)*100)):0;
+  const limite=1000;
+  const pct=Math.min(100,Math.round((saldoDevedor/limite)*100));
   document.getElementById('total-debt').textContent=formatCurrency(saldoDevedor);
   document.getElementById('paid-amount').textContent=formatCurrency(totalPago);
   document.getElementById('total-amount').textContent=formatCurrency(totalGeral);
@@ -138,6 +173,81 @@ function renderDashboard() {
   const elExp=document.getElementById('stat-expenses'); if(elExp)elExp.textContent=formatCurrency(totalGastos);
   const elPen=document.getElementById('stat-pending'); if(elPen)elPen.textContent=formatCurrency(totalPendente);
   document.getElementById('debt-card').classList.toggle('zeroed',saldoDevedor===0&&totalGeral>0);
+  const ccTotal=document.getElementById('cc-total'); if(ccTotal) ccTotal.textContent=formatCurrency(saldoDevedor);
+}
+
+/* ─── HOME: Contas Pendentes ─── */
+function renderHomeContas() {
+  const container = document.getElementById('home-contas');
+  if (!container) return;
+  const COLORS = ['#FF4444', '#A3FF47', '#F59E0B', '#60A5FA', '#A78BFA'];
+  const contas = Object.entries(state.contas)
+    .filter(([, c]) => !c.paga)
+    .sort(([, a], [, b]) => (a.vencimento || '9999').localeCompare(b.vencimento || '9999'))
+    .slice(0, 3);
+  if (!contas.length) {
+    container.innerHTML = `<div class="conta-pill-empty">Nenhuma conta pendente</div>`;
+    return;
+  }
+  container.innerHTML = contas.map(([, c], i) => `
+    <div class="conta-pill">
+      <div class="conta-pill-top">
+        <span class="conta-pill-name">${escHtml(c.nome)}</span>
+        <div class="conta-pill-dot" style="background:${COLORS[i % COLORS.length]};color:${COLORS[i % COLORS.length]}"></div>
+      </div>
+      <span class="conta-pill-val">${formatCurrency(c.valor)}</span>
+    </div>`).join('');
+}
+
+/* ─── HOME: Notificações ─── */
+function renderHomeNotifications() {
+  const container = document.getElementById('home-notif');
+  if (!container) return;
+  const today = todayStr();
+  const notifs = Object.entries(state.contas)
+    .filter(([, c]) => !c.paga && c.vencimento)
+    .sort(([, a], [, b]) => a.vencimento.localeCompare(b.vencimento))
+    .slice(0, 3);
+  if (!notifs.length) {
+    container.innerHTML = `<div class="notif-empty">Nenhuma notificação pendente</div>`;
+    return;
+  }
+  container.innerHTML = notifs.map(([id, c]) => {
+    const overdue = c.vencimento < today;
+    return `<div class="notif-item${overdue ? ' notif-danger' : ' notif-success'}">
+      <div class="notif-text">${overdue ? `${ICO.warning(14)} <strong>${escHtml(c.nome)}</strong> está vencida!` : `${ICO.bell(14)} <strong>${escHtml(c.nome)}</strong> próxima a vencer`}</div>
+      <div class="notif-footer">
+        <span class="notif-date">${formatDate(c.vencimento)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── HOME: Transações Recentes ─── */
+function renderHomeTransactions() {
+  const container = document.getElementById('home-transacoes');
+  if (!container) return;
+  const entries = Object.entries(state.gastos)
+    .sort(([, a], [, b]) => (b.criadoEm || 0) - (a.criadoEm || 0))
+    .slice(0, 5);
+  if (!entries.length) {
+    container.innerHTML = `<div class="transacao-empty">Nenhuma transação ainda</div>`;
+    return;
+  }
+  container.innerHTML = entries.map(([, g]) => {
+    const cat = CATEGORIAS[g.categoria] || CATEGORIAS.outros;
+    return `<div class="transacao-item">
+      <span class="transacao-icon cat-${g.categoria || 'outros'}">${cat.icon(26)}</span>
+      <div class="transacao-info">
+        <div class="transacao-desc">${escHtml(g.descricao)}</div>
+        <div class="transacao-sub">${cat.label}</div>
+      </div>
+      <div class="transacao-right">
+        <div class="transacao-date">${formatDate(g.data)}</div>
+        <div class="transacao-val">-${formatCurrency(g.valor)}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function setupForms() {
@@ -162,17 +272,17 @@ async function handleAddExpense(e) {
   const desc=document.getElementById('expense-desc').value.trim();
   const value=parseFloat(document.getElementById('expense-value').value);
   const date=document.getElementById('expense-date').value;
-  if(!desc) return showToast('❗ Escreve o que foi gasto');
-  if(!value||value<=0) return showToast('❗ Coloca o valor certinho');
-  if(!date) return showToast('❗ Escolhe a data');
+  if(!desc) return showToast('Escreve o que foi gasto');
+  if(!value||value<=0) return showToast('Coloca o valor certinho');
+  if(!date) return showToast('Escolhe a data');
   const btn=document.getElementById('btn-submit-expense'); btn.disabled=true; btn.textContent='Salvando...';
   const entry={descricao:desc,valor:value,categoria:state.selectedCategory,data:date,criadoEm:Date.now()};
   try {
     if(db) { await db.ref(`meses/${state.mesAtual}/gastos`).push(entry); }
     else { state.gastos[genId()]=entry; saveToLocalStorage(); renderAll(); }
-    showToast('✅ Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
-  } catch(err) { showToast('❌ Erro ao salvar. Tente de novo.'); }
-  finally { btn.disabled=false; btn.textContent='✅ Confirmar Gasto'; }
+    showToast('Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
+  } catch(err) { showToast('Erro ao salvar. Tente de novo.'); }
+  finally { btn.disabled=false; btn.textContent='Confirmar Gasto'; }
 }
 
 function confirmDeleteExpense(id,descricao) {
@@ -190,42 +300,42 @@ async function executeDelete() {
     if(type==='gasto') {
       if(db) await db.ref(`meses/${state.mesAtual}/gastos/${id}`).remove();
       else { delete state.gastos[id]; saveToLocalStorage(); renderAll(); }
-      showToast('🗑️ Gasto removido');
+      showToast('Gasto removido');
     } else if(type==='conta') {
       if(db) await db.ref(`meses/${state.mesAtual}/contas/${id}`).remove();
       else { delete state.contas[id]; saveToLocalStorage(); renderAll(); }
-      showToast('🗑️ Conta removida');
+      showToast('Conta removida');
     } else if(type==='contaFixa') {
       if(db) await db.ref(`contasFixas/${id}`).remove();
       else { delete state.contasFixas[id]; saveFixedBillsToLocalStorage(); renderFixedBills(); }
       _appliedFixed.delete(id);
-      showToast('🗑️ Conta fixa removida');
+      showToast('Conta fixa removida');
     }
-  } catch(err) { showToast('❌ Erro ao apagar'); }
+  } catch(err) { showToast('Erro ao apagar'); }
   state.pendingDeleteId=null; state.pendingDeleteType=null;
 }
 
 function renderBills() {
   const container=document.getElementById('bills-list');
   const entries=Object.entries(state.contas), today=todayStr();
-  if(!entries.length){container.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>Nenhuma conta cadastrada</p><p class="empty-sub">Toque no ➕ para adicionar</p></div>`;return;}
+  if(!entries.length){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.inbox(40)}</span><p>Nenhuma conta cadastrada</p><p class="empty-sub">Toque no + para adicionar</p></div>`;return;}
   entries.sort(([,a],[,b])=>{if(a.paga!==b.paga)return a.paga?1:-1;return(a.vencimento||'9999').localeCompare(b.vencimento||'9999');});
   container.innerHTML=`<div class="bills-list-inner">${entries.map(([id,c])=>{
     const overdue=!c.paga&&c.vencimento&&c.vencimento<today;
-    const meta=c.vencimento?`${overdue?'⚠️ Venceu em: ':'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
-    const fixedBadge=c.contaFixaId?'<span class="fixed-badge">🔁 Fixa</span>':'';
-    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>✅</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">🗑️</button>`:''}</div>`;
+    const meta=c.vencimento?`${overdue?`${ICO.warning(12)} Venceu em: `:'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
+    const fixedBadge=c.contaFixaId?`<span class="fixed-badge">${ICO.repeat(10)} Fixa</span>`:'';
+    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>${ICO.check(16)}</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">${ICO.trash(16)}</button>`:''}</div>`;
   }).join('')}</div>`;
 }
 
 async function payBill(id) {
   const btn=document.querySelector(`#bill-${CSS.escape(id)} .btn-pay`);
-  if(btn){btn.textContent='✅';btn.classList.add('pay-anim','done');btn.disabled=true;}
+  if(btn){btn.innerHTML=ICO.check(16);btn.classList.add('pay-anim','done');btn.disabled=true;}
   try {
     if(db) await db.ref(`meses/${state.mesAtual}/contas/${id}`).update({paga:true,pagaEm:Date.now()});
     else{if(state.contas[id]){state.contas[id].paga=true;state.contas[id].pagaEm=Date.now();}saveToLocalStorage();renderAll();}
-    showToast('🎉 Conta marcada como paga!');
-  } catch(err){showToast('❌ Erro ao marcar como paga');if(btn){btn.textContent='Pagar';btn.classList.remove('pay-anim','done');btn.disabled=false;}}
+    showToast('Conta marcada como paga!');
+  } catch(err){showToast('Erro ao marcar como paga');if(btn){btn.textContent='Pagar';btn.classList.remove('pay-anim','done');btn.disabled=false;}}
 }
 
 function confirmDeleteBill(id,nome) {
@@ -240,14 +350,14 @@ async function handleAddBill(e) {
   const nome=document.getElementById('bill-name').value.trim();
   const value=parseFloat(document.getElementById('bill-value').value);
   const due=document.getElementById('bill-due').value;
-  if(!nome) return showToast('❗ Dá um nome pra conta');
-  if(!value||value<=0) return showToast('❗ Coloca o valor certinho');
+  if(!nome) return showToast('Dá um nome pra conta');
+  if(!value||value<=0) return showToast('Coloca o valor certinho');
   const entry={nome,valor:value,vencimento:due||null,paga:false,pagaEm:null,criadoEm:Date.now()};
   try {
     if(db) await db.ref(`meses/${state.mesAtual}/contas`).push(entry);
     else{state.contas[genId()]=entry;saveToLocalStorage();renderAll();}
-    closeModal('modal-add-bill'); document.getElementById('form-bill').reset(); showToast('✅ Conta adicionada!');
-  } catch(err){showToast('❌ Erro ao salvar.');}
+    closeModal('modal-add-bill'); document.getElementById('form-bill').reset(); showToast('Conta adicionada!');
+  } catch(err){showToast('Erro ao salvar.');}
 }
 
 function renderFixedBills() {
@@ -255,12 +365,12 @@ function renderFixedBills() {
   if(!container) return;
   const entries=Object.entries(state.contasFixas);
   if(!entries.length){
-    container.innerHTML=`<div class="empty-state"><span class="empty-icon">🔁</span><p>Nenhuma conta fixa cadastrada</p><p class="empty-sub">Toque no ➕ para adicionar</p></div>`;
+    container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.repeat(40)}</span><p>Nenhuma conta fixa cadastrada</p><p class="empty-sub">Toque no + para adicionar</p></div>`;
     return;
   }
   entries.sort(([,a],[,b])=>(a.nome||'').localeCompare(b.nome||''));
   container.innerHTML=`<div class="fixed-bills-inner">${entries.map(([id,f])=>{
-    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">🗑️</button></div>`;
+    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">${ICO.trash(15)}</button></div>`;
   }).join('')}</div>`;
 }
 
@@ -269,33 +379,33 @@ async function handleAddFixedBill(e) {
   const nome=document.getElementById('fixed-name').value.trim();
   const value=parseFloat(document.getElementById('fixed-value').value);
   const day=parseInt(document.getElementById('fixed-day').value);
-  if(!nome) return showToast('❗ Dá um nome pra conta fixa');
-  if(!value||value<=0) return showToast('❗ Coloca o valor certinho');
-  if(!day||day<1||day>28) return showToast('❗ Dia deve ser entre 1 e 28');
+  if(!nome) return showToast('Dá um nome pra conta fixa');
+  if(!value||value<=0) return showToast('Coloca o valor certinho');
+  if(!day||day<1||day>28) return showToast('Dia deve ser entre 1 e 28');
   const entry={nome,valor:value,diaVencimento:day,ativa:true,criadoEm:Date.now()};
   try {
     if(db) { await db.ref('contasFixas').push(entry); }
     else { state.contasFixas[genId()]=entry; saveFixedBillsToLocalStorage(); renderFixedBills(); applyFixedBillsToCurrentMonth(); }
     closeModal('modal-add-fixed-bill'); document.getElementById('form-fixed-bill').reset();
-    showToast('✅ Conta fixa criada! Adicionada a este mês.');
-  } catch(err){showToast('❌ Erro ao salvar.');}
+    showToast('Conta fixa criada! Adicionada a este mês.');
+  } catch(err){showToast('Erro ao salvar.');}
 }
 
 function confirmDeleteFixedBill(id,nome) {
   state.pendingDeleteId=id; state.pendingDeleteType='contaFixa';
   document.querySelector('#modal-confirm-delete .modal-title').textContent='Remover conta fixa?';
-  document.getElementById('delete-item-name').textContent=`"${nome}" não será mais gerada nos próximos meses. As contas já criadas este mês não são afetadas.`;
+  document.getElementById('delete-item-name').textContent=`"${nome}" não será mais gerada nos próximos meses.`;
   openModal('modal-confirm-delete');
 }
 
 function renderHistory() {
   const container=document.getElementById('history-list');
   const entries=Object.entries(state.gastos);
-  if(!entries.length){container.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>Nenhum gasto lançado</p><p class="empty-sub">Use o botão ➕ para adicionar</p></div>`;return;}
+  if(!entries.length){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.inbox(40)}</span><p>Nenhum gasto lançado</p><p class="empty-sub">Use o botão + para adicionar</p></div>`;return;}
   entries.sort(([,a],[,b])=>(b.criadoEm||0)-(a.criadoEm||0));
   container.innerHTML=`<div class="history-inner">${entries.map(([id,g])=>{
     const cat=CATEGORIAS[g.categoria]||CATEGORIAS.outros;
-    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">🗑️</button></div>`;
+    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon(26)}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">${ICO.trash(16)}</button></div>`;
   }).join('')}</div>`;
 }
 
@@ -314,8 +424,8 @@ async function handleCloseMonth() {
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
     state.gastos={};state.contas={};
     _appliedFixed.clear();
-    closeModal('modal-close-month');showToast('🎉 Mês fechado!');navigateTo('home');renderAll();
-  } catch(err){showToast('❌ Erro ao fechar o mês');}
+    closeModal('modal-close-month');showToast('Mês fechado!');navigateTo('home');renderAll();
+  } catch(err){showToast('Erro ao fechar o mês');}
 }
 
 async function loadPastMonths() {
@@ -325,39 +435,65 @@ async function loadPastMonths() {
     let data=null;
     if(db){const snap=await db.ref('historico').once('value');data=snap.val();}
     else{data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('nd_hist_')){try{data[k.replace('nd_hist_','')]=JSON.parse(localStorage.getItem(k));}catch(_){}}};if(!Object.keys(data).length)data=null;}
-    if(!data){container.innerHTML=`<div class="empty-state"><span class="empty-icon">📅</span><p>Nenhum mês fechado ainda</p></div>`;return;}
+    if(!data){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.calendar(40)}</span><p>Nenhum mês fechado ainda</p></div>`;return;}
     const months=Object.entries(data).sort(([a],[b])=>b.localeCompare(a));
     container.innerHTML=`<div class="past-months-inner">${months.map(([key,d])=>{
       const[y,m]=key.split('-'),nomeMes=MESES[parseInt(m)-1];
-      return`<div class="past-month-card"><div class="past-month-title">${nomeMes} de ${y}</div><div class="past-month-grid"><div class="past-stat"><div class="past-stat-label">🛍️ Gastos</div><div class="past-stat-value" style="color:var(--danger)">${formatCurrency(d.totalGastos)}</div></div><div class="past-stat"><div class="past-stat-label">📋 Contas</div><div class="past-stat-value" style="color:var(--bills-color)">${formatCurrency(d.totalContas)}</div></div><div class="past-stat"><div class="past-stat-label">✅ Pago</div><div class="past-stat-value" style="color:var(--success)">${formatCurrency(d.totalPago)}</div></div><div class="past-stat"><div class="past-stat-label">📊 Total</div><div class="past-stat-value" style="color:var(--primary)">${formatCurrency((d.totalGastos||0)+(d.totalContas||0))}</div></div></div></div>`;
+      return`<div class="past-month-card"><div class="past-month-title">${nomeMes} de ${y}</div><div class="past-month-grid"><div class="past-stat"><div class="past-stat-label">${ICO.bag(14)} Gastos</div><div class="past-stat-value" style="color:var(--danger)">${formatCurrency(d.totalGastos)}</div></div><div class="past-stat"><div class="past-stat-label">${ICO.clipboard(14)} Contas</div><div class="past-stat-value">${formatCurrency(d.totalContas)}</div></div><div class="past-stat"><div class="past-stat-label">${ICO.check(14)} Pago</div><div class="past-stat-value" style="color:var(--green)">${formatCurrency(d.totalPago)}</div></div><div class="past-stat"><div class="past-stat-label">${ICO.chart(14)} Total</div><div class="past-stat-value">${formatCurrency((d.totalGastos||0)+(d.totalContas||0))}</div></div></div></div>`;
     }).join('')}</div>`;
-  } catch(err){container.innerHTML=`<div class="empty-state"><span class="empty-icon">⚠️</span><p>Erro ao carregar</p></div>`;}
+  } catch(err){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.warning(40)}</span><p>Erro ao carregar</p></div>`;}
 }
 
 function setupNavigation() {
-  document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>navigateTo(btn.dataset.view)));
-  on('btn-back-expense','click',()=>navigateTo('home')); on('btn-back-bills','click',()=>navigateTo('home'));
-  on('btn-back-history','click',()=>navigateTo('home')); on('btn-back-past','click',()=>navigateTo('home'));
+  // Bottom nav + sidebar buttons com data-view
+  document.querySelectorAll('.nav-btn[data-view], .sidebar-btn[data-view]').forEach(btn =>
+    btn.addEventListener('click', () => navigateTo(btn.dataset.view))
+  );
+  // Botões "Ver tudo" no home (data-nav)
+  document.querySelectorAll('[data-nav]').forEach(btn =>
+    btn.addEventListener('click', () => navigateTo(btn.dataset.nav))
+  );
+  // Voltar
+  on('btn-back-expense','click',()=>navigateTo('home'));
+  on('btn-back-bills','click',()=>navigateTo('home'));
+  on('btn-back-history','click',()=>navigateTo('home'));
+  on('btn-back-past','click',()=>navigateTo('home'));
   on('btn-back-fixed','click',()=>navigateTo('bills'));
-  on('btn-add-expense','click',()=>navigateTo('add-expense')); on('btn-add-expense-header','click',()=>navigateTo('add-expense')); on('btn-go-bills','click',()=>navigateTo('bills'));
+  // Ações
+  on('btn-add-expense','click',()=>navigateTo('add-expense'));
+  on('btn-add-expense-header','click',()=>navigateTo('add-expense'));
+  on('btn-go-bills','click',()=>navigateTo('bills'));
+  on('btn-manage-fixed-hdr','click',()=>navigateTo('fixed-bills'));
+  // Fechar mês
   on('btn-close-month','click',openCloseMonthModal);
+  on('btn-close-month-mobile','click',openCloseMonthModal);
+  // Meses anteriores
   on('btn-history-months','click',()=>{loadPastMonths();navigateTo('past-months');});
+  on('btn-history-months-sb','click',()=>{loadPastMonths();navigateTo('past-months');});
+  // Contas fixas
   on('btn-manage-fixed','click',()=>navigateTo('fixed-bills'));
 }
 
 function navigateTo(viewName) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===viewName));
-  const view=document.getElementById(`view-${viewName}`); if(view)view.classList.add('active');
-  document.getElementById('bottom-nav').style.display=['past-months','fixed-bills'].includes(viewName)?'none':'';
-  if(viewName==='add-expense') resetExpenseForm();
-  if(viewName==='dashboard') renderDashboardTab();
+  if (!viewName) return;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn[data-view], .sidebar-btn[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === viewName)
+  );
+  const view = document.getElementById(`view-${viewName}`);
+  if (view) view.classList.add('active');
+  // Ocultar bottom-nav em certas views
+  const hideNav = ['past-months','fixed-bills'].includes(viewName);
+  document.getElementById('bottom-nav').style.display = hideNav ? 'none' : '';
+  if (viewName === 'add-expense') resetExpenseForm();
+  if (viewName === 'past-months') loadPastMonths();
 }
 
 function setupModals() {
   on('btn-add-bill','click',()=>{document.getElementById('form-bill').reset();document.getElementById('bill-due').value=todayStr();openModal('modal-add-bill');setTimeout(()=>document.getElementById('bill-name').focus(),300);});
   on('btn-add-fixed-bill','click',()=>{document.getElementById('form-fixed-bill').reset();openModal('modal-add-fixed-bill');setTimeout(()=>document.getElementById('fixed-name').focus(),300);});
-  on('btn-confirm-close','click',handleCloseMonth); on('btn-confirm-delete','click',executeDelete);
+  on('btn-confirm-close','click',handleCloseMonth);
+  on('btn-confirm-delete','click',executeDelete);
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 }
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
@@ -367,24 +503,11 @@ function showToast(msg,duration=2600){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.add('hidden'),duration);
 }
-function setupOnlineStatus(){window.addEventListener('online',()=>showToast('✅ Conexão restaurada'));window.addEventListener('offline',()=>showToast('📵 Sem conexão'));}
+function setupOnlineStatus(){window.addEventListener('online',()=>showToast('Conexão restaurada'));window.addEventListener('offline',()=>showToast('Sem conexão'));}
 function registerServiceWorker(){if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
-function renderDashboardTab() {
-  const d=new Date();
-  const el=document.getElementById('dash-month-label');
-  if(el) el.textContent=`${MESES[d.getMonth()]} de ${d.getFullYear()}`;
-  const gastos=Object.values(state.gastos), contas=Object.values(state.contas);
-  const tG=gastos.reduce((s,g)=>s+(g.valor||0),0);
-  const tC=contas.reduce((s,c)=>s+(c.valor||0),0);
-  const elG=document.getElementById('dash-gastos'), elC=document.getElementById('dash-contas'), elT=document.getElementById('dash-total');
-  if(elG) elG.textContent=formatCurrency(tG);
-  if(elC) elC.textContent=formatCurrency(tC);
-  if(elT) elT.textContent=formatCurrency(tG+tC);
-  renderCategoryChart();
-  renderMonthlyChart();
-}
 
+/* ─── CHARTS ─── */
 function renderCategoryChart() {
   const totals={};
   for(const g of Object.values(state.gastos)){const c=g.categoria||'outros';totals[c]=(totals[c]||0)+(g.valor||0);}
@@ -401,7 +524,7 @@ function renderCategoryChart() {
   if(canvas)canvas.style.display='';
   if(chartCategories){chartCategories.destroy();chartCategories=null;}
   if(!canvas)return;
-  const labels=cats.map(([k])=>`${CATEGORIAS[k]?.icon||''} ${CATEGORIAS[k]?.label||k}`);
+  const labels=cats.map(([k])=>CATEGORIAS[k]?.label||k);
   const data=cats.map(([,v])=>v);
   const colors=cats.map(([k])=>CAT_COLORS[k]||'#94a3b8');
   chartCategories=new Chart(canvas,{
@@ -437,13 +560,13 @@ async function renderMonthlyChart() {
   chartMonthly=new Chart(canvas,{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Gastos',data:gastosData,backgroundColor:'#8cc63f',borderRadius:6,borderSkipped:false},
-      {label:'Contas',data:contasData,backgroundColor:'#4a5568',borderRadius:6,borderSkipped:false}
+      {label:'Gastos',data:gastosData,backgroundColor:'#A3FF47',borderRadius:6,borderSkipped:false},
+      {label:'Contas',data:contasData,backgroundColor:'#d7fca4',borderRadius:6,borderSkipped:false}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{ticks:{color:'#8888aa',font:{size:12}},grid:{color:'rgba(42,42,69,0.6)'}},
-        y:{ticks:{color:'#8888aa',font:{size:11},callback:v=>'R$'+v},grid:{color:'rgba(42,42,69,0.6)'}}
+        x:{ticks:{color:'#6B7280',font:{size:12}},grid:{color:'rgba(42,42,42,0.8)'}},
+        y:{ticks:{color:'#6B7280',font:{size:11},callback:v=>'R$'+v},grid:{color:'rgba(42,42,42,0.8)'}}
       },
       plugins:{
         legend:{labels:{color:'#f0f0f5',font:{size:12},usePointStyle:true,padding:14}},
@@ -453,4 +576,14 @@ async function renderMonthlyChart() {
   });
 }
 
-window.payBill=payBill; window.confirmDeleteExpense=confirmDeleteExpense; window.confirmDeleteBill=confirmDeleteBill; window.confirmDeleteFixedBill=confirmDeleteFixedBill;
+/* Compatibilidade com JS antigo */
+function renderDashboardTab() {
+  const d=new Date();
+  const el=document.getElementById('dash-month-label');
+  if(el) el.textContent=`${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+window.payBill=payBill;
+window.confirmDeleteExpense=confirmDeleteExpense;
+window.confirmDeleteBill=confirmDeleteBill;
+window.confirmDeleteFixedBill=confirmDeleteFixedBill;
