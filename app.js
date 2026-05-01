@@ -42,6 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuth();
 });
 
+function uRef(path) {
+  return db.ref(`users/${state.currentUser.uid}/${path}`);
+}
+
 function initFirebase() {
   try {
     if (typeof firebase === 'undefined' || !firebase.apps.length) throw new Error('Firebase não inicializado');
@@ -70,9 +74,9 @@ function showSetupMessage() {
 
 function subscribeToMonth(key) {
   if (!db) return;
-  if (currentMonthListener) db.ref(`meses/${currentMonthListener}`).off('value');
+  if (currentMonthListener) uRef(`meses/${currentMonthListener}`).off('value');
   currentMonthListener = key;
-  db.ref(`meses/${key}`).on('value', snap => {
+  uRef(`meses/${key}`).on('value', snap => {
     const data = snap.val() || {};
     state.gastos = data.gastos || {}; state.contas = data.contas || {};
     saveToLocalStorage(); renderAll();
@@ -81,7 +85,7 @@ function subscribeToMonth(key) {
 
 function subscribeToFixedBills() {
   if (!db) return;
-  db.ref('contasFixas').on('value', snap => {
+  uRef('contasFixas').on('value', snap => {
     state.contasFixas = snap.val() || {};
     renderFixedBills();
     applyFixedBillsToCurrentMonth();
@@ -102,7 +106,7 @@ async function applyFixedBillsToCurrentMonth() {
     const dia = Math.min(fixa.diaVencimento || 1, 28);
     const vencimento = `${year}-${month}-${String(dia).padStart(2, '0')}`;
     try {
-      await db.ref(`meses/${state.mesAtual}/contas`).push({
+      await uRef(`meses/${state.mesAtual}/contas`).push({
         nome: fixa.nome, valor: fixa.valor, vencimento,
         paga: false, pagaEm: null, criadoEm: Date.now(), contaFixaId: fixaId
       });
@@ -280,7 +284,7 @@ async function handleAddExpense(e) {
   const btn=document.getElementById('btn-submit-expense'); btn.disabled=true; btn.textContent='Salvando...';
   const entry={descricao:desc,valor:value,categoria:state.selectedCategory,data:date,criadoEm:Date.now()};
   try {
-    if(db) { await db.ref(`meses/${state.mesAtual}/gastos`).push(entry); }
+    if(db) { await uRef(`meses/${state.mesAtual}/gastos`).push(entry); }
     else { state.gastos[genId()]=entry; saveToLocalStorage(); renderAll(); }
     showToast('Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
   } catch(err) { showToast('Erro ao salvar. Tente de novo.'); }
@@ -300,15 +304,15 @@ async function executeDelete() {
   closeModal('modal-confirm-delete');
   try {
     if(type==='gasto') {
-      if(db) await db.ref(`meses/${state.mesAtual}/gastos/${id}`).remove();
+      if(db) await uRef(`meses/${state.mesAtual}/gastos/${id}`).remove();
       else { delete state.gastos[id]; saveToLocalStorage(); renderAll(); }
       showToast('Gasto removido');
     } else if(type==='conta') {
-      if(db) await db.ref(`meses/${state.mesAtual}/contas/${id}`).remove();
+      if(db) await uRef(`meses/${state.mesAtual}/contas/${id}`).remove();
       else { delete state.contas[id]; saveToLocalStorage(); renderAll(); }
       showToast('Conta removida');
     } else if(type==='contaFixa') {
-      if(db) await db.ref(`contasFixas/${id}`).remove();
+      if(db) await uRef(`contasFixas/${id}`).remove();
       else { delete state.contasFixas[id]; saveFixedBillsToLocalStorage(); renderFixedBills(); }
       _appliedFixed.delete(id);
       showToast('Conta fixa removida');
@@ -334,7 +338,7 @@ async function payBill(id) {
   const btn=document.querySelector(`#bill-${CSS.escape(id)} .btn-pay`);
   if(btn){btn.innerHTML=ICO.check(16);btn.classList.add('pay-anim','done');btn.disabled=true;}
   try {
-    if(db) await db.ref(`meses/${state.mesAtual}/contas/${id}`).update({paga:true,pagaEm:Date.now()});
+    if(db) await uRef(`meses/${state.mesAtual}/contas/${id}`).update({paga:true,pagaEm:Date.now()});
     else{if(state.contas[id]){state.contas[id].paga=true;state.contas[id].pagaEm=Date.now();}saveToLocalStorage();renderAll();}
     showToast('Conta marcada como paga!');
   } catch(err){showToast('Erro ao marcar como paga');if(btn){btn.textContent='Pagar';btn.classList.remove('pay-anim','done');btn.disabled=false;}}
@@ -356,7 +360,7 @@ async function handleAddBill(e) {
   if(!value||value<=0) return showToast('Coloca o valor certinho');
   const entry={nome,valor:value,vencimento:due||null,paga:false,pagaEm:null,criadoEm:Date.now()};
   try {
-    if(db) await db.ref(`meses/${state.mesAtual}/contas`).push(entry);
+    if(db) await uRef(`meses/${state.mesAtual}/contas`).push(entry);
     else{state.contas[genId()]=entry;saveToLocalStorage();renderAll();}
     closeModal('modal-add-bill'); document.getElementById('form-bill').reset(); showToast('Conta adicionada!');
   } catch(err){showToast('Erro ao salvar.');}
@@ -386,7 +390,7 @@ async function handleAddFixedBill(e) {
   if(!day||day<1||day>28) return showToast('Dia deve ser entre 1 e 28');
   const entry={nome,valor:value,diaVencimento:day,ativa:true,criadoEm:Date.now()};
   try {
-    if(db) { await db.ref('contasFixas').push(entry); }
+    if(db) { await uRef('contasFixas').push(entry); }
     else { state.contasFixas[genId()]=entry; saveFixedBillsToLocalStorage(); renderFixedBills(); applyFixedBillsToCurrentMonth(); }
     closeModal('modal-add-fixed-bill'); document.getElementById('form-fixed-bill').reset();
     showToast('Conta fixa criada! Adicionada a este mês.');
@@ -422,7 +426,7 @@ async function handleCloseMonth() {
   const gastos=Object.values(state.gastos),contas=Object.values(state.contas);
   const arquivo={gastos:state.gastos,contas:state.contas,totalGastos:gastos.reduce((s,g)=>s+(g.valor||0),0),totalContas:contas.reduce((s,c)=>s+(c.valor||0),0),totalPago:contas.filter(c=>c.paga).reduce((s,c)=>s+(c.valor||0),0),fechadoEm:Date.now()};
   try {
-    if(db){await db.ref(`historico/${key}`).set(arquivo);await db.ref(`meses/${key}`).remove();}
+    if(db){await uRef(`historico/${key}`).set(arquivo);await uRef(`meses/${key}`).remove();}
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
     state.gastos={};state.contas={};
     _appliedFixed.clear();
@@ -435,7 +439,7 @@ async function loadPastMonths() {
   container.innerHTML=`<div class="empty-state"><div class="spinner"></div><p>Carregando...</p></div>`;
   try {
     let data=null;
-    if(db){const snap=await db.ref('historico').once('value');data=snap.val();}
+    if(db){const snap=await uRef('historico').once('value');data=snap.val();}
     else{data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('nd_hist_')){try{data[k.replace('nd_hist_','')]=JSON.parse(localStorage.getItem(k));}catch(_){}}};if(!Object.keys(data).length)data=null;}
     if(!data){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.calendar(40)}</span><p>Nenhum mês fechado ainda</p></div>`;return;}
     const months=Object.entries(data).sort(([a],[b])=>b.localeCompare(a));
@@ -742,8 +746,8 @@ function logout() {
     state.gastos = {}; state.contas = {}; state.contasFixas = {};
     document.getElementById('demo-banner').classList.remove('visible');
   } else if (typeof firebase !== 'undefined' && firebase.auth) {
-    if (db && currentMonthListener) db.ref(`meses/${currentMonthListener}`).off('value');
-    if (db) db.ref('contasFixas').off('value');
+    if (db && currentMonthListener) uRef(`meses/${currentMonthListener}`).off('value');
+    if (db) uRef('contasFixas').off('value');
     db = null; state.firebaseOk = false; currentMonthListener = null;
     state.gastos = {}; state.contas = {}; state.contasFixas = {};
     firebase.auth().signOut();
