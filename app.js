@@ -549,7 +549,7 @@ async function renderMonthlyChart() {
   const empty=document.getElementById('chart-monthly-empty');
   const canvas=document.getElementById('chart-monthly');
   let historico={};
-  if(db){try{const snap=await db.ref('historico').once('value');historico=snap.val()||{};}catch(e){}}
+  if(db){try{const snap=await uRef('historico').once('value');historico=snap.val()||{};}catch(e){}}
   const pastKeys=Object.keys(historico).sort().slice(-5);
   const allKeys=[...pastKeys,state.mesAtual];
   if(allKeys.length<=1&&!Object.values(state.gastos).length&&!Object.values(state.contas).length){
@@ -660,6 +660,9 @@ function showMainApp() {
     initFirebase();
   }
 
+  loadUserProfile();
+  showMotivationalQuote();
+
   const shortcut = new URLSearchParams(location.search).get('shortcut');
   if (shortcut === 'add-expense') navigateTo('add-expense');
 }
@@ -698,16 +701,19 @@ function setupAuthForms() {
   if (signupForm) {
     signupForm.addEventListener('submit', async e => {
       e.preventDefault();
+      const name = document.getElementById('signup-name').value.trim();
       const email = document.getElementById('signup-email').value.trim();
       const password = document.getElementById('signup-password').value;
       const confirm = document.getElementById('signup-confirm').value;
+      if (!name) return showAuthError('Coloca seu nome primeiro');
       if (!email || !password) return showAuthError('Preencha todos os campos');
       if (password !== confirm) return showAuthError('As senhas não conferem');
       if (password.length < 6) return showAuthError('A senha precisa ter ao menos 6 caracteres');
       const btn = document.getElementById('btn-signup-submit');
       btn.disabled = true; btn.textContent = 'Criando...';
       try {
-        await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name });
       } catch(err) {
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Criar Conta';
@@ -838,4 +844,37 @@ function forceVideoPlay() {
   tryPlay();
   document.addEventListener('touchstart', tryPlay, { once: true });
   document.addEventListener('click', tryPlay, { once: true });
+}
+
+async function loadUserProfile() {
+  const el = document.getElementById('greeting-text');
+  if (!el) return;
+  if (state.demoMode) { el.textContent = 'Olá!'; return; }
+  if (!state.currentUser || !db) { el.textContent = 'Oi!'; return; }
+  try {
+    const snap = await uRef('profile').once('value');
+    const nome = snap.val()?.nome || '';
+    el.textContent = nome ? `Oi, ${nome}!` : 'Oi!';
+  } catch(_) { el.textContent = 'Oi!'; }
+}
+
+const FRASES_MOTIVACIONAIS = [
+  'O rico não é quem mais ganha, é quem mais guarda.',
+  'Cada centavo guardado hoje é liberdade amanhã.',
+  'Cuide do seu dinheiro ou ele vai embora sozinho.',
+  'Disciplina financeira hoje, sonhos realizados amanhã.',
+  'Gastar menos do que ganha é o segredo dos ricos.',
+  'Pequenas economias constroem grandes fortunas.',
+  'Investir em você mesmo é o melhor investimento.',
+  'O controle do seu dinheiro começa com consciência.',
+  'Poupe primeiro, gaste depois — nunca o contrário.',
+  'Seu futuro financeiro começa nas escolhas de hoje.',
+];
+
+let _motivationalShown = false;
+function showMotivationalQuote() {
+  if (_motivationalShown) return;
+  _motivationalShown = true;
+  const frase = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)];
+  setTimeout(() => showToast(frase, 4500), 800);
 }
