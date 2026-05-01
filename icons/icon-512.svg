@@ -1,4 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="100" fill="#6c63ff"/>
-  <text x="256" y="350" font-size="280" text-anchor="middle" font-family="system-ui">💰</text>
+  <!-- Fundo escuro (maskable) -->
+  <rect width="512" height="512" fill="#0D0D0D"/>
+  <!-- Card verde central -->
+  <rect x="64" y="64" width="384" height="384" rx="90" fill="#A3FF47"/>
+  <!-- Linha do gráfico ascendente -->
+  <path d="M134 358 L198 284 L254 320 L316 234 L384 170"
+        stroke="#0D0D0D" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Ponto inicial -->
+  <circle cx="134" cy="358" r="21" fill="#0D0D0D"/>
+  <!-- Ponto final -->
+  <circle cx="384" cy="170" r="21" fill="#0D0D0D"/>
 </svg>
