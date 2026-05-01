@@ -80,7 +80,7 @@ function subscribeToMonth(key) {
     const data = snap.val() || {};
     state.gastos = data.gastos || {}; state.contas = data.contas || {};
     saveToLocalStorage(); renderAll();
-  }, err => { console.error(err); showToast('Erro ao carregar dados'); });
+  }, err => { console.error(err); showToast('Erro: ' + (err.code || err.message), 5000); });
 }
 
 function subscribeToFixedBills() {
