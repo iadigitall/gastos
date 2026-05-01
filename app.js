@@ -823,4 +823,15 @@ function initAuthCanvas() {
     requestAnimationFrame(draw);
   }
   draw();
+  forceVideoPlay();
+}
+
+function forceVideoPlay() {
+  const video = document.getElementById('auth-bg-video');
+  if (!video) return;
+  video.muted = true;
+  const tryPlay = () => video.play().catch(() => {});
+  tryPlay();
+  document.addEventListener('touchstart', tryPlay, { once: true });
+  document.addEventListener('click', tryPlay, { once: true });
 }
