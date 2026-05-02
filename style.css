@@ -1059,6 +1059,19 @@ html, body {
   display: block; font-size: 11px; color: var(--muted);
   margin-top: 5px; line-height: 1.4;
 }
+/* ─── PROFILE: card spacing overrides ─── */
+#view-profile .section-card {
+  padding: 24px;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+#view-profile .section-header {
+  margin-bottom: 4px;
+}
+#view-profile .form-group {
+  gap: 10px;
+}
+
 .profile-share-card { margin-top: 8px; }
 .profile-share-desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
 .profile-share-btn {
