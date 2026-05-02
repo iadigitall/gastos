@@ -986,16 +986,7 @@ function setupProfileForm() {
   }
 
   const shareBtn = document.getElementById('btn-share-app');
-  if (shareBtn) {
-    shareBtn.addEventListener('click', () => {
-      const url = 'https://iadigitall.github.io/Gastos/';
-      if (navigator.share) {
-        navigator.share({ title: 'Minhas Finanças', text: 'Controle seus gastos com este app!', url }).catch(()=>{});
-      } else {
-        navigator.clipboard.writeText(url).then(() => showToast('Link copiado!')).catch(() => showToast('Link: ' + url, 4000));
-      }
-    });
-  }
+  if (shareBtn) shareBtn.addEventListener('click', shareApp);
 
   on('btn-logout-profile', 'click', logout);
 }
@@ -1055,4 +1046,134 @@ function compressImage(file, maxW, maxH) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+/* ═══════════════════════════════════════
+   SHARE
+═══════════════════════════════════════ */
+
+async function shareApp() {
+  const shareBtn = document.getElementById('btn-share-app');
+  if (shareBtn) { shareBtn.disabled = true; shareBtn.textContent = 'Gerando...'; }
+  const APP_URL = 'https://iadigitall.github.io/Gastos/';
+  const name = state._profileName || '';
+  const msgText = name
+    ? `${name} te convidou: "Venha ter o controle total das suas finanças comigo!" 💚\n\n${APP_URL}`
+    : '"Venha ter o controle total das suas finanças comigo!" 💚\n\n' + APP_URL;
+
+  try {
+    const blob = await generateShareCard();
+    const file = new File([blob], 'minhas-financas.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Minhas Finanças', text: msgText });
+    } else if (navigator.share) {
+      await navigator.share({ title: 'Minhas Finanças', text: msgText, url: APP_URL });
+    } else {
+      await navigator.clipboard.writeText(msgText);
+      showToast('Mensagem copiada!');
+    }
+  } catch(err) {
+    if (err.name !== 'AbortError') {
+      try {
+        await navigator.clipboard.writeText(msgText);
+        showToast('Mensagem copiada!');
+      } catch(_) { showToast('Link: ' + APP_URL, 5000); }
+    }
+  } finally {
+    if (shareBtn) {
+      shareBtn.disabled = false;
+      shareBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartilhar App`;
+    }
+  }
+}
+
+async function generateShareCard() {
+  const W = 1080, H = 1080;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Fundo escuro
+  ctx.fillStyle = '#0D0D0D';
+  ctx.fillRect(0, 0, W, H);
+
+  // Brilho verde sutil no centro
+  const glow = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, W*0.55);
+  glow.addColorStop(0, 'rgba(163,255,71,0.07)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Barra verde no topo
+  ctx.fillStyle = '#A3FF47';
+  ctx.fillRect(0, 0, W, 10);
+
+  // Nome do app
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#A3FF47';
+  ctx.font = 'bold 58px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('Minhas Finanças', W/2, 118);
+
+  ctx.fillStyle = '#6B7280';
+  ctx.font = '34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('Controle inteligente do seu dinheiro', W/2, 168);
+
+  // Avatar circular
+  const cx = W/2, cy = 420, r = 168;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.clip();
+
+  if (state._profileFoto) {
+    const img = new Image();
+    await new Promise(res => { img.onload = res; img.onerror = res; img.src = state._profileFoto; });
+    ctx.drawImage(img, cx - r, cy - r, r*2, r*2);
+  } else {
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(cx - r, cy - r, r*2, r*2);
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.arc(cx, cy - 38, 62, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy + 148, 108, Math.PI, 0); ctx.fill();
+  }
+  ctx.restore();
+
+  // Borda verde no avatar
+  ctx.strokeStyle = '#A3FF47';
+  ctx.lineWidth = 9;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Nome do usuário
+  const nome = state._profileName || 'Usuário';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(nome, W/2, 666);
+
+  // Mensagem principal
+  ctx.fillStyle = '#D1D5DB';
+  ctx.font = '40px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('"Venha ter o controle total', W/2, 756);
+  ctx.fillText('das suas finanças comigo!"', W/2, 808);
+
+  // Linha divisória
+  ctx.strokeStyle = '#2A2A2A';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(W*0.18, 862); ctx.lineTo(W*0.82, 862);
+  ctx.stroke();
+
+  // URL
+  ctx.fillStyle = '#A3FF47';
+  ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('iadigitall.github.io/Gastos', W/2, 920);
+
+  // Barra verde no rodapé
+  ctx.fillStyle = '#A3FF47';
+  ctx.fillRect(0, H - 10, W, 10);
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
 }
