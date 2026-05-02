@@ -70,6 +70,16 @@
             <label>Como quer ser chamado?</label>
             <input type="text" id="signup-name" placeholder="Seu nome" autocomplete="given-name">
           </div>
+          <div class="auth-field-row">
+            <div class="auth-field">
+              <label>Salário mensal <span class="auth-opt">(opcional)</span></label>
+              <input type="number" id="signup-salary" placeholder="Ex: 3000" inputmode="decimal" step="0.01" min="0">
+            </div>
+            <div class="auth-field">
+              <label>Limite de gastos <span class="auth-opt">(opcional)</span></label>
+              <input type="number" id="signup-limit" placeholder="Ex: 1000" inputmode="decimal" step="0.01" min="0">
+            </div>
+          </div>
           <div class="auth-field">
             <label>Email</label>
             <input type="email" id="signup-email" placeholder="seu@email.com" autocomplete="email">
@@ -178,12 +188,13 @@
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg></button>
-          <div class="header-avatar" style="display: flex; align-items: center; justify-content: center; background: #2A2A2A; color: #a3a3a3;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <button class="header-avatar" id="btn-open-profile" title="Perfil">
+            <img id="header-avatar-img" class="header-avatar-img hidden" alt="Perfil">
+            <svg id="header-avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-          </div>
+          </button>
           <button id="btn-logout" class="header-logout-btn" title="Sair">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -209,11 +220,12 @@
               <div class="debt-left">
                 <div class="debt-label">Gastos Totais <span class="lbl-arrow">›</span></div>
                 <div id="total-debt" class="debt-value">R$ 9.500,00</div>
+                <div class="debt-limit-row"><span class="debt-limit-label">Limite:</span> <span id="limit-tag" class="limit-tag">R$ 1.000,00</span></div>
                 <div class="debt-prog-wrap">
                   <div class="progress-track">
                     <div id="progress-bar" class="progress-bar" style="width:5%"></div>
                   </div>
-                  <div class="progress-info"><span id="progress-percent">5</span>% utilizado</div>
+                  <div class="progress-info"><span id="progress-percent">5</span>% <span id="limit-info-text">utilizado</span></div>
                 </div>
               </div>
               <div class="debt-vsep"></div>
@@ -236,6 +248,12 @@
                 ADICIONAR DESPESA -
               </button>
             </div>
+          </div>
+
+          <!-- Alerta salário 35% -->
+          <div id="salary-alert" class="salary-alert hidden">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="salary-alert-text"></span>
           </div>
 
           <!-- Contas Preview -->
@@ -435,6 +453,77 @@
       </div>
     </div>
 
+    <!-- ═══ VIEW: PERFIL / CONFIGURAÇÕES ═══ -->
+    <div id="view-profile" class="view">
+      <div class="view-header">
+        <button id="btn-back-profile" class="btn-back">‹ Voltar</button>
+        <h2>Perfil</h2>
+      </div>
+      <div class="view-content">
+
+        <!-- Hero: foto + nome -->
+        <div class="profile-hero">
+          <div class="profile-avatar-wrap">
+            <img id="profile-avatar-img" class="profile-avatar-img hidden" alt="Foto">
+            <div id="profile-avatar-placeholder" class="profile-avatar-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <label class="profile-camera-btn" for="profile-photo-input" title="Trocar foto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
+            <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
+          </div>
+          <div id="profile-name-display" class="profile-name-display">Usuário</div>
+          <div id="profile-email-display" class="profile-email-display"></div>
+        </div>
+
+        <!-- Formulário -->
+        <form id="form-profile">
+
+          <div class="section-card">
+            <div class="section-header"><span class="section-title">Dados Pessoais</span></div>
+            <div class="form-group">
+              <label for="profile-name">Como quer ser chamado?</label>
+              <input type="text" id="profile-name" placeholder="Seu nome" autocomplete="given-name">
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header"><span class="section-title">Configurações Financeiras</span></div>
+            <div class="form-group">
+              <label for="profile-salary">Salário mensal (R$)</label>
+              <input type="number" id="profile-salary" placeholder="Ex: 3000,00" inputmode="decimal" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+              <label for="profile-limit">Limite de gastos mensais (R$)</label>
+              <input type="number" id="profile-limit" placeholder="Ex: 1000,00" inputmode="decimal" step="0.01" min="0">
+              <small class="form-hint">Você será alertado ao atingir 70% deste limite</small>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-save-profile" class="btn-primary">Salvar Alterações</button>
+
+        </form>
+
+        <!-- Compartilhar -->
+        <div class="section-card profile-share-card">
+          <div class="section-header"><span class="section-title">Compartilhar</span></div>
+          <p class="profile-share-desc">Convide amigos e família para usar o app</p>
+          <button id="btn-share-app" class="btn-secondary profile-share-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Compartilhar App
+          </button>
+        </div>
+
+        <!-- Sair -->
+        <button id="btn-logout-profile" class="btn-danger-outline profile-logout-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sair da conta
+        </button>
+
+      </div>
+    </div>
+
   </div>
   <!-- fim app-wrapper -->
 
@@ -463,6 +552,14 @@
           <path d="M12 6v6l4 2" />
         </svg></div>
       <span class="nav-label">Histórico</span>
+    </button>
+    <button class="nav-btn" data-view="profile">
+      <div class="nav-icon-wrap"><svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg></div>
+      <span class="nav-label">Perfil</span>
     </button>
   </nav>
 

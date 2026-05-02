@@ -28,7 +28,7 @@ const CATEGORIAS = {
   saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
   outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
 const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#76db1a', lazer:'#FFFFFF', saude:'#b2fc5d', outros:'#555555' };
@@ -169,13 +169,32 @@ function renderDashboard() {
   const totalPendente=contas.filter(c=>!c.paga).reduce((s,c)=>s+(c.valor||0),0);
   const saldoDevedor=totalGastos+totalPendente;
   const totalGeral=totalGastos+totalContas;
-  const limite=1000;
+  const limite = state.limiteGastos || 1000;
   const pct=Math.min(100,Math.round((saldoDevedor/limite)*100));
   document.getElementById('total-debt').textContent=formatCurrency(saldoDevedor);
   document.getElementById('paid-amount').textContent=formatCurrency(totalPago);
   document.getElementById('total-amount').textContent=formatCurrency(totalGeral);
-  document.getElementById('progress-bar').style.width=`${pct}%`;
+  const bar = document.getElementById('progress-bar');
+  bar.style.width=`${pct}%`;
+  bar.classList.toggle('danger', pct >= 70);
   document.getElementById('progress-percent').textContent=pct;
+  const limitTag=document.getElementById('limit-tag'); if(limitTag) limitTag.textContent=formatCurrency(limite);
+  const limitInfo=document.getElementById('limit-info-text'); if(limitInfo) limitInfo.textContent=`utilizado de ${formatCurrency(limite)}`;
+  if(pct>=70 && !state._limitAlertShown && saldoDevedor>0){
+    state._limitAlertShown=true;
+    showToast(`Atenção! ${pct}% do limite usado. Restam ${formatCurrency(Math.max(0,limite-saldoDevedor))}`,4500);
+  }
+  const salAlert=document.getElementById('salary-alert');
+  if(salAlert){
+    if(state.salario>0){
+      const comprometido=Math.round((saldoDevedor/state.salario)*100);
+      const alertTxt=document.getElementById('salary-alert-text');
+      if(comprometido>35){
+        salAlert.classList.remove('hidden');
+        if(alertTxt) alertTxt.textContent=`${comprometido}% do salário comprometido — o recomendado é até 35%`;
+      } else { salAlert.classList.add('hidden'); }
+    } else { salAlert.classList.add('hidden'); }
+  }
   const elExp=document.getElementById('stat-expenses'); if(elExp)elExp.textContent=formatCurrency(totalGastos);
   const elPen=document.getElementById('stat-pending'); if(elPen)elPen.textContent=formatCurrency(totalPendente);
   document.getElementById('debt-card').classList.toggle('zeroed',saldoDevedor===0&&totalGeral>0);
@@ -480,6 +499,9 @@ function setupNavigation() {
   on('btn-manage-fixed','click',()=>navigateTo('fixed-bills'));
   // Logout
   on('btn-logout','click',logout);
+  // Perfil
+  on('btn-open-profile','click',()=>navigateTo('profile'));
+  on('btn-back-profile','click',()=>navigateTo('home'));
 }
 
 function navigateTo(viewName) {
@@ -491,10 +513,11 @@ function navigateTo(viewName) {
   const view = document.getElementById(`view-${viewName}`);
   if (view) view.classList.add('active');
   // Ocultar bottom-nav em certas views
-  const hideNav = ['past-months','fixed-bills'].includes(viewName);
+  const hideNav = ['past-months','fixed-bills','profile'].includes(viewName);
   document.getElementById('bottom-nav').style.display = hideNav ? 'none' : '';
   if (viewName === 'add-expense') resetExpenseForm();
   if (viewName === 'past-months') loadPastMonths();
+  if (viewName === 'profile') renderProfile();
 }
 
 function setupModals() {
@@ -643,6 +666,7 @@ function showMainApp() {
     setupNavigation();
     setupForms();
     setupModals();
+    setupProfileForm();
   }
 
   if (state.demoMode) {
@@ -712,8 +736,10 @@ function setupAuthForms() {
       const btn = document.getElementById('btn-signup-submit');
       btn.disabled = true; btn.textContent = 'Criando...';
       try {
+        const salary = parseFloat(document.getElementById('signup-salary')?.value) || 0;
+        const limit = parseFloat(document.getElementById('signup-limit')?.value) || 1000;
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name });
+        await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name, salario: salary, limiteGastos: limit });
       } catch(err) {
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Criar Conta';
@@ -759,6 +785,11 @@ function logout() {
     firebase.auth().signOut();
   }
   state.currentUser = null;
+  state.salario = 0; state.limiteGastos = 1000;
+  state._limitAlertShown = false; state._profileName = '';
+  state._profileFoto = null; state._pendingPhoto = null;
+  _motivationalShown = false;
+  updateHeaderAvatar(null);
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.classList.remove('visible');
   showAuthUI();
@@ -848,14 +879,19 @@ function forceVideoPlay() {
 
 async function loadUserProfile() {
   const el = document.getElementById('greeting-text');
-  if (!el) return;
-  if (state.demoMode) { el.textContent = 'Olá!'; return; }
-  if (!state.currentUser || !db) { el.textContent = 'Oi!'; return; }
+  if (state.demoMode) { if (el) el.textContent = 'Olá!'; return; }
+  if (!state.currentUser || !db) { if (el) el.textContent = 'Oi!'; return; }
   try {
     const snap = await uRef('profile').once('value');
-    const nome = snap.val()?.nome || '';
-    el.textContent = nome ? `Oi, ${nome}!` : 'Oi!';
-  } catch(_) { el.textContent = 'Oi!'; }
+    const profile = snap.val() || {};
+    state._profileName = profile.nome || '';
+    state.salario = profile.salario || 0;
+    state.limiteGastos = profile.limiteGastos || 1000;
+    state._limitAlertShown = false;
+    if (el) el.textContent = state._profileName ? `Oi, ${state._profileName}!` : 'Oi!';
+    if (profile.foto) { state._profileFoto = profile.foto; updateHeaderAvatar(profile.foto); }
+    renderDashboard();
+  } catch(_) { if (el) el.textContent = 'Oi!'; }
 }
 
 const FRASES_MOTIVACIONAIS = [
@@ -877,4 +913,139 @@ function showMotivationalQuote() {
   _motivationalShown = true;
   const frase = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)];
   setTimeout(() => showToast(frase, 4500), 800);
+}
+
+/* ═══════════════════════════════════════
+   PERFIL / CONFIGURAÇÕES
+═══════════════════════════════════════ */
+
+function updateHeaderAvatar(photoUrl) {
+  const img  = document.getElementById('header-avatar-img');
+  const icon = document.getElementById('header-avatar-icon');
+  if (photoUrl) {
+    if (img)  { img.src = photoUrl; img.classList.remove('hidden'); }
+    if (icon) icon.classList.add('hidden');
+  } else {
+    if (img)  img.classList.add('hidden');
+    if (icon) icon.classList.remove('hidden');
+  }
+}
+
+function renderProfile() {
+  const nameInput   = document.getElementById('profile-name');
+  const salaryInput = document.getElementById('profile-salary');
+  const limitInput  = document.getElementById('profile-limit');
+  if (nameInput)   nameInput.value   = state._profileName || '';
+  if (salaryInput) salaryInput.value = state.salario || '';
+  if (limitInput)  limitInput.value  = state.limiteGastos || '';
+
+  const nameDisplay  = document.getElementById('profile-name-display');
+  const emailDisplay = document.getElementById('profile-email-display');
+  if (nameDisplay)  nameDisplay.textContent  = state._profileName || 'Usuário';
+  if (emailDisplay) emailDisplay.textContent = state.demoMode ? 'Modo Demo' : (state.currentUser?.email || '');
+
+  const img         = document.getElementById('profile-avatar-img');
+  const placeholder = document.getElementById('profile-avatar-placeholder');
+  if (state._profileFoto) {
+    if (img)         { img.src = state._profileFoto; img.classList.remove('hidden'); }
+    if (placeholder) placeholder.classList.add('hidden');
+  } else {
+    if (img)         img.classList.add('hidden');
+    if (placeholder) placeholder.classList.remove('hidden');
+  }
+}
+
+function setupProfileForm() {
+  const form = document.getElementById('form-profile');
+  if (!form) return;
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    await saveProfile();
+  });
+
+  const photoInput = document.getElementById('profile-photo-input');
+  if (photoInput) {
+    photoInput.addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const base64 = await compressImage(file, 220, 220);
+      state._pendingPhoto = base64;
+      const img         = document.getElementById('profile-avatar-img');
+      const placeholder = document.getElementById('profile-avatar-placeholder');
+      if (img)         { img.src = base64; img.classList.remove('hidden'); }
+      if (placeholder) placeholder.classList.add('hidden');
+    });
+  }
+
+  const shareBtn = document.getElementById('btn-share-app');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const url = 'https://iadigitall.github.io/Gastos/';
+      if (navigator.share) {
+        navigator.share({ title: 'Minhas Finanças', text: 'Controle seus gastos com este app!', url }).catch(()=>{});
+      } else {
+        navigator.clipboard.writeText(url).then(() => showToast('Link copiado!')).catch(() => showToast('Link: ' + url, 4000));
+      }
+    });
+  }
+
+  on('btn-logout-profile', 'click', logout);
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('btn-save-profile');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+  const nome    = (document.getElementById('profile-name')?.value   || '').trim();
+  const salario = parseFloat(document.getElementById('profile-salary')?.value) || 0;
+  const limite  = parseFloat(document.getElementById('profile-limit')?.value)  || 1000;
+
+  const data = { nome, salario, limiteGastos: limite };
+  if (state._pendingPhoto) data.foto = state._pendingPhoto;
+
+  try {
+    if (!state.demoMode && db && state.currentUser) {
+      await uRef('profile').update(data);
+    }
+    state._profileName  = nome;
+    state.salario       = salario;
+    state.limiteGastos  = limite;
+    state._limitAlertShown = false;
+    if (state._pendingPhoto) {
+      state._profileFoto  = state._pendingPhoto;
+      state._pendingPhoto = null;
+      updateHeaderAvatar(state._profileFoto);
+    }
+    const greetEl = document.getElementById('greeting-text');
+    if (greetEl) greetEl.textContent = nome ? `Oi, ${nome}!` : 'Oi!';
+    const nameDisplay = document.getElementById('profile-name-display');
+    if (nameDisplay) nameDisplay.textContent = nome || 'Usuário';
+    renderDashboard();
+    showToast('Perfil salvo!');
+  } catch(err) {
+    showToast('Erro ao salvar perfil');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar Alterações'; }
+  }
+}
+
+function compressImage(file, maxW, maxH) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        const ratio = Math.min(maxW / w, maxH / h);
+        if (ratio < 1) { w = Math.round(w * ratio); h = Math.round(h * ratio); }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
