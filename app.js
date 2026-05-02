@@ -965,6 +965,9 @@ function setupProfileForm() {
   });
 
   const photoInput = document.getElementById('profile-photo-input');
+  const cameraBtn  = document.getElementById('profile-camera-btn');
+  if (cameraBtn && photoInput) cameraBtn.addEventListener('click', () => photoInput.click());
+
   if (photoInput) {
     photoInput.addEventListener('change', async e => {
       const file = e.target.files[0];
