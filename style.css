@@ -1006,16 +1006,27 @@ html, body {
 /* ─── HEADER AVATAR como botão ─── */
 .header-avatar {
   width: 38px; height: 38px; border-radius: 50%;
-  background: #2A2A2A; border: none; cursor: pointer;
+  background: #2A2A2A; border: 1.5px solid var(--border); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; padding: 0; flex-shrink: 0;
-  transition: border 0.2s;
+  transition: border-color 0.2s;
 }
-.header-avatar:hover { border: 2px solid var(--green); }
+.header-avatar:hover { border-color: var(--green); }
 .header-avatar-img {
   width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
 }
+.header-avatar-img.hidden { display: none; }
 .header-avatar svg { color: #a3a3a3; }
+
+/* ─── NAV AVATAR (botão Perfil no bottom nav) ─── */
+.nav-avatar-wrap {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #2A2A2A; border: 1.5px solid var(--border);
+  overflow: hidden;
+}
+.nav-btn.active .nav-avatar-wrap { border-color: var(--green); }
+.nav-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nav-avatar-img.hidden { display: none; }
 
 /* ─── VIEW PERFIL ─── */
 .profile-hero {

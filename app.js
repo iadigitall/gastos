@@ -920,14 +920,18 @@ function showMotivationalQuote() {
 ═══════════════════════════════════════ */
 
 function updateHeaderAvatar(photoUrl) {
-  const img  = document.getElementById('header-avatar-img');
-  const icon = document.getElementById('header-avatar-icon');
-  if (photoUrl) {
-    if (img)  { img.src = photoUrl; img.classList.remove('hidden'); }
-    if (icon) icon.classList.add('hidden');
-  } else {
-    if (img)  img.classList.add('hidden');
-    if (icon) icon.classList.remove('hidden');
+  const pairs = [
+    [document.getElementById('header-avatar-img'),  document.getElementById('header-avatar-icon')],
+    [document.getElementById('nav-avatar-img'),      document.getElementById('nav-avatar-icon')],
+  ];
+  for (const [img, icon] of pairs) {
+    if (photoUrl) {
+      if (img)  { img.src = photoUrl; img.classList.remove('hidden'); }
+      if (icon) icon.classList.add('hidden');
+    } else {
+      if (img)  img.classList.add('hidden');
+      if (icon) icon.classList.remove('hidden');
+    }
   }
 }
 
