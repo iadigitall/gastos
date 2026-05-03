@@ -1135,8 +1135,8 @@ async function shareApp() {
   const APP_URL = 'https://iadigitall.github.io/Gastos/';
   const name = state._profileName || '';
   const msgText = name
-    ? `${name} te convidou: "Venha ter o controle total das suas finanças comigo!" 💚\n\n${APP_URL}`
-    : '"Venha ter o controle total das suas finanças comigo!" 💚\n\n' + APP_URL;
+    ? `💚 *${name}* te convida para o *Minhas Finanças*\nControle inteligente do seu dinheiro — grátis!\n\n👉 ${APP_URL}`
+    : `💚 *Minhas Finanças* — Controle inteligente do seu dinheiro!\nInstale grátis direto no celular.\n\n👉 ${APP_URL}`;
 
   try {
     const blob = await generateShareCard();
@@ -1164,93 +1164,145 @@ async function shareApp() {
   }
 }
 
+function _cardRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
 async function generateShareCard() {
   const W = 1080, H = 1080;
+  const F = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // Fundo escuro
+  // ── Fundo
   ctx.fillStyle = '#0D0D0D';
   ctx.fillRect(0, 0, W, H);
-
-  // Brilho verde sutil no centro
-  const glow = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, W*0.55);
-  glow.addColorStop(0, 'rgba(163,255,71,0.07)');
+  const glow = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, W*0.6);
+  glow.addColorStop(0, 'rgba(163,255,71,0.06)');
   glow.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // Barra verde no topo
+  // ── Barras de acento
   ctx.fillStyle = '#A3FF47';
-  ctx.fillRect(0, 0, W, 10);
+  ctx.fillRect(0, 0, W, 8);
+  ctx.fillRect(0, H - 8, W, 8);
 
-  // Nome do app
+  // ── Cabeçalho
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#A3FF47';
-  ctx.font = 'bold 58px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Minhas Finanças', W/2, 118);
-
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `800 62px ${F}`;
+  ctx.fillText('Minhas Finanças', W/2, 108);
   ctx.fillStyle = '#6B7280';
-  ctx.font = '34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Controle inteligente do seu dinheiro', W/2, 168);
+  ctx.font = `400 30px ${F}`;
+  ctx.fillText('Controle inteligente do seu dinheiro', W/2, 152);
 
-  // Avatar circular
-  const cx = W/2, cy = 420, r = 168;
+  // ── Linha separadora topo
+  ctx.strokeStyle = '#1E1E1E';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(W*0.12, 188); ctx.lineTo(W*0.88, 188); ctx.stroke();
 
+  // ── Dois círculos lado a lado
+  const r = 148;
+  const leftCx = W/2 - 195, rightCx = W/2 + 195, cy = 430;
+
+  // Avatar do usuário (esquerda)
   ctx.save();
   ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.arc(leftCx, cy, r, 0, Math.PI * 2);
   ctx.clip();
-
   if (state._profileFoto) {
     const img = new Image();
     await new Promise(res => { img.onload = res; img.onerror = res; img.src = state._profileFoto; });
-    ctx.drawImage(img, cx - r, cy - r, r*2, r*2);
+    ctx.drawImage(img, leftCx - r, cy - r, r*2, r*2);
   } else {
-    ctx.fillStyle = '#1E1E1E';
-    ctx.fillRect(cx - r, cy - r, r*2, r*2);
-    ctx.fillStyle = '#444';
-    ctx.beginPath(); ctx.arc(cx, cy - 38, 62, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(cx, cy + 148, 108, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillRect(leftCx - r, cy - r, r*2, r*2);
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(leftCx, cy - 32, 56, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(leftCx, cy + 136, 100, Math.PI, 0); ctx.fill();
   }
   ctx.restore();
-
-  // Borda verde no avatar
   ctx.strokeStyle = '#A3FF47';
-  ctx.lineWidth = 9;
+  ctx.lineWidth = 8;
+  ctx.beginPath(); ctx.arc(leftCx, cy, r + 5, 0, Math.PI * 2); ctx.stroke();
+
+  // Logo do app (direita) — rounded square verde com gráfico
+  const logoSize = r * 2;
+  const lx = rightCx - r, ly = cy - r, lrr = Math.round(logoSize * 0.29);
+  ctx.fillStyle = '#A3FF47';
+  _cardRoundRect(ctx, lx, ly, logoSize, logoSize, lrr);
+  ctx.fill();
+
+  // Gráfico de linha dentro do logo (escala do viewBox 56x56)
+  const sc = logoSize / 56;
+  ctx.strokeStyle = '#0D0D0D';
+  ctx.lineWidth = 3.8 * sc;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   ctx.beginPath();
-  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+  ctx.moveTo(lx + 14*sc, ly + 38*sc);
+  ctx.lineTo(lx + 20*sc, ly + 30*sc);
+  ctx.lineTo(lx + 27*sc, ly + 34*sc);
+  ctx.lineTo(lx + 35*sc, ly + 22*sc);
+  ctx.lineTo(lx + 42*sc, ly + 18*sc);
   ctx.stroke();
+  ctx.fillStyle = '#0D0D0D';
+  ctx.beginPath(); ctx.arc(lx + 14*sc, ly + 38*sc, 3.2*sc, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(lx + 42*sc, ly + 18*sc, 3.2*sc, 0, Math.PI*2); ctx.fill();
 
-  // Nome do usuário
-  const nome = state._profileName || 'Usuário';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(nome, W/2, 666);
-
-  // Mensagem principal
-  ctx.fillStyle = '#D1D5DB';
-  ctx.font = '40px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('"Venha ter o controle total', W/2, 756);
-  ctx.fillText('das suas finanças comigo!"', W/2, 808);
-
-  // Linha divisória
+  // ── Badge "+" entre os dois
+  const badgeR = 34;
+  ctx.fillStyle = '#0D0D0D';
+  ctx.beginPath(); ctx.arc(W/2, cy, badgeR, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#2A2A2A';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(W*0.18, 862); ctx.lineTo(W*0.82, 862);
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(W/2, cy, badgeR, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = '#A3FF47';
+  ctx.font = `700 38px ${F}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('+', W/2, cy + 13);
+
+  // ── Label abaixo de cada círculo
+  ctx.font = `600 26px ${F}`;
+  ctx.fillStyle = '#6B7280';
+  const nome = state._profileName || 'Usuário';
+  ctx.fillText(nome, leftCx, cy + r + 44);
+  ctx.fillText('App', rightCx, cy + r + 44);
+
+  // ── Mensagem principal
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `700 52px ${F}`;
+  ctx.fillText(`${nome} te convida!`, W/2, cy + r + 130);
+
+  ctx.fillStyle = '#9CA3AF';
+  ctx.font = `400 32px ${F}`;
+  ctx.fillText('Controle suas finanças com inteligência.', W/2, cy + r + 184);
+  ctx.fillText('Grátis · Instala direto no celular.', W/2, cy + r + 226);
+
+  // ── Pill com URL
+  const pillW = 560, pillH = 68, pillX = W/2 - pillW/2, pillY = cy + r + 278;
+  ctx.fillStyle = '#161616';
+  _cardRoundRect(ctx, pillX, pillY, pillW, pillH, 34);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(163,255,71,0.25)';
+  ctx.lineWidth = 1.5;
+  _cardRoundRect(ctx, pillX, pillY, pillW, pillH, 34);
   ctx.stroke();
-
-  // URL
   ctx.fillStyle = '#A3FF47';
-  ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('iadigitall.github.io/Gastos', W/2, 920);
-
-  // Barra verde no rodapé
-  ctx.fillStyle = '#A3FF47';
-  ctx.fillRect(0, H - 10, W, 10);
+  ctx.font = `700 28px ${F}`;
+  ctx.fillText('iadigitall.github.io/Gastos', W/2, pillY + 44);
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
 }
