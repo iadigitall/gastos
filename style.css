@@ -879,7 +879,7 @@ html, body {
 
 .auth-card {
   width: 100%;
-  background: rgba(14, 14, 14, 0.45);
+  background: rgba(14, 14, 14, 0.30);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255,255,255,0.07);
