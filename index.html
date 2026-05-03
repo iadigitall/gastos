@@ -13,7 +13,9 @@
   <link rel="stylesheet" href="style.css?v=4">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.svg">
   <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <meta name="apple-mobile-web-app-title" content="Finanças">
 </head>
 
 <body>
@@ -144,10 +146,11 @@
         </svg>
       </button>
     </nav>
-    <button class="sidebar-btn sidebar-btn-bottom" id="btn-close-month" title="Fechar Mês">
+    <button class="sidebar-btn sidebar-btn-bottom sidebar-close-month" id="btn-close-month" title="Fechar Mês">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-4M9 3h6M9 3v4h6V3" />
       </svg>
+      <span class="sidebar-close-label">Fechar Mês</span>
     </button>
   </aside>
 
@@ -188,6 +191,9 @@
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg></button>
+          <button class="header-icon-btn" id="btn-toggle-hide" title="Ocultar valores">
+            <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
           <button class="header-avatar" id="btn-open-profile" title="Perfil">
             <img id="header-avatar-img" class="header-avatar-img hidden" alt="Perfil">
             <svg id="header-avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
@@ -250,6 +256,12 @@
             </div>
           </div>
 
+          <!-- Alerta limite estourado -->
+          <div id="limit-exceeded-alert" class="limit-exceeded-alert hidden">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="limit-exceeded-text">Limite estourado — pare de gastar agora!</span>
+          </div>
+
           <!-- Alerta salário 35% -->
           <div id="salary-alert" class="salary-alert hidden">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -290,8 +302,11 @@
             </div>
           </div>
 
-          <!-- Fechar Mês (mobile) -->
-          <button id="btn-close-month-mobile" class="btn-ghost mobile-only"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Fechar Mês</button>
+          <!-- Fechar Mês -->
+          <button id="btn-close-month-mobile" class="btn-close-month-prominent mobile-only">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-4M9 3h6M9 3v4h6V3"/></svg>
+            Fechar Mês Atual
+          </button>
           <button id="btn-history-months" class="btn-link mobile-only">Ver meses anteriores →</button>
 
         </div>
@@ -580,6 +595,7 @@
             step="0.01" min="0.01" placeholder="0,00" inputmode="decimal"></div>
         <div class="form-group"><label for="fixed-day">Dia do vencimento (1–28)</label><input id="fixed-day"
             type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric"></div>
+        <div class="form-group"><label for="fixed-parcelas">Parcelas <span class="form-opt">(opcional — deixe em branco para recorrência sem fim)</span></label><input id="fixed-parcelas" type="number" min="1" max="360" placeholder="Ex: 12" inputmode="numeric"></div>
         <button type="submit" class="btn-primary">Salvar Conta Fixa</button>
       </form>
     </div>
@@ -631,6 +647,24 @@
         <button data-close="modal-close-month" class="btn-secondary">Cancelar</button>
         <button id="btn-confirm-close" class="btn-danger">Fechar Mês</button>
       </div>
+    </div>
+  </div>
+
+  <div id="modal-edit-fixed-day" class="modal hidden">
+    <div class="modal-backdrop" data-close="modal-edit-fixed-day"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Editar Vencimento</h3>
+        <button class="modal-close" data-close="modal-edit-fixed-day">✕</button>
+      </div>
+      <form id="form-edit-fixed-day">
+        <input type="hidden" id="edit-fixed-id">
+        <div class="form-group">
+          <label for="edit-fixed-day">Novo dia de vencimento (1–28)</label>
+          <input id="edit-fixed-day" type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric">
+        </div>
+        <button type="submit" class="btn-primary">Salvar</button>
+      </form>
     </div>
   </div>
 

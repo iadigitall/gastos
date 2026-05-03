@@ -28,7 +28,7 @@ const CATEGORIAS = {
   saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
   outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
 const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#76db1a', lazer:'#FFFFFF', saude:'#b2fc5d', outros:'#555555' };
@@ -101,15 +101,21 @@ async function applyFixedBillsToCurrentMonth() {
     if (Object.values(state.contas).some(c => c.contaFixaId === fixaId)) {
       _appliedFixed.add(fixaId); continue;
     }
+    const totalParcelas = fixa.totalParcelas || 0;
+    let parcelaAtual = 1;
+    if (fixa.mesInicio) parcelaAtual = monthDiff(fixa.mesInicio, state.mesAtual) + 1;
+    if (totalParcelas > 0 && parcelaAtual > totalParcelas) {
+      await uRef(`contasFixas/${fixaId}`).update({ ativa: false }).catch(() => {});
+      continue;
+    }
     _addingFixed.add(fixaId);
     const [year, month] = state.mesAtual.split('-');
     const dia = Math.min(fixa.diaVencimento || 1, 28);
     const vencimento = `${year}-${month}-${String(dia).padStart(2, '0')}`;
+    const entry = { nome: fixa.nome, valor: fixa.valor, vencimento, paga: false, pagaEm: null, criadoEm: Date.now(), contaFixaId: fixaId };
+    if (totalParcelas > 0) { entry.parcelaAtual = parcelaAtual; entry.totalParcelas = totalParcelas; }
     try {
-      await uRef(`meses/${state.mesAtual}/contas`).push({
-        nome: fixa.nome, valor: fixa.valor, vencimento,
-        paga: false, pagaEm: null, criadoEm: Date.now(), contaFixaId: fixaId
-      });
+      await uRef(`meses/${state.mesAtual}/contas`).push(entry);
       _appliedFixed.add(fixaId);
     } catch(err) { console.error('Erro ao aplicar conta fixa:', err); }
     finally { _addingFixed.delete(fixaId); }
@@ -133,10 +139,11 @@ function loadFixedBillsFromLocalStorage() {
 
 function getCurrentMonthKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
-function formatCurrency(val) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(val)||0); }
+function formatCurrency(val) { if (state.hideValues) return 'R$ •••'; return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(val)||0); }
 function formatDate(str) { if(!str)return''; const[y,m,d]=str.split('-'); return`${d}/${m}/${y}`; }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function genId() { return`${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
+function monthDiff(from, to) { const[fy,fm]=from.split('-').map(Number);const[ty,tm]=to.split('-').map(Number);return(ty-fy)*12+(tm-fm); }
 
 function renderAll() {
   renderDashboard();
@@ -180,10 +187,21 @@ function renderDashboard() {
   document.getElementById('progress-percent').textContent=pct;
   const limitTag=document.getElementById('limit-tag'); if(limitTag) limitTag.textContent=formatCurrency(limite);
   const limitInfo=document.getElementById('limit-info-text'); if(limitInfo) limitInfo.textContent=`utilizado de ${formatCurrency(limite)}`;
-  if(pct>=70 && !state._limitAlertShown && saldoDevedor>0){
+  if(pct>=70 && !state._limitAlertShown && saldoDevedor>0 && saldoDevedor<=limite){
     state._limitAlertShown=true;
     showToast(`Atenção! ${pct}% do limite usado. Restam ${formatCurrency(Math.max(0,limite-saldoDevedor))}`,4500);
   }
+  const limitExcAlert=document.getElementById('limit-exceeded-alert');
+  if(limitExcAlert){
+    if(saldoDevedor>limite){
+      limitExcAlert.classList.remove('hidden');
+      const excTxt=document.getElementById('limit-exceeded-text');
+      const excPct=Math.round((saldoDevedor/limite)*100);
+      if(excTxt) excTxt.textContent=`Você gastou ${excPct}% do limite — pare de gastar agora!`;
+      if(!state._limitExceededAlertShown){state._limitExceededAlertShown=true;showToast('🚨 Limite estourado! Pare de gastar agora!',5000);}
+    } else { limitExcAlert.classList.add('hidden'); }
+  }
+  bar.classList.toggle('over-limit', saldoDevedor>limite);
   const salAlert=document.getElementById('salary-alert');
   if(salAlert){
     if(state.salario>0){
@@ -348,7 +366,7 @@ function renderBills() {
   container.innerHTML=`<div class="bills-list-inner">${entries.map(([id,c])=>{
     const overdue=!c.paga&&c.vencimento&&c.vencimento<today;
     const meta=c.vencimento?`${overdue?`${ICO.warning(12)} Venceu em: `:'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
-    const fixedBadge=c.contaFixaId?`<span class="fixed-badge">${ICO.repeat(10)} Fixa</span>`:'';
+    let fixedBadge='';if(c.contaFixaId){fixedBadge=c.parcelaAtual&&c.totalParcelas?`<span class="fixed-badge">${ICO.repeat(10)} ${c.parcelaAtual}/${c.totalParcelas}</span>`:`<span class="fixed-badge">${ICO.repeat(10)} Fixa</span>`;}
     return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>${ICO.check(16)}</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">${ICO.trash(16)}</button>`:''}</div>`;
   }).join('')}</div>`;
 }
@@ -395,7 +413,10 @@ function renderFixedBills() {
   }
   entries.sort(([,a],[,b])=>(a.nome||'').localeCompare(b.nome||''));
   container.innerHTML=`<div class="fixed-bills-inner">${entries.map(([id,f])=>{
-    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">${ICO.trash(15)}</button></div>`;
+    const totalP=f.totalParcelas||0;
+    let parcelaTag='';
+    if(totalP>0){const atual=f.mesInicio?Math.min(monthDiff(f.mesInicio,state.mesAtual)+1,totalP):1;parcelaTag=`<span class="parcela-badge">${atual}/${totalP}</span>`;}
+    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)} ${parcelaTag}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><div class="fixed-bill-actions"><button class="btn-edit-fixed" onclick="openEditFixedDay('${escHtml(id)}',${f.diaVencimento||1})" title="Editar vencimento">${ICO.calendar(15)}</button><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">${ICO.trash(15)}</button></div></div>`;
   }).join('')}</div>`;
 }
 
@@ -404,15 +425,17 @@ async function handleAddFixedBill(e) {
   const nome=document.getElementById('fixed-name').value.trim();
   const value=parseFloat(document.getElementById('fixed-value').value);
   const day=parseInt(document.getElementById('fixed-day').value);
+  const parcelas=parseInt(document.getElementById('fixed-parcelas')?.value)||0;
   if(!nome) return showToast('Dá um nome pra conta fixa');
   if(!value||value<=0) return showToast('Coloca o valor certinho');
   if(!day||day<1||day>28) return showToast('Dia deve ser entre 1 e 28');
-  const entry={nome,valor:value,diaVencimento:day,ativa:true,criadoEm:Date.now()};
+  const entry={nome,valor:value,diaVencimento:day,ativa:true,criadoEm:Date.now(),mesInicio:state.mesAtual};
+  if(parcelas>0) entry.totalParcelas=parcelas;
   try {
     if(db) { await uRef('contasFixas').push(entry); }
     else { state.contasFixas[genId()]=entry; saveFixedBillsToLocalStorage(); renderFixedBills(); applyFixedBillsToCurrentMonth(); }
     closeModal('modal-add-fixed-bill'); document.getElementById('form-fixed-bill').reset();
-    showToast('Conta fixa criada! Adicionada a este mês.');
+    showToast(parcelas>0?`Conta fixa criada! ${parcelas} parcelas.`:'Conta fixa criada! Adicionada a este mês.');
   } catch(err){showToast('Erro ao salvar.');}
 }
 
@@ -469,6 +492,37 @@ async function loadPastMonths() {
   } catch(err){container.innerHTML=`<div class="empty-state"><span class="empty-icon">${ICO.warning(40)}</span><p>Erro ao carregar</p></div>`;}
 }
 
+function toggleHideValues() {
+  state.hideValues = !state.hideValues;
+  const btn = document.getElementById('btn-toggle-hide');
+  if (btn) btn.classList.toggle('active', state.hideValues);
+  const icon = document.getElementById('eye-icon');
+  if (icon) icon.innerHTML = state.hideValues
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  renderAll();
+}
+
+function openEditFixedDay(id, currentDay) {
+  document.getElementById('edit-fixed-id').value = id;
+  document.getElementById('edit-fixed-day').value = currentDay;
+  openModal('modal-edit-fixed-day');
+}
+
+async function saveEditFixedDay(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-fixed-id').value;
+  const day = parseInt(document.getElementById('edit-fixed-day').value);
+  if (!day || day < 1 || day > 28) return showToast('Dia deve ser entre 1 e 28');
+  try {
+    if (db) await uRef(`contasFixas/${id}`).update({ diaVencimento: day });
+    else { if (state.contasFixas[id]) state.contasFixas[id].diaVencimento = day; saveFixedBillsToLocalStorage(); }
+    closeModal('modal-edit-fixed-day');
+    renderFixedBills();
+    showToast('Vencimento atualizado!');
+  } catch(_) { showToast('Erro ao salvar'); }
+}
+
 function setupNavigation() {
   // Bottom nav + sidebar buttons com data-view
   document.querySelectorAll('.nav-btn[data-view], .sidebar-btn[data-view]').forEach(btn =>
@@ -523,6 +577,9 @@ function navigateTo(viewName) {
 function setupModals() {
   on('btn-add-bill','click',()=>{document.getElementById('form-bill').reset();document.getElementById('bill-due').value=todayStr();openModal('modal-add-bill');setTimeout(()=>document.getElementById('bill-name').focus(),300);});
   on('btn-add-fixed-bill','click',()=>{document.getElementById('form-fixed-bill').reset();openModal('modal-add-fixed-bill');setTimeout(()=>document.getElementById('fixed-name').focus(),300);});
+  on('btn-toggle-hide','click',toggleHideValues);
+  const formEditFixed=document.getElementById('form-edit-fixed-day');
+  if(formEditFixed) formEditFixed.addEventListener('submit',saveEditFixedDay);
   on('btn-confirm-close','click',handleCloseMonth);
   on('btn-confirm-delete','click',executeDelete);
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
@@ -618,6 +675,8 @@ window.payBill=payBill;
 window.confirmDeleteExpense=confirmDeleteExpense;
 window.confirmDeleteBill=confirmDeleteBill;
 window.confirmDeleteFixedBill=confirmDeleteFixedBill;
+window.openEditFixedDay=openEditFixedDay;
+window.toggleHideValues=toggleHideValues;
 
 /* ═══════════════════════════════════════
    AUTH
@@ -786,7 +845,7 @@ function logout() {
   }
   state.currentUser = null;
   state.salario = 0; state.limiteGastos = 1000;
-  state._limitAlertShown = false; state._profileName = '';
+  state._limitAlertShown = false; state._limitExceededAlertShown = false; state.hideValues = false; state._profileName = '';
   state._profileFoto = null; state._pendingPhoto = null;
   _motivationalShown = false;
   updateHeaderAvatar(null);
