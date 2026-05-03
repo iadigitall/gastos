@@ -1026,13 +1026,20 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; padding: 0; flex-shrink: 0;
   transition: border-color 0.2s;
+  position: relative;
 }
 .header-avatar:hover { border-color: var(--green); }
 .header-avatar-img {
+  position: absolute; top: 0; left: 0;
   width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
 }
 .header-avatar-img.hidden { display: none; }
-.header-avatar svg { color: #a3a3a3; }
+#header-avatar-icon {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #a3a3a3;
+}
+#header-avatar-icon.hidden { display: none; }
 
 /* ─── NAV AVATAR (botão Perfil no bottom nav) ─── */
 .nav-avatar-wrap {
