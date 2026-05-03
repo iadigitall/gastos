@@ -808,6 +808,15 @@ function setupAuthForms() {
 
   const demoBtn = document.getElementById('btn-try-demo');
   if (demoBtn) demoBtn.addEventListener('click', enterDemoMode);
+
+  const signupSalary = document.getElementById('signup-salary');
+  const signupLimit  = document.getElementById('signup-limit');
+  if (signupSalary && signupLimit) {
+    signupSalary.addEventListener('input', () => {
+      const sal = parseFloat(signupSalary.value) || 0;
+      signupLimit.value = sal > 0 ? (Math.round(sal * 0.8 * 100) / 100) : '';
+    });
+  }
 }
 
 function enterDemoMode() {
@@ -1046,6 +1055,15 @@ function setupProfileForm() {
 
   const shareBtn = document.getElementById('btn-share-app');
   if (shareBtn) shareBtn.addEventListener('click', shareApp);
+
+  const profileSalary = document.getElementById('profile-salary');
+  const profileLimit  = document.getElementById('profile-limit');
+  if (profileSalary && profileLimit) {
+    profileSalary.addEventListener('input', () => {
+      const sal = parseFloat(profileSalary.value) || 0;
+      if (sal > 0) profileLimit.value = Math.round(sal * 0.8 * 100) / 100;
+    });
+  }
 
   on('btn-logout-profile', 'click', logout);
 }
