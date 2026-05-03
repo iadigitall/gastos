@@ -1036,16 +1036,18 @@ html, body {
   position: relative; width: 96px; height: 96px; margin-bottom: 20px;
 }
 .profile-avatar-img {
-  width: 96px; height: 96px; border-radius: 50%; object-fit: cover; object-position: center;
+  position: absolute; top: 0; left: 0;
+  width: 96px; height: 96px; border-radius: 50%; object-fit: cover; object-position: center top;
 }
 .profile-avatar-img.hidden { display: none; }
-.profile-avatar-placeholder.hidden { display: none; }
 .profile-avatar-placeholder {
+  position: absolute; top: 0; left: 0;
   width: 96px; height: 96px; border-radius: 50%;
   background: #2A2A2A; border: 3px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   color: var(--muted);
 }
+.profile-avatar-placeholder.hidden { display: none; }
 .profile-camera-btn {
   position: absolute; bottom: 2px; right: 2px;
   width: 28px; height: 28px; border-radius: 50%;
