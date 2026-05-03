@@ -587,8 +587,9 @@ function setupModals() {
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 
-function showToast(msg,duration=2600){
+function showToast(msg,duration=2600,position='bottom'){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden');
+  t.classList.toggle('toast-top',position==='top');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.add('hidden'),duration);
 }
 function setupOnlineStatus(){window.addEventListener('online',()=>showToast('Conexão restaurada'));window.addEventListener('offline',()=>showToast('Sem conexão'));}
@@ -980,7 +981,7 @@ function showMotivationalQuote() {
   if (_motivationalShown) return;
   _motivationalShown = true;
   const frase = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)];
-  setTimeout(() => showToast(frase, 4500), 800);
+  setTimeout(() => showToast(frase, 4500, 'top'), 800);
 }
 
 /* ═══════════════════════════════════════
