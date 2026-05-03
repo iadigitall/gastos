@@ -1225,7 +1225,10 @@ async function generateShareCard() {
   if (state._profileFoto) {
     const img = new Image();
     await new Promise(res => { img.onload = res; img.onerror = res; img.src = state._profileFoto; });
-    ctx.drawImage(img, leftCx - r, cy - r, r*2, r*2);
+    const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+    const scale = Math.max((r*2) / iw, (r*2) / ih);
+    const dw = iw * scale, dh = ih * scale;
+    ctx.drawImage(img, leftCx - r - (dw - r*2)/2, cy - r - (dh - r*2)/2, dw, dh);
   } else {
     ctx.fillStyle = '#1A1A1A';
     ctx.fillRect(leftCx - r, cy - r, r*2, r*2);
