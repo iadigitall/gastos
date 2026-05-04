@@ -714,12 +714,26 @@ function renderCategoryChart() {
   const labels=cats.map(([k])=>CATEGORIAS[k]?.label||k);
   const data=cats.map(([,v])=>v);
   const colors=cats.map(([k])=>CAT_COLORS[k]||'#94a3b8');
+  const total=data.reduce((s,v)=>s+v,0);
   chartCategories=new Chart(canvas,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:8}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{
-      legend:{position:'bottom',labels:{color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true}},
-      tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)}`}}
+      legend:{
+        position:'bottom',
+        labels:{
+          color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true,
+          generateLabels: chart => chart.data.labels.map((lbl,i)=>({
+            text: `${lbl}  ${Math.round(chart.data.datasets[0].data[i]/total*100)}%`,
+            fillStyle: chart.data.datasets[0].backgroundColor[i],
+            strokeStyle: chart.data.datasets[0].backgroundColor[i],
+            pointStyle: 'circle',
+            hidden: false,
+            index: i
+          }))
+        }
+      },
+      tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)}  (${Math.round(c.raw/total*100)}%)`}}
     }}
   });
 }
