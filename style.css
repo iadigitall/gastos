@@ -1215,9 +1215,102 @@ html, body {
 .btn-close-month-card:active { border-color: var(--muted); color: var(--text); }
 
 /* ═══════════════════════════════════════
-   INTELIGÊNCIA FINANCEIRA
+   INTELIGÊNCIA FINANCEIRA — FLUTUANTE
 ═══════════════════════════════════════ */
-#insights-list {
+
+/* Botão flutuante */
+.floating-insights-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  background: #0d0d0d;
+  border: 1.5px solid #a3ff47;
+  border-radius: 50px;
+  color: #a3ff47;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(163,255,71,0.2);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.floating-insights-btn:active {
+  transform: scale(0.96);
+}
+.floating-insights-btn.has-alerts {
+  animation: float-pulse 2.5s ease-in-out infinite;
+}
+@keyframes float-pulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(163,255,71,0.2); }
+  50%      { box-shadow: 0 4px 28px rgba(163,255,71,0.5); }
+}
+
+/* Modal / painel deslizante */
+.insights-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+}
+.insights-modal.hidden { display: none; }
+
+.insights-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+}
+
+.insights-modal-sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: #111;
+  border-top: 1.5px solid #a3ff47;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 18px 32px;
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+}
+.insights-modal:not(.hidden) .insights-modal-sheet {
+  transform: translateY(0);
+}
+
+.insights-modal-handle {
+  width: 36px; height: 4px;
+  background: #333;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.insights-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.insights-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #a3ff47;
+}
+.insights-modal-close {
+  background: transparent;
+  border: none;
+  color: #555;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.2s;
+}
+.insights-modal-close:hover { color: #aaa; }
+
+/* Cards de insight */
+.insights-modal-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1250,19 +1343,17 @@ html, body {
   color: #f0f0f5;
   line-height: 1.35;
 }
-
 .insight-detail {
   font-size: 0.775rem;
   color: #6B7280;
   margin-top: 3px;
   line-height: 1.5;
 }
-
 .insights-empty {
   font-size: 0.82rem;
   color: #6B7280;
   text-align: center;
-  padding: 8px 0 4px;
+  padding: 16px 0 8px;
 }
 
 .insight-hidden { display: none; }

@@ -272,16 +272,6 @@
             <span id="salary-alert-text"></span>
           </div>
 
-          <!-- Inteligência Financeira -->
-          <div class="section-card" id="insights-section">
-            <div class="section-header">
-              <span class="section-title">Inteligência Financeira</span>
-            </div>
-            <div id="insights-list">
-              <div class="insights-empty">Carregando análise...</div>
-            </div>
-          </div>
-
           <!-- Contas Preview -->
           <div class="section-card">
             <div class="section-header">
@@ -322,14 +312,6 @@
 
         <!-- ── COLUNA DIREITA ── -->
         <div class="dash-right">
-
-          <!-- Notificações -->
-          <div class="section-card">
-            <div class="section-header">
-              <span class="section-title">Notificações</span>
-            </div>
-            <div id="home-notif" class="home-notif-list"></div>
-          </div>
 
           <!-- Cartões -->
           <div class="section-card">
@@ -720,6 +702,27 @@
           <button type="button" class="btn-delete-inline" onclick="deleteFromEditBill()">Excluir conta</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Botão flutuante Inteligência Financeira -->
+  <button id="floating-insights-btn" class="floating-insights-btn" onclick="openInsights()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="floating-insights-label">Análise</span>
+  </button>
+
+  <!-- Painel deslizante Inteligência Financeira -->
+  <div id="insights-modal" class="insights-modal hidden">
+    <div class="insights-modal-backdrop" onclick="closeInsights()"></div>
+    <div class="insights-modal-sheet">
+      <div class="insights-modal-handle"></div>
+      <div class="insights-modal-header">
+        <span class="insights-modal-title">Inteligência Financeira</span>
+        <button class="insights-modal-close" onclick="closeInsights()">✕</button>
+      </div>
+      <div id="insights-list" class="insights-modal-list">
+        <div class="insights-empty">Carregando análise...</div>
+      </div>
     </div>
   </div>
 

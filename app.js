@@ -32,7 +32,7 @@ const CATEGORIAS = {
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
-const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#76db1a', lazer:'#FFFFFF', saude:'#b2fc5d', outros:'#555555' };
+const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#60A5FA', lazer:'#F59E0B', saude:'#F87171', outros:'#A78BFA' };
 let chartCategories = null, chartMonthly = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -152,7 +152,6 @@ function renderAll() {
   renderBills();
   renderHistory();
   renderHomeContas();
-  renderHomeNotifications();
   renderHomeTransactions();
   renderCategoryChart();
   renderMonthlyChart();
@@ -778,7 +777,8 @@ window.confirmDeleteFixedBill=confirmDeleteFixedBill;
 window.openEditFixedBill=openEditFixedBill;
 window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
-window.toggleInsights=toggleInsights;
+window.openInsights=openInsights;
+window.closeInsights=closeInsights;
 
 /* ═══════════════════════════════════════
    INTELIGÊNCIA FINANCEIRA
@@ -931,44 +931,49 @@ async function buildHistoricoInsights() {
 function renderInsightsList(insights) {
   const container = document.getElementById('insights-list');
   if (!container) return;
+
   const hasData = Object.keys(state.gastos).length > 0 || Object.keys(state.contas).length > 0;
+
+  // atualiza botão flutuante
+  const btn = document.getElementById('floating-insights-btn');
+  const label = document.getElementById('floating-insights-label');
+  if (btn && label) {
+    const alerts = insights.filter(i => i.type === 'danger' || i.type === 'warning').length;
+    if (alerts > 0) {
+      label.textContent = `${alerts} alerta${alerts > 1 ? 's' : ''}`;
+      btn.classList.add('has-alerts');
+    } else {
+      label.textContent = 'Análise';
+      btn.classList.remove('has-alerts');
+    }
+  }
+
   if (!insights.length) {
     container.innerHTML = `<div class="insights-empty">${hasData ? 'Tudo em ordem — continue assim! 👍' : 'Registre seus primeiros gastos para ver análises aqui'}</div>`;
     return;
   }
 
-  const VISIBLE = 2;
-  const hasMore = insights.length > VISIBLE;
-
-  container.innerHTML = insights.map((ins, i) => `
-    <div class="insight-item insight-${ins.type}${i >= VISIBLE ? ' insight-hidden' : ''}">
+  container.innerHTML = insights.map(ins => `
+    <div class="insight-item insight-${ins.type}">
       <div class="insight-icon">${ins.icon}</div>
       <div class="insight-body">
         <div class="insight-title">${ins.title}</div>
         <div class="insight-detail">${ins.detail}</div>
       </div>
     </div>
-  `).join('') + (hasMore ? `
-    <button class="insights-toggle" id="btn-insights-toggle" onclick="toggleInsights(this)">
-      Ver mais
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-  ` : '');
+  `).join('');
 }
 
-function toggleInsights(btn) {
-  const hidden = document.querySelectorAll('#insights-list .insight-hidden');
-  const isExpanded = hidden.length === 0;
-  if (isExpanded) {
-    document.querySelectorAll('#insights-list .insight-item').forEach((el, i) => {
-      if (i >= 2) el.classList.add('insight-hidden');
-    });
-    btn.innerHTML = `Ver mais <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
-  } else {
-    hidden.forEach(el => el.classList.remove('insight-hidden'));
-    btn.innerHTML = `Ver menos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>`;
-  }
+function openInsights() {
+  document.getElementById('insights-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 }
+
+function closeInsights() {
+  document.getElementById('insights-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
 
 async function renderInsights() {
   const sync = buildSyncInsights();
