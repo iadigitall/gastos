@@ -723,9 +723,9 @@ html, body {
   animation: fadeInDown 0.22s ease;
 }
 .toast.toast-motivational {
-  background: rgba(163,255,71,0.12);
-  border-color: rgba(163,255,71,0.4);
-  color: var(--green);
+  background: rgba(30,40,18,0.97);
+  border-color: rgba(163,255,71,0.7);
+  color: #d4ff8a;
   font-style: italic;
   font-size: 14px;
   padding: 14px 28px;
@@ -733,7 +733,7 @@ html, body {
   white-space: normal;
   text-align: center;
   line-height: 1.5;
-  box-shadow: 0 4px 24px rgba(163,255,71,0.15);
+  box-shadow: 0 4px 24px rgba(163,255,71,0.25);
 }
 .toast.hidden { display: none; }
 @keyframes fadeInUp {
