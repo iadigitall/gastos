@@ -779,6 +779,7 @@ window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
 window.openInsights=openInsights;
 window.closeInsights=closeInsights;
+window.insightPayBill=insightPayBill;
 
 /* ═══════════════════════════════════════
    INTELIGÊNCIA FINANCEIRA
@@ -800,33 +801,36 @@ function buildSyncInsights() {
   const insights = [];
   const today = todayStr();
 
-  // contas vencidas
-  const vencidas = Object.values(state.contas).filter(c => !c.paga && c.vencimento && c.vencimento < today);
-  if (vencidas.length) {
-    const total = vencidas.reduce((s, c) => s + (c.valor || 0), 0);
+  // contas vencidas — uma por uma com botão de pagar
+  const vencidas = Object.entries(state.contas)
+    .filter(([, c]) => !c.paga && c.vencimento && c.vencimento < today)
+    .sort(([, a], [, b]) => a.vencimento.localeCompare(b.vencimento));
+  for (const [id, c] of vencidas) {
     insights.push({
       type: 'danger',
       icon: ICO.warning(18),
-      title: vencidas.length === 1 ? `"${escHtml(vencidas[0].nome)}" está vencida` : `${vencidas.length} contas estão vencidas`,
-      detail: `Total em atraso: ${formatCurrency(total)}`
+      title: `"${escHtml(c.nome)}" está vencida`,
+      detail: `Venceu em ${formatDate(c.vencimento)} · ${formatCurrency(c.valor)}`,
+      billId: id
     });
   }
 
-  // contas vencendo em até 3 dias
+  // contas vencendo em até 3 dias — uma por uma com botão de pagar
   const limite3d = new Date();
   limite3d.setDate(limite3d.getDate() + 3);
   const limite3dStr = limite3d.toISOString().split('T')[0];
-  const proximas = Object.values(state.contas)
-    .filter(c => !c.paga && c.vencimento && c.vencimento >= today && c.vencimento <= limite3dStr)
-    .sort((a, b) => a.vencimento.localeCompare(b.vencimento));
-  for (const c of proximas) {
+  const proximas = Object.entries(state.contas)
+    .filter(([, c]) => !c.paga && c.vencimento && c.vencimento >= today && c.vencimento <= limite3dStr)
+    .sort(([, a], [, b]) => a.vencimento.localeCompare(b.vencimento));
+  for (const [id, c] of proximas) {
     const diff = Math.round((new Date(c.vencimento + 'T12:00:00') - new Date()) / 86400000);
     const label = diff <= 0 ? 'vence hoje' : diff === 1 ? 'vence amanhã' : `vence em ${diff} dias`;
     insights.push({
       type: 'warning',
       icon: ICO.calendar(18),
       title: `"${escHtml(c.nome)}" ${label}`,
-      detail: formatCurrency(c.valor)
+      detail: formatCurrency(c.valor),
+      billId: id
     });
   }
 
@@ -959,9 +963,15 @@ function renderInsightsList(insights) {
       <div class="insight-body">
         <div class="insight-title">${ins.title}</div>
         <div class="insight-detail">${ins.detail}</div>
+        ${ins.billId ? `<button class="insight-pay-btn" onclick="insightPayBill('${ins.billId}', this)">Já paguei ✓</button>` : ''}
       </div>
     </div>
   `).join('');
+}
+
+async function insightPayBill(id, btn) {
+  if (btn) { btn.textContent = 'Pagando...'; btn.disabled = true; }
+  await payBill(id);
 }
 
 function openInsights() {

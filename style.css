@@ -1221,22 +1221,22 @@ html, body {
 /* Botão flutuante */
 .floating-insights-btn {
   position: fixed;
-  bottom: 80px;
+  bottom: 82px;
   right: 16px;
   z-index: 500;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 10px 16px;
+  gap: 8px;
+  padding: 13px 22px;
   background: #0d0d0d;
-  border: 1.5px solid #a3ff47;
+  border: 2px solid #a3ff47;
   border-radius: 50px;
   color: #a3ff47;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(163,255,71,0.2);
+  box-shadow: 0 4px 24px rgba(163,255,71,0.25), 0 2px 8px rgba(0,0,0,0.6);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .floating-insights-btn:active {
@@ -1355,6 +1355,22 @@ html, body {
   text-align: center;
   padding: 16px 0 8px;
 }
+
+.insight-pay-btn {
+  margin-top: 9px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #A3FF47;
+  border-radius: 6px;
+  color: #A3FF47;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.insight-pay-btn:hover { background: #A3FF47; color: #0d0d0d; }
+.insight-pay-btn:disabled { opacity: 0.5; cursor: default; }
 
 .insight-hidden { display: none; }
 
