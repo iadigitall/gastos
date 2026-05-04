@@ -582,24 +582,6 @@ function setupModals() {
   if(formEditFixed) formEditFixed.addEventListener('submit',saveEditFixedDay);
   on('btn-confirm-close','click',handleCloseMonth);
   on('btn-confirm-delete','click',executeDelete);
-  on('btn-confirm-biometric','click', async () => {
-    closeModal('modal-biometric-offer');
-    const user = state.currentUser; if (!user) return;
-    const ok = await registerBiometric(user.uid, user.email, state._profileName);
-    showToast(ok ? '✅ Biometria ativada!' : 'Não foi possível ativar. Tente em Perfil > Segurança.');
-    updateBiometricToggle();
-  });
-  on('btn-biometric-unlock','click', async () => {
-    const btn = document.getElementById('btn-biometric-unlock');
-    if (btn) { btn.disabled = true; btn.textContent = 'Verificando...'; }
-    const ok = await verifyBiometric();
-    if (ok) { hideBiometricScreen(); showMainApp(); }
-    else {
-      if (btn) { btn.disabled = false; btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 2H7a2 2 0 0 0-2 2v2"/><path d="M15 2h2a2 2 0 0 1 2 2v2"/><path d="M9 22H7a2 2 0 0 1-2-2v-2"/><path d="M15 22h2a2 2 0 0 0 2-2v-2"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><path d="M9 15c.83 1.5 2.17 2 3 2s2.17-.5 3-2"/></svg> Tentar novamente`; }
-      showToast('Tente novamente ou use sua senha');
-    }
-  });
-  on('btn-biometric-use-password','click', () => hideBiometricScreen());
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 }
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
@@ -718,12 +700,7 @@ function initAuth() {
       if (user) {
         state.currentUser = user;
         state.demoMode = false;
-        const bioData = getBiometricData();
-        if (bioData && bioData.uid === user.uid) {
-          showBiometricScreen(user);
-        } else {
-          showMainApp();
-        }
+        showMainApp();
       } else if (!state.demoMode) {
         showAuthUI();
       }
@@ -776,11 +753,6 @@ function showMainApp() {
   loadUserProfile();
   showMotivationalQuote();
 
-  if (state._offerBiometric) {
-    state._offerBiometric = false;
-    setTimeout(() => openModal('modal-biometric-offer'), 1500);
-  }
-
   const shortcut = new URLSearchParams(location.search).get('shortcut');
   if (shortcut === 'add-expense') navigateTo('add-expense');
 }
@@ -808,7 +780,6 @@ function setupAuthForms() {
       btn.disabled = true; btn.textContent = 'Entrando...';
       try {
         await firebase.auth().signInWithEmailAndPassword(email, password);
-        if (isBiometricSupported() && !getBiometricData()) state._offerBiometric = true;
       } catch(err) {
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Entrar';
@@ -893,7 +864,6 @@ function logout() {
   state._limitAlertShown = false; state._limitExceededAlertShown = false; state.hideValues = false; state._profileName = '';
   state._profileFoto = null; state._pendingPhoto = null;
   _motivationalShown = false;
-  hideBiometricScreen();
   updateHeaderAvatar(null);
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.classList.remove('visible');
@@ -923,86 +893,6 @@ function getAuthErrorMsg(code) {
     'auth/network-request-failed': 'Sem conexão. Verifique sua internet',
   };
   return msgs[code] || 'Erro ao autenticar. Tente novamente.';
-}
-
-/* ═══════════════════════════════════════
-   BIOMETRIA (WebAuthn)
-═══════════════════════════════════════ */
-const BIOMETRIC_LS_KEY = 'mf_bio';
-
-function isBiometricSupported() {
-  return typeof window.PublicKeyCredential !== 'undefined' &&
-         typeof navigator.credentials !== 'undefined';
-}
-function getBiometricData() {
-  try { return JSON.parse(localStorage.getItem(BIOMETRIC_LS_KEY) || 'null'); } catch(_) { return null; }
-}
-function clearBiometric() { localStorage.removeItem(BIOMETRIC_LS_KEY); }
-
-async function registerBiometric(uid, email, displayName) {
-  if (!isBiometricSupported()) return false;
-  try {
-    const challenge = crypto.getRandomValues(new Uint8Array(32));
-    const cred = await navigator.credentials.create({ publicKey: {
-      challenge,
-      rp: { name: 'Minhas Finanças', id: location.hostname },
-      user: { id: new TextEncoder().encode(uid), name: email || uid, displayName: displayName || 'Usuário' },
-      pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
-      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
-      timeout: 60000
-    }});
-    const credId = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-    localStorage.setItem(BIOMETRIC_LS_KEY, JSON.stringify({ uid, email, name: displayName || '', credId }));
-    return true;
-  } catch(e) { return false; }
-}
-
-async function verifyBiometric() {
-  const data = getBiometricData();
-  if (!data || !isBiometricSupported()) return false;
-  try {
-    const credIdBytes = Uint8Array.from(atob(data.credId), c => c.charCodeAt(0));
-    const challenge = crypto.getRandomValues(new Uint8Array(32));
-    await navigator.credentials.get({ publicKey: {
-      challenge,
-      allowCredentials: [{ id: credIdBytes, type: 'public-key' }],
-      userVerification: 'required', timeout: 60000
-    }});
-    return true;
-  } catch(e) { return false; }
-}
-
-function showBiometricScreen(user) {
-  showAuthUI();
-  const bioData = getBiometricData();
-  const nameEl = document.getElementById('biometric-user-name');
-  const emailEl = document.getElementById('biometric-user-email');
-  if (nameEl) nameEl.textContent = `Olá, ${bioData?.name || 'Usuário'}!`;
-  if (emailEl) emailEl.textContent = bioData?.email || '';
-  document.getElementById('auth-wrap-normal')?.classList.add('hidden');
-  document.getElementById('auth-biometric-screen')?.classList.remove('hidden');
-  setTimeout(() => verifyBiometricAndEnter(), 400);
-}
-
-function hideBiometricScreen() {
-  document.getElementById('auth-biometric-screen')?.classList.add('hidden');
-  document.getElementById('auth-wrap-normal')?.classList.remove('hidden');
-}
-
-async function verifyBiometricAndEnter() {
-  const ok = await verifyBiometric();
-  if (ok) { hideBiometricScreen(); showMainApp(); }
-}
-
-function updateBiometricToggle() {
-  const btn = document.getElementById('btn-biometric-toggle');
-  if (!btn) return;
-  const active = !!getBiometricData();
-  btn.textContent = active ? 'Desativar' : 'Ativar';
-  btn.classList.toggle('biometric-btn-on', active);
-  btn.classList.toggle('biometric-btn-off', !active);
-  const section = document.getElementById('biometric-section');
-  if (section) section.style.display = isBiometricSupported() ? '' : 'none';
 }
 
 function initAuthCanvas() {
@@ -1183,24 +1073,6 @@ function setupProfileForm() {
   }
 
   on('btn-logout-profile', 'click', logout);
-
-  const btnBioToggle = document.getElementById('btn-biometric-toggle');
-  if (btnBioToggle) {
-    updateBiometricToggle();
-    btnBioToggle.addEventListener('click', async () => {
-      if (getBiometricData()) {
-        clearBiometric();
-        updateBiometricToggle();
-        showToast('Biometria desativada');
-      } else {
-        if (!isBiometricSupported()) return showToast('Biometria não disponível neste dispositivo');
-        const user = state.currentUser; if (!user) return;
-        const ok = await registerBiometric(user.uid, user.email, state._profileName);
-        updateBiometricToggle();
-        showToast(ok ? '✅ Biometria ativada!' : 'Não foi possível ativar a biometria');
-      }
-    });
-  }
 }
 
 async function saveProfile() {
