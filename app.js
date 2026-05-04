@@ -342,15 +342,15 @@ async function executeDelete() {
   closeModal('modal-confirm-delete');
   try {
     if(type==='gasto') {
-      if(db) await uRef(`meses/${state.mesAtual}/gastos/${id}`).remove();
+      if(db) { await uRef(`meses/${state.mesAtual}/gastos/${id}`).remove(); delete state.gastos[id]; renderAll(); }
       else { delete state.gastos[id]; saveToLocalStorage(); renderAll(); }
       showToast('Gasto removido');
     } else if(type==='conta') {
-      if(db) await uRef(`meses/${state.mesAtual}/contas/${id}`).remove();
+      if(db) { await uRef(`meses/${state.mesAtual}/contas/${id}`).remove(); delete state.contas[id]; renderAll(); }
       else { delete state.contas[id]; saveToLocalStorage(); renderAll(); }
       showToast('Conta removida');
     } else if(type==='contaFixa') {
-      if(db) await uRef(`contasFixas/${id}`).remove();
+      if(db) { await uRef(`contasFixas/${id}`).remove(); delete state.contasFixas[id]; renderFixedBills(); }
       else { delete state.contasFixas[id]; saveFixedBillsToLocalStorage(); renderFixedBills(); }
       _appliedFixed.delete(id);
       showToast('Conta fixa removida');
