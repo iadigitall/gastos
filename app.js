@@ -730,6 +730,7 @@ function renderCategoryChart() {
               text:`${CATEGORIAS[k].label}  ${Math.round((totals[k]||0)/total*100)}%`,
               fillStyle:colors[i],
               strokeStyle:colors[i],
+              fontColor:colors[i],
               pointStyle:'circle',
               hidden:false,
               index:i
