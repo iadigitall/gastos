@@ -29,7 +29,7 @@ const CATEGORIAS = {
   saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
   outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
 let db = null, toastTimer = null, currentMonthListener = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
 const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#76db1a', lazer:'#FFFFFF', saude:'#b2fc5d', outros:'#555555' };
@@ -79,7 +79,7 @@ function subscribeToMonth(key) {
   currentMonthListener = key;
   uRef(`meses/${key}`).on('value', snap => {
     const data = snap.val() || {};
-    state.gastos = data.gastos || {}; state.contas = data.contas || {};
+    state.gastos = data.gastos || {}; state.contas = data.contas || {}; state.fixasIgnoradas = data.fixasIgnoradas || {};
     saveToLocalStorage(); renderAll();
   }, err => { console.error(err); showToast('Erro: ' + (err.code || err.message), 5000); });
 }
@@ -99,6 +99,7 @@ async function applyFixedBillsToCurrentMonth() {
     if (fixa.ativa === false) continue;
     if (_appliedFixed.has(fixaId)) continue;
     if (_addingFixed.has(fixaId)) continue;
+    if (state.fixasIgnoradas[fixaId]) { _appliedFixed.add(fixaId); continue; }
     if (Object.values(state.contas).some(c => c.contaFixaId === fixaId)) {
       _appliedFixed.add(fixaId); continue;
     }
@@ -346,8 +347,15 @@ async function executeDelete() {
       else { delete state.gastos[id]; saveToLocalStorage(); renderAll(); }
       showToast('Gasto removido');
     } else if(type==='conta') {
-      if(db) { await uRef(`meses/${state.mesAtual}/contas/${id}`).remove(); delete state.contas[id]; renderAll(); }
-      else { delete state.contas[id]; saveToLocalStorage(); renderAll(); }
+      const fixaId = state.contas[id]?.contaFixaId || null;
+      if(db) {
+        await uRef(`meses/${state.mesAtual}/contas/${id}`).remove();
+        if(fixaId) { await uRef(`meses/${state.mesAtual}/fixasIgnoradas/${fixaId}`).set(true); state.fixasIgnoradas[fixaId]=true; _appliedFixed.add(fixaId); }
+        delete state.contas[id]; renderAll();
+      } else {
+        if(fixaId) { state.fixasIgnoradas[fixaId]=true; _appliedFixed.add(fixaId); }
+        delete state.contas[id]; saveToLocalStorage(); renderAll();
+      }
       showToast('Conta removida');
     } else if(type==='contaFixa') {
       if(db) { await uRef(`contasFixas/${id}`).remove(); delete state.contasFixas[id]; renderFixedBills(); }
