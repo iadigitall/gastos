@@ -675,7 +675,10 @@
           <label for="edit-fixed-parcelas-edit">Parcelas (0 = sem limite)</label>
           <input id="edit-fixed-parcelas-edit" type="number" min="0" placeholder="Ex: 12" inputmode="numeric">
         </div>
-        <button type="submit" class="btn-primary">Salvar</button>
+        <div class="edit-modal-actions">
+          <button type="submit" class="btn-primary">Salvar</button>
+          <button type="button" class="btn-delete-inline" onclick="deleteFromEditFixed()">Excluir conta</button>
+        </div>
       </form>
     </div>
   </div>
@@ -701,7 +704,10 @@
           <label for="edit-bill-vencimento">Vencimento</label>
           <input id="edit-bill-vencimento" type="date">
         </div>
-        <button type="submit" class="btn-primary">Salvar</button>
+        <div class="edit-modal-actions">
+          <button type="submit" class="btn-primary">Salvar</button>
+          <button type="button" class="btn-delete-inline" onclick="deleteFromEditBill()">Excluir conta</button>
+        </div>
       </form>
     </div>
   </div>

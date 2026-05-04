@@ -589,6 +589,20 @@ async function saveEditBill(e) {
   } catch(_) { showToast('Erro ao salvar'); }
 }
 
+function deleteFromEditFixed() {
+  const id = document.getElementById('edit-fixed-id').value;
+  const nome = document.getElementById('edit-fixed-nome').value;
+  closeModal('modal-edit-fixed-day');
+  confirmDeleteFixedBill(id, nome);
+}
+
+function deleteFromEditBill() {
+  const id = document.getElementById('edit-bill-id').value;
+  const nome = document.getElementById('edit-bill-nome').value;
+  closeModal('modal-edit-bill');
+  confirmDeleteBill(id, nome);
+}
+
 function setupNavigation() {
   // Bottom nav + sidebar buttons com data-view
   document.querySelectorAll('.nav-btn[data-view], .sidebar-btn[data-view]').forEach(btn =>
