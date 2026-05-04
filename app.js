@@ -778,6 +778,144 @@ window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
 
 /* ═══════════════════════════════════════
+   ONBOARDING TOUR
+═══════════════════════════════════════ */
+const TOUR_STEPS = [
+  {
+    targetId: 'debt-card',
+    title: 'Painel Principal',
+    desc: 'Aqui você vê o resumo completo do seu mês: gastos totais, limite disponível e a barra de progresso. Você recebe um alerta ao atingir 70% do limite. O botão Fechar Mês arquiva tudo no histórico no fim do mês — use-o para começar o próximo mês do zero.'
+  },
+  {
+    targetId: 'btn-add-expense-header',
+    title: 'Adicionar Gasto',
+    desc: 'Toque aqui para registrar uma despesa. Informe o que foi, o valor, a data e escolha a categoria: alimentação, transporte, lazer, saúde ou outros. Cada gasto é descontado automaticamente do seu limite mensal.'
+  },
+  {
+    targetId: 'btn-manage-fixed-hdr',
+    title: 'Contas Fixas',
+    desc: 'Cadastre aqui suas contas recorrentes: aluguel, internet, streaming, parcelas. Uma vez cadastrada, a conta aparece automaticamente em Contas a Pagar todo mês. Você pode definir o número de parcelas — quando acabar, some sozinha.'
+  },
+  {
+    targetId: 'nav-tour-bills',
+    title: 'Contas a Pagar',
+    desc: 'Lista todas as suas contas do mês — as fixas geradas automaticamente e as avulsas que você adicionar. Marque como paga, edite o valor ou exclua quando precisar. Contas não pagas ao fechar o mês ficam registradas no histórico como pendentes.'
+  },
+  {
+    targetId: 'nav-tour-history',
+    title: 'Histórico de Transações',
+    desc: 'Veja todas as despesas lançadas no mês atual em ordem cronológica. Os resumos dos meses anteriores ficam disponíveis pelo botão "Ver meses anteriores" na tela inicial — lá você acompanha a evolução dos seus gastos ao longo do tempo.'
+  },
+  {
+    targetId: 'nav-tour-profile',
+    title: 'Perfil',
+    desc: 'Configure seu nome, salário mensal e limite de gastos. O salário alimenta os alertas automáticos — como o aviso quando suas contas passam 35% da sua renda. Você também pode adicionar uma foto, compartilhar o app e sair da conta por aqui.'
+  }
+];
+
+let _tourStep = 0;
+
+function _tourInjectDOM() {
+  if (document.getElementById('tour-backdrop')) return;
+  const backdrop = document.createElement('div');
+  backdrop.id = 'tour-backdrop';
+  document.body.appendChild(backdrop);
+
+  const card = document.createElement('div');
+  card.id = 'tour-card';
+  card.innerHTML = `
+    <button class="tour-btn-close" id="tour-close">✕</button>
+    <div class="tour-card-title" id="tour-title"></div>
+    <div class="tour-card-desc" id="tour-desc"></div>
+    <div class="tour-card-footer">
+      <span class="tour-card-step" id="tour-step-lbl"></span>
+      <div class="tour-card-actions">
+        <button class="tour-btn-skip" id="tour-skip">Pular</button>
+        <button class="tour-btn-next" id="tour-next">Próximo →</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(card);
+  document.getElementById('tour-next').addEventListener('click', _tourAdvance);
+  document.getElementById('tour-skip').addEventListener('click', _tourAdvance);
+  document.getElementById('tour-close').addEventListener('click', _tourAdvance);
+}
+
+function startTour() {
+  if (localStorage.getItem('tourDone') === '1') return;
+  _tourInjectDOM();
+  _tourStep = 0;
+  _tourShowRing(0);
+}
+
+function _tourShowRing(index) {
+  document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
+  const oldInterceptor = document.getElementById('tour-interceptor');
+  if (oldInterceptor) oldInterceptor.remove();
+  const backdrop = document.getElementById('tour-backdrop');
+  const card = document.getElementById('tour-card');
+  if (backdrop) backdrop.style.display = 'none';
+  if (card) card.style.display = 'none';
+
+  const step = TOUR_STEPS[index];
+  const target = document.getElementById(step.targetId);
+  if (!target) { _tourAdvance(); return; }
+
+  target.classList.add('tour-pulse');
+  target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  setTimeout(() => {
+    const rect = target.getBoundingClientRect();
+    const interceptor = document.createElement('div');
+    interceptor.id = 'tour-interceptor';
+    interceptor.style.top    = rect.top + 'px';
+    interceptor.style.left   = rect.left + 'px';
+    interceptor.style.width  = rect.width + 'px';
+    interceptor.style.height = rect.height + 'px';
+    document.body.appendChild(interceptor);
+    interceptor.addEventListener('click', () => {
+      interceptor.remove();
+      _tourOpenCard(index);
+    });
+  }, 350);
+}
+
+function _tourOpenCard(index) {
+  const step = TOUR_STEPS[index];
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-desc').textContent  = step.desc;
+  document.getElementById('tour-step-lbl').textContent = `${index + 1} de ${TOUR_STEPS.length}`;
+
+  const isLast = index === TOUR_STEPS.length - 1;
+  document.getElementById('tour-next').textContent = isLast ? 'Concluir ✓' : 'Próximo →';
+  document.getElementById('tour-skip').style.display = isLast ? 'none' : '';
+
+  document.getElementById('tour-backdrop').style.display = 'block';
+  document.getElementById('tour-card').style.display = 'block';
+}
+
+function _tourAdvance() {
+  const next = _tourStep + 1;
+  if (next >= TOUR_STEPS.length) {
+    _tourEnd();
+  } else {
+    _tourStep = next;
+    _tourShowRing(next);
+  }
+}
+
+function _tourEnd() {
+  document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
+  const interceptor = document.getElementById('tour-interceptor');
+  if (interceptor) interceptor.remove();
+  const backdrop = document.getElementById('tour-backdrop');
+  if (backdrop) backdrop.style.display = 'none';
+  const card = document.getElementById('tour-card');
+  if (card) card.style.display = 'none';
+  localStorage.setItem('tourDone', '1');
+}
+
+/* ═══════════════════════════════════════
    AUTH
 ═══════════════════════════════════════ */
 let _appInitialized = false;
@@ -818,6 +956,8 @@ function showMainApp() {
   if (authScreen) authScreen.classList.add('hidden');
   if (appWrapper) appWrapper.style.display = '';
   if (sidebar) sidebar.style.display = '';
+  const bottomNav = document.getElementById('bottom-nav');
+  if (bottomNav) bottomNav.style.display = '';
 
   if (!_appInitialized) {
     _appInitialized = true;
@@ -847,6 +987,8 @@ function showMainApp() {
 
   const shortcut = new URLSearchParams(location.search).get('shortcut');
   if (shortcut === 'add-expense') navigateTo('add-expense');
+
+  setTimeout(startTour, 1500);
 }
 
 function setupAuthForms() {
