@@ -1215,6 +1215,57 @@ html, body {
 .btn-close-month-card:active { border-color: var(--muted); color: var(--text); }
 
 /* ═══════════════════════════════════════
+   INTELIGÊNCIA FINANCEIRA
+═══════════════════════════════════════ */
+#insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+}
+
+.insight-danger  { border-left-color: #FF4444; }
+.insight-warning { border-left-color: #F59E0B; }
+.insight-success { border-left-color: #A3FF47; }
+.insight-info    { border-left-color: #60A5FA; }
+
+.insight-icon { flex-shrink: 0; padding-top: 1px; }
+.insight-danger  .insight-icon { color: #FF4444; }
+.insight-warning .insight-icon { color: #F59E0B; }
+.insight-success .insight-icon { color: #A3FF47; }
+.insight-info    .insight-icon { color: #60A5FA; }
+
+.insight-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f0f0f5;
+  line-height: 1.35;
+}
+
+.insight-detail {
+  font-size: 0.775rem;
+  color: #6B7280;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.insights-empty {
+  font-size: 0.82rem;
+  color: #6B7280;
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+/* ═══════════════════════════════════════
    ONBOARDING TOUR
 ═══════════════════════════════════════ */
 .tour-pulse {

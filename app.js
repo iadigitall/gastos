@@ -156,6 +156,7 @@ function renderAll() {
   renderHomeTransactions();
   renderCategoryChart();
   renderMonthlyChart();
+  renderInsights();
 }
 
 function updateHeaderMonth() {
@@ -481,6 +482,7 @@ async function handleCloseMonth() {
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
     state.gastos={};state.contas={};
     _appliedFixed.clear();
+    _historicoCache = null; _historicoPending = null;
     closeModal('modal-close-month');showToast('Mês fechado!');navigateTo('home');renderAll();
   } catch(err){showToast('Erro ao fechar o mês');}
 }
@@ -776,6 +778,180 @@ window.confirmDeleteFixedBill=confirmDeleteFixedBill;
 window.openEditFixedBill=openEditFixedBill;
 window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
+
+/* ═══════════════════════════════════════
+   INTELIGÊNCIA FINANCEIRA
+═══════════════════════════════════════ */
+let _historicoCache = null;
+let _historicoPending = null;
+
+async function getHistoricoCache() {
+  if (_historicoCache !== null) return _historicoCache;
+  if (_historicoPending) return _historicoPending;
+  if (!db) return (_historicoCache = {});
+  _historicoPending = uRef('historico').once('value')
+    .then(snap => { _historicoCache = snap.val() || {}; _historicoPending = null; return _historicoCache; })
+    .catch(() => { _historicoPending = null; return (_historicoCache = {}); });
+  return _historicoPending;
+}
+
+function buildSyncInsights() {
+  const insights = [];
+  const today = todayStr();
+
+  // contas vencidas
+  const vencidas = Object.values(state.contas).filter(c => !c.paga && c.vencimento && c.vencimento < today);
+  if (vencidas.length) {
+    const total = vencidas.reduce((s, c) => s + (c.valor || 0), 0);
+    insights.push({
+      type: 'danger',
+      icon: ICO.warning(18),
+      title: vencidas.length === 1 ? `"${escHtml(vencidas[0].nome)}" está vencida` : `${vencidas.length} contas estão vencidas`,
+      detail: `Total em atraso: ${formatCurrency(total)}`
+    });
+  }
+
+  // contas vencendo em até 3 dias
+  const limite3d = new Date();
+  limite3d.setDate(limite3d.getDate() + 3);
+  const limite3dStr = limite3d.toISOString().split('T')[0];
+  const proximas = Object.values(state.contas)
+    .filter(c => !c.paga && c.vencimento && c.vencimento >= today && c.vencimento <= limite3dStr)
+    .sort((a, b) => a.vencimento.localeCompare(b.vencimento));
+  for (const c of proximas) {
+    const diff = Math.round((new Date(c.vencimento + 'T12:00:00') - new Date()) / 86400000);
+    const label = diff <= 0 ? 'vence hoje' : diff === 1 ? 'vence amanhã' : `vence em ${diff} dias`;
+    insights.push({
+      type: 'warning',
+      icon: ICO.calendar(18),
+      title: `"${escHtml(c.nome)}" ${label}`,
+      detail: formatCurrency(c.valor)
+    });
+  }
+
+  // projeção do mês (só a partir do dia 5, com 3+ gastos)
+  const now = new Date();
+  const dayOfMonth = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const expenses = Object.values(state.gastos);
+  if (dayOfMonth >= 5 && expenses.length >= 3) {
+    const totalGastos = expenses.reduce((s, g) => s + (g.valor || 0), 0);
+    const totalContas = Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
+    const projected = Math.round((totalGastos / dayOfMonth) * daysInMonth + totalContas);
+    const limiteVal = state.limiteGastos || 1000;
+    const pctProj = Math.round((projected / limiteVal) * 100);
+    if (projected > totalGastos + totalContas) {
+      insights.push({
+        type: projected > limiteVal ? 'danger' : pctProj >= 80 ? 'warning' : 'info',
+        icon: ICO.chart(18),
+        title: `Projeção: ${formatCurrency(projected)} este mês`,
+        detail: projected > limiteVal
+          ? `Acima do limite em ${formatCurrency(projected - limiteVal)} se continuar neste ritmo`
+          : `${pctProj}% do limite de ${formatCurrency(limiteVal)}`
+      });
+    }
+  }
+
+  return insights;
+}
+
+async function buildHistoricoInsights() {
+  const insights = [];
+  const historico = await getHistoricoCache();
+  const keys = Object.keys(historico).sort();
+  if (!keys.length) return insights;
+
+  // comparação com mês anterior (só se diferença >= 10%)
+  const lastKey = keys[keys.length - 1];
+  const lastMonth = historico[lastKey];
+  const lastTotal = (lastMonth.totalGastos || 0) + (lastMonth.totalContas || 0);
+  const currentTotal = Object.values(state.gastos).reduce((s, g) => s + (g.valor || 0), 0)
+    + Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
+  if (lastTotal > 0 && currentTotal > 0) {
+    const diff = currentTotal - lastTotal;
+    const pct = Math.abs(Math.round((diff / lastTotal) * 100));
+    const mesNome = MESES[parseInt(lastKey.split('-')[1]) - 1];
+    if (pct >= 10) {
+      insights.push({
+        type: diff > 0 ? 'warning' : 'success',
+        icon: diff > 0 ? ICO.warning(18) : ICO.check(18),
+        title: diff > 0 ? `Gastos ${pct}% acima de ${mesNome}` : `Gastos ${pct}% abaixo de ${mesNome}`,
+        detail: diff > 0
+          ? `${formatCurrency(Math.abs(diff))} a mais que no mês passado`
+          : `${formatCurrency(Math.abs(diff))} economizados em relação ao mês passado`
+      });
+    }
+  }
+
+  // categoria acima da média (só com 2+ meses e média >= R$50)
+  if (keys.length >= 2) {
+    const catAccum = {};
+    let validMonths = 0;
+    for (const key of keys) {
+      const h = historico[key];
+      if (!h.gastos || !Object.keys(h.gastos).length) continue;
+      validMonths++;
+      for (const g of Object.values(h.gastos)) {
+        const cat = g.categoria || 'outros';
+        catAccum[cat] = (catAccum[cat] || 0) + (g.valor || 0);
+      }
+    }
+    if (validMonths >= 2) {
+      const catAvg = {};
+      for (const [cat, total] of Object.entries(catAccum)) catAvg[cat] = total / validMonths;
+      const currentCats = {};
+      for (const g of Object.values(state.gastos)) {
+        const cat = g.categoria || 'outros';
+        currentCats[cat] = (currentCats[cat] || 0) + (g.valor || 0);
+      }
+      let topSpike = null, topPct = 0;
+      for (const [cat, val] of Object.entries(currentCats)) {
+        const avg = catAvg[cat] || 0;
+        if (avg >= 50 && val > avg) {
+          const pct = Math.round(((val - avg) / avg) * 100);
+          if (pct >= 30 && pct > topPct) { topSpike = { cat, val, avg, pct }; topPct = pct; }
+        }
+      }
+      if (topSpike) {
+        const catLabel = CATEGORIAS[topSpike.cat]?.label || topSpike.cat;
+        insights.push({
+          type: 'warning',
+          icon: ICO.warning(18),
+          title: `${catLabel} ${topSpike.pct}% acima da sua média`,
+          detail: `${formatCurrency(topSpike.val)} este mês · média histórica: ${formatCurrency(Math.round(topSpike.avg))}`
+        });
+      }
+    }
+  }
+
+  return insights;
+}
+
+function renderInsightsList(insights) {
+  const container = document.getElementById('insights-list');
+  if (!container) return;
+  const hasData = Object.keys(state.gastos).length > 0 || Object.keys(state.contas).length > 0;
+  if (!insights.length) {
+    container.innerHTML = `<div class="insights-empty">${hasData ? 'Tudo em ordem — continue assim! 👍' : 'Registre seus primeiros gastos para ver análises aqui'}</div>`;
+    return;
+  }
+  container.innerHTML = insights.map(ins => `
+    <div class="insight-item insight-${ins.type}">
+      <div class="insight-icon">${ins.icon}</div>
+      <div class="insight-body">
+        <div class="insight-title">${ins.title}</div>
+        <div class="insight-detail">${ins.detail}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function renderInsights() {
+  const sync = buildSyncInsights();
+  renderInsightsList(sync);
+  const hist = await buildHistoricoInsights();
+  renderInsightsList([...sync, ...hist]);
+}
 
 /* ═══════════════════════════════════════
    ONBOARDING TOUR
