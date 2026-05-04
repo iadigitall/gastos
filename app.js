@@ -639,6 +639,7 @@ function setupNavigation() {
   on('btn-history-months-sb','click',()=>{loadPastMonths();navigateTo('past-months');});
   // Contas fixas
   on('btn-manage-fixed','click',()=>navigateTo('fixed-bills'));
+  on('btn-go-bills-from-fixed','click',()=>navigateTo('bills'));
   // Logout
   on('btn-logout','click',logout);
   // Perfil
