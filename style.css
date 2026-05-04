@@ -707,6 +707,19 @@ html, body {
   top: calc(var(--header-h) + 16px);
   animation: fadeInDown 0.22s ease;
 }
+.toast.toast-motivational {
+  background: rgba(163,255,71,0.12);
+  border-color: rgba(163,255,71,0.4);
+  color: var(--green);
+  font-style: italic;
+  font-size: 14px;
+  padding: 14px 28px;
+  max-width: 86vw;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.5;
+  box-shadow: 0 4px 24px rgba(163,255,71,0.15);
+}
 .toast.hidden { display: none; }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateX(-50%) translateY(10px); }
@@ -1173,6 +1186,65 @@ html, body {
 
 /* ─── FORM OPT LABEL ─── */
 .form-opt { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* ─── BIOMETRIA ─── */
+.biometric-card {
+  align-items: center; text-align: center; gap: 16px; padding: 36px 24px 28px;
+}
+.biometric-avatar-wrap {
+  position: relative; width: 88px; height: 88px; margin-bottom: 4px;
+}
+.biometric-avatar-img {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+}
+.biometric-avatar-img.hidden { display: none; }
+.biometric-avatar-placeholder {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: #1A1A1A; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; color: var(--muted);
+}
+.biometric-user-name {
+  font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px;
+}
+.biometric-user-email {
+  font-size: 13px; color: var(--muted); margin-bottom: 4px;
+}
+.btn-biometric-unlock {
+  width: 100%; padding: 16px; border-radius: 14px;
+  background: var(--green); color: #000;
+  border: none; font-size: 15px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 10px; font-family: inherit; transition: opacity 0.15s;
+}
+.btn-biometric-unlock:active { opacity: 0.8; }
+.btn-biometric-unlock:disabled { opacity: 0.5; cursor: default; }
+.biometric-use-password {
+  background: none; border: none; color: var(--muted);
+  font-size: 13px; cursor: pointer; padding: 4px; font-family: inherit;
+  transition: color 0.2s;
+}
+.biometric-use-password:hover { color: #fff; }
+.biometric-offer-icon {
+  display: flex; justify-content: center; padding: 8px 0;
+  color: var(--green);
+}
+.biometric-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.biometric-row-label { font-size: 14px; font-weight: 600; color: var(--text); }
+.biometric-row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.biometric-btn-off {
+  padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  border: 1.5px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
+}
+.biometric-btn-off:hover { border-color: var(--green); color: var(--green); }
+.biometric-btn-on {
+  padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  border: 1.5px solid var(--green); background: rgba(163,255,71,0.12); color: var(--green);
+  cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
+}
 
 /* ─── BOTÃO FECHAR MÊS (mobile, dentro do card) ─── */
 .btn-close-month-card {

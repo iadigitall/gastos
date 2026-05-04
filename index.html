@@ -30,7 +30,39 @@
     </video>
     <div class="auth-video-overlay"></div>
     <canvas id="auth-bg-canvas"></canvas>
-    <div class="auth-wrap">
+    <!-- ── TELA BIOMÉTRICA ── -->
+    <div id="auth-biometric-screen" class="auth-wrap hidden">
+      <div class="auth-logo-wrap">
+        <div class="auth-logo-icon">
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="56" height="56" rx="16" fill="#A3FF47"/>
+            <path d="M14 38 L20 30 L27 34 L35 22 L42 18" stroke="#0D0D0D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="14" cy="38" r="3" fill="#0D0D0D"/><circle cx="42" cy="18" r="3" fill="#0D0D0D"/>
+          </svg>
+        </div>
+        <div class="auth-logo-text">
+          <span class="auth-logo-name">Finanças</span>
+          <span class="auth-logo-sub">Controle inteligente</span>
+        </div>
+      </div>
+      <div class="auth-card biometric-card">
+        <div class="biometric-avatar-wrap">
+          <img id="biometric-avatar-img" class="biometric-avatar-img hidden" alt="">
+          <div id="biometric-avatar-placeholder" class="biometric-avatar-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        </div>
+        <div id="biometric-user-name" class="biometric-user-name">Olá!</div>
+        <div id="biometric-user-email" class="biometric-user-email"></div>
+        <button id="btn-biometric-unlock" class="btn-biometric-unlock">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M9 2H7a2 2 0 0 0-2 2v2"/><path d="M15 2h2a2 2 0 0 1 2 2v2"/><path d="M9 22H7a2 2 0 0 1-2-2v-2"/><path d="M15 22h2a2 2 0 0 0 2-2v-2"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><path d="M9 15c.83 1.5 2.17 2 3 2s2.17-.5 3-2"/></svg>
+          Entrar com Biometria
+        </button>
+        <button id="btn-biometric-use-password" class="biometric-use-password">Usar email e senha</button>
+      </div>
+    </div>
+
+    <div id="auth-wrap-normal" class="auth-wrap">
 
       <div class="auth-logo-wrap">
         <div class="auth-logo-icon">
@@ -520,6 +552,18 @@
 
         </form>
 
+        <!-- Segurança -->
+        <div class="section-card" id="biometric-section">
+          <div class="section-header"><span class="section-title">Segurança</span></div>
+          <div class="biometric-row">
+            <div>
+              <div class="biometric-row-label">Login por Biometria</div>
+              <div class="biometric-row-sub">Digital ou reconhecimento facial</div>
+            </div>
+            <button id="btn-biometric-toggle" class="biometric-btn-off">Ativar</button>
+          </div>
+        </div>
+
         <!-- Compartilhar -->
         <div class="section-card profile-share-card">
           <div class="section-header"><span class="section-title">Compartilhar</span></div>
@@ -646,6 +690,24 @@
       <div class="modal-actions">
         <button data-close="modal-close-month" class="btn-secondary">Cancelar</button>
         <button id="btn-confirm-close" class="btn-danger">Fechar Mês</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-biometric-offer" class="modal hidden">
+    <div class="modal-backdrop" data-close="modal-biometric-offer"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Login por Biometria</h3>
+        <button class="modal-close" data-close="modal-biometric-offer">✕</button>
+      </div>
+      <div class="biometric-offer-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M9 2H7a2 2 0 0 0-2 2v2"/><path d="M15 2h2a2 2 0 0 1 2 2v2"/><path d="M9 22H7a2 2 0 0 1-2-2v-2"/><path d="M15 22h2a2 2 0 0 0 2-2v-2"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><path d="M9 15c.83 1.5 2.17 2 3 2s2.17-.5 3-2"/></svg>
+      </div>
+      <p class="modal-body-text">Use sua digital ou reconhecimento facial para entrar sem digitar senha nas próximas vezes.</p>
+      <div class="modal-actions">
+        <button data-close="modal-biometric-offer" class="btn-secondary">Agora não</button>
+        <button id="btn-confirm-biometric" class="btn-primary" style="flex:1;margin-top:0">Ativar</button>
       </div>
     </div>
   </div>
