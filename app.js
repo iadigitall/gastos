@@ -19,6 +19,7 @@ const ICO = {
   repeat:    (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
   settings:  (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
   trash:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  edit:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
 };
 
 const CATEGORIAS = {
@@ -367,7 +368,7 @@ function renderBills() {
     const overdue=!c.paga&&c.vencimento&&c.vencimento<today;
     const meta=c.vencimento?`${overdue?`${ICO.warning(12)} Venceu em: `:'Vence em: '}${formatDate(c.vencimento)}`:'Sem data de vencimento';
     let fixedBadge='';if(c.contaFixaId){fixedBadge=c.parcelaAtual&&c.totalParcelas?`<span class="fixed-badge">${ICO.repeat(10)} ${c.parcelaAtual}/${c.totalParcelas}</span>`:`<span class="fixed-badge">${ICO.repeat(10)} Fixa</span>`;}
-    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>${ICO.check(16)}</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">${ICO.trash(16)}</button>`:''}</div>`;
+    return`<div class="bill-item${c.paga?' paid':''}" id="bill-${escHtml(id)}"><div class="bill-status-dot"></div><div class="bill-info"><div class="bill-name">${escHtml(c.nome)}${fixedBadge}</div><div class="bill-meta${overdue?' overdue':''}">${meta}</div></div><div class="bill-value">${formatCurrency(c.valor)}</div>${c.paga?`<button class="btn-pay done" disabled>${ICO.check(16)}</button>`:`<button class="btn-pay" onclick="payBill('${escHtml(id)}')">Pagar</button>`}${!c.paga?`<button class="btn-edit-bill" onclick="openEditBill('${escHtml(id)}')" title="Editar">${ICO.edit(16)}</button>`:''  }${!c.paga?`<button class="btn-delete-bill" onclick="confirmDeleteBill('${escHtml(id)}','${escHtml(c.nome)}')">${ICO.trash(16)}</button>`:''}</div>`;
   }).join('')}</div>`;
 }
 
@@ -416,7 +417,7 @@ function renderFixedBills() {
     const totalP=f.totalParcelas||0;
     let parcelaTag='';
     if(totalP>0){const atual=f.mesInicio?Math.min(monthDiff(f.mesInicio,state.mesAtual)+1,totalP):1;parcelaTag=`<span class="parcela-badge">${atual}/${totalP}</span>`;}
-    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)} ${parcelaTag}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><div class="fixed-bill-actions"><button class="btn-edit-fixed" onclick="openEditFixedDay('${escHtml(id)}',${f.diaVencimento||1})" title="Editar vencimento">${ICO.calendar(15)}</button><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">${ICO.trash(15)}</button></div></div>`;
+    return`<div class="fixed-bill-item"><div class="fixed-bill-info"><div class="fixed-bill-name">${escHtml(f.nome)} ${parcelaTag}</div><div class="fixed-bill-meta">Todo dia ${f.diaVencimento||'?'} · ${formatCurrency(f.valor)}</div></div><div class="fixed-bill-actions"><button class="btn-edit-fixed" onclick="openEditFixedBill('${escHtml(id)}')" title="Editar">${ICO.edit(15)}</button><button class="btn-delete-fixed" onclick="confirmDeleteFixedBill('${escHtml(id)}','${escHtml(f.nome)}')">${ICO.trash(15)}</button></div></div>`;
   }).join('')}</div>`;
 }
 
@@ -503,23 +504,88 @@ function toggleHideValues() {
   renderAll();
 }
 
-function openEditFixedDay(id, currentDay) {
+function openEditFixedBill(id) {
+  const fixa = state.contasFixas[id];
+  if (!fixa) return;
   document.getElementById('edit-fixed-id').value = id;
-  document.getElementById('edit-fixed-day').value = currentDay;
+  document.getElementById('edit-fixed-nome').value = fixa.nome || '';
+  document.getElementById('edit-fixed-valor').value = fixa.valor || '';
+  document.getElementById('edit-fixed-day').value = fixa.diaVencimento || '';
+  document.getElementById('edit-fixed-parcelas-edit').value = fixa.totalParcelas || '';
   openModal('modal-edit-fixed-day');
 }
 
-async function saveEditFixedDay(e) {
+async function saveEditFixedBill(e) {
   e.preventDefault();
   const id = document.getElementById('edit-fixed-id').value;
+  const nome = document.getElementById('edit-fixed-nome').value.trim();
+  const valor = parseFloat(document.getElementById('edit-fixed-valor').value);
   const day = parseInt(document.getElementById('edit-fixed-day').value);
+  const parcelas = parseInt(document.getElementById('edit-fixed-parcelas-edit').value) || 0;
+  if (!nome) return showToast('Dá um nome pra conta');
+  if (!valor || valor <= 0) return showToast('Coloca o valor certinho');
   if (!day || day < 1 || day > 28) return showToast('Dia deve ser entre 1 e 28');
+  const updates = { nome, valor, diaVencimento: day };
+  if (parcelas > 0) updates.totalParcelas = parcelas; else updates.totalParcelas = null;
   try {
-    if (db) await uRef(`contasFixas/${id}`).update({ diaVencimento: day });
-    else { if (state.contasFixas[id]) state.contasFixas[id].diaVencimento = day; saveFixedBillsToLocalStorage(); }
+    if (db) {
+      await uRef(`contasFixas/${id}`).update(updates);
+      // Update matching conta in current month so the change takes effect immediately
+      const contasSnap = await uRef(`meses/${state.mesAtual}/contas`).once('value');
+      const contas = contasSnap.val() || {};
+      const match = Object.entries(contas).find(([,c]) => c.contaFixaId === id && !c.paga);
+      if (match) {
+        const [contaId] = match;
+        const mes = state.mesAtual;
+        const [y, m] = mes.split('-').map(Number);
+        const vencimento = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        await uRef(`meses/${mes}/contas/${contaId}`).update({ nome, valor, vencimento });
+      }
+    } else {
+      if (state.contasFixas[id]) Object.assign(state.contasFixas[id], updates);
+      saveFixedBillsToLocalStorage();
+      // Update local month too
+      const match = Object.entries(state.contas).find(([,c]) => c.contaFixaId === id && !c.paga);
+      if (match) {
+        const [contaId] = match;
+        const [y, m] = state.mesAtual.split('-').map(Number);
+        const vencimento = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        Object.assign(state.contas[contaId], { nome, valor, vencimento });
+        saveToLocalStorage();
+      }
+    }
     closeModal('modal-edit-fixed-day');
     renderFixedBills();
-    showToast('Vencimento atualizado!');
+    renderBills();
+    showToast('Conta fixa atualizada!');
+  } catch(_) { showToast('Erro ao salvar'); }
+}
+
+function openEditBill(id) {
+  const c = state.contas[id];
+  if (!c) return;
+  document.getElementById('edit-bill-id').value = id;
+  document.getElementById('edit-bill-nome').value = c.nome || '';
+  document.getElementById('edit-bill-valor').value = c.valor || '';
+  document.getElementById('edit-bill-vencimento').value = c.vencimento || '';
+  openModal('modal-edit-bill');
+}
+
+async function saveEditBill(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-bill-id').value;
+  const nome = document.getElementById('edit-bill-nome').value.trim();
+  const valor = parseFloat(document.getElementById('edit-bill-valor').value);
+  const vencimento = document.getElementById('edit-bill-vencimento').value;
+  if (!nome) return showToast('Dá um nome pra conta');
+  if (!valor || valor <= 0) return showToast('Coloca o valor certinho');
+  const updates = { nome, valor, vencimento: vencimento || null };
+  try {
+    if (db) await uRef(`meses/${state.mesAtual}/contas/${id}`).update(updates);
+    else { if (state.contas[id]) Object.assign(state.contas[id], updates); saveToLocalStorage(); }
+    closeModal('modal-edit-bill');
+    renderBills();
+    showToast('Conta atualizada!');
   } catch(_) { showToast('Erro ao salvar'); }
 }
 
@@ -579,7 +645,9 @@ function setupModals() {
   on('btn-add-fixed-bill','click',()=>{document.getElementById('form-fixed-bill').reset();openModal('modal-add-fixed-bill');setTimeout(()=>document.getElementById('fixed-name').focus(),300);});
   on('btn-toggle-hide','click',toggleHideValues);
   const formEditFixed=document.getElementById('form-edit-fixed-day');
-  if(formEditFixed) formEditFixed.addEventListener('submit',saveEditFixedDay);
+  if(formEditFixed) formEditFixed.addEventListener('submit',saveEditFixedBill);
+  const formEditBill=document.getElementById('form-edit-bill');
+  if(formEditBill) formEditBill.addEventListener('submit',saveEditBill);
   on('btn-confirm-close','click',handleCloseMonth);
   on('btn-confirm-delete','click',executeDelete);
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
@@ -682,7 +750,8 @@ window.payBill=payBill;
 window.confirmDeleteExpense=confirmDeleteExpense;
 window.confirmDeleteBill=confirmDeleteBill;
 window.confirmDeleteFixedBill=confirmDeleteFixedBill;
-window.openEditFixedDay=openEditFixedDay;
+window.openEditFixedBill=openEditFixedBill;
+window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
 
 /* ═══════════════════════════════════════

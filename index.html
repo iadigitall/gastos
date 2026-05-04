@@ -654,14 +654,52 @@
     <div class="modal-backdrop" data-close="modal-edit-fixed-day"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Editar Vencimento</h3>
+        <h3>Editar Conta Fixa</h3>
         <button class="modal-close" data-close="modal-edit-fixed-day">✕</button>
       </div>
       <form id="form-edit-fixed-day">
         <input type="hidden" id="edit-fixed-id">
         <div class="form-group">
-          <label for="edit-fixed-day">Novo dia de vencimento (1–28)</label>
+          <label for="edit-fixed-nome">Nome</label>
+          <input id="edit-fixed-nome" type="text" placeholder="Ex: Aluguel">
+        </div>
+        <div class="form-group">
+          <label for="edit-fixed-valor">Valor (R$)</label>
+          <input id="edit-fixed-valor" type="number" min="0.01" step="0.01" placeholder="Ex: 1200,00" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label for="edit-fixed-day">Dia de vencimento (1–28)</label>
           <input id="edit-fixed-day" type="number" min="1" max="28" placeholder="Ex: 10" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label for="edit-fixed-parcelas-edit">Parcelas (0 = sem limite)</label>
+          <input id="edit-fixed-parcelas-edit" type="number" min="0" placeholder="Ex: 12" inputmode="numeric">
+        </div>
+        <button type="submit" class="btn-primary">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-edit-bill" class="modal hidden">
+    <div class="modal-backdrop" data-close="modal-edit-bill"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Editar Conta</h3>
+        <button class="modal-close" data-close="modal-edit-bill">✕</button>
+      </div>
+      <form id="form-edit-bill">
+        <input type="hidden" id="edit-bill-id">
+        <div class="form-group">
+          <label for="edit-bill-nome">Nome</label>
+          <input id="edit-bill-nome" type="text" placeholder="Ex: Cartão de crédito">
+        </div>
+        <div class="form-group">
+          <label for="edit-bill-valor">Valor (R$)</label>
+          <input id="edit-bill-valor" type="number" min="0.01" step="0.01" placeholder="Ex: 500,00" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label for="edit-bill-vencimento">Vencimento</label>
+          <input id="edit-bill-vencimento" type="date">
         </div>
         <button type="submit" class="btn-primary">Salvar</button>
       </form>
