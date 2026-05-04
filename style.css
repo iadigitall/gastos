@@ -1265,6 +1265,27 @@ html, body {
   padding: 8px 0 4px;
 }
 
+.insight-hidden { display: none; }
+
+.insights-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px;
+  margin-top: 2px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #6B7280;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.insights-toggle:hover { border-color: #A3FF47; color: #A3FF47; }
+
 /* ═══════════════════════════════════════
    ONBOARDING TOUR
 ═══════════════════════════════════════ */

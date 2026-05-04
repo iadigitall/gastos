@@ -778,6 +778,7 @@ window.confirmDeleteFixedBill=confirmDeleteFixedBill;
 window.openEditFixedBill=openEditFixedBill;
 window.openEditBill=openEditBill;
 window.toggleHideValues=toggleHideValues;
+window.toggleInsights=toggleInsights;
 
 /* ═══════════════════════════════════════
    INTELIGÊNCIA FINANCEIRA
@@ -935,15 +936,38 @@ function renderInsightsList(insights) {
     container.innerHTML = `<div class="insights-empty">${hasData ? 'Tudo em ordem — continue assim! 👍' : 'Registre seus primeiros gastos para ver análises aqui'}</div>`;
     return;
   }
-  container.innerHTML = insights.map(ins => `
-    <div class="insight-item insight-${ins.type}">
+
+  const VISIBLE = 2;
+  const hasMore = insights.length > VISIBLE;
+
+  container.innerHTML = insights.map((ins, i) => `
+    <div class="insight-item insight-${ins.type}${i >= VISIBLE ? ' insight-hidden' : ''}">
       <div class="insight-icon">${ins.icon}</div>
       <div class="insight-body">
         <div class="insight-title">${ins.title}</div>
         <div class="insight-detail">${ins.detail}</div>
       </div>
     </div>
-  `).join('');
+  `).join('') + (hasMore ? `
+    <button class="insights-toggle" id="btn-insights-toggle" onclick="toggleInsights(this)">
+      Ver mais
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  ` : '');
+}
+
+function toggleInsights(btn) {
+  const hidden = document.querySelectorAll('#insights-list .insight-hidden');
+  const isExpanded = hidden.length === 0;
+  if (isExpanded) {
+    document.querySelectorAll('#insights-list .insight-item').forEach((el, i) => {
+      if (i >= 2) el.classList.add('insight-hidden');
+    });
+    btn.innerHTML = `Ver mais <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
+  } else {
+    hidden.forEach(el => el.classList.remove('insight-hidden'));
+    btn.innerHTML = `Ver menos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>`;
+  }
 }
 
 async function renderInsights() {
