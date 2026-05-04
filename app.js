@@ -696,12 +696,13 @@ function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventList
 
 /* ─── CHARTS ─── */
 function renderCategoryChart() {
+  const ALL_CATS = ['alimentacao','transporte','lazer','saude','outros'];
   const totals={};
   for(const g of Object.values(state.gastos)){const c=g.categoria||'outros';totals[c]=(totals[c]||0)+(g.valor||0);}
-  const cats=Object.entries(totals).filter(([,v])=>v>0);
+  const total = ALL_CATS.reduce((s,k)=>s+(totals[k]||0),0);
   const empty=document.getElementById('chart-cat-empty');
   const canvas=document.getElementById('chart-categories');
-  if(!cats.length){
+  if(!total){
     if(chartCategories){chartCategories.destroy();chartCategories=null;}
     if(empty)empty.classList.remove('hidden');
     if(canvas)canvas.style.display='none';
@@ -711,10 +712,9 @@ function renderCategoryChart() {
   if(canvas)canvas.style.display='';
   if(chartCategories){chartCategories.destroy();chartCategories=null;}
   if(!canvas)return;
-  const labels=cats.map(([k])=>CATEGORIAS[k]?.label||k);
-  const data=cats.map(([,v])=>v);
-  const colors=cats.map(([k])=>CAT_COLORS[k]||'#94a3b8');
-  const total=data.reduce((s,v)=>s+v,0);
+  const labels = ALL_CATS.map(k=>CATEGORIAS[k].label);
+  const data   = ALL_CATS.map(k=>totals[k]||0);
+  const colors = ALL_CATS.map(k=>CAT_COLORS[k]);
   chartCategories=new Chart(canvas,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#0d0d0d',hoverOffset:6}]},
@@ -724,9 +724,19 @@ function renderCategoryChart() {
       plugins:{
         legend:{
           position:'bottom',
-          labels:{color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true}
+          labels:{
+            color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true,
+            generateLabels: chart => ALL_CATS.map((k,i)=>({
+              text:`${CATEGORIAS[k].label}  ${Math.round((totals[k]||0)/total*100)}%`,
+              fillStyle:colors[i],
+              strokeStyle:colors[i],
+              pointStyle:'circle',
+              hidden:false,
+              index:i
+            }))
+          }
         },
-        tooltip:{callbacks:{label:c=>` ${CATEGORIAS[cats[c.dataIndex]?.[0]]?.label||labels[c.dataIndex]}: ${formatCurrency(c.raw)} (${Math.round(c.raw/total*100)}%)`}},
+        tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)} (${Math.round(c.raw/total*100)}%)`}},
         datalabels:{
           color:'#0d0d0d',
           font:{weight:'bold',size:13},
