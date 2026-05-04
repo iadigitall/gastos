@@ -1374,24 +1374,49 @@ html, body {
 
 .insight-hidden { display: none; }
 
-.insights-toggle {
+.insights-show-more {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 9px;
-  margin-top: 2px;
-  background: transparent;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  color: #6B7280;
-  font-size: 0.82rem;
+  padding: 10px 14px;
+  margin-top: 4px;
+  background: rgba(163,255,71,0.06);
+  border: 1px solid rgba(163,255,71,0.25);
+  border-radius: 10px;
+  color: #a3ff47;
+  font-size: 0.83rem;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
-.insights-toggle:hover { border-color: #A3FF47; color: #A3FF47; }
+.insights-show-more:hover { background: rgba(163,255,71,0.12); border-color: rgba(163,255,71,0.5); }
+
+.insights-show-more-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: #a3ff47;
+  color: #0d0d0d;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 50px;
+}
+
+.insights-show-more-text {
+  flex: 1;
+  text-align: left;
+  font-weight: 600;
+}
+
+.insights-show-more-arrow {
+  transition: transform 0.25s;
+  opacity: 0.7;
+}
 
 /* ═══════════════════════════════════════
    ONBOARDING TOUR

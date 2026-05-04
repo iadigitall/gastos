@@ -810,6 +810,7 @@ window.toggleHideValues=toggleHideValues;
 window.openInsights=openInsights;
 window.closeInsights=closeInsights;
 window.insightPayBill=insightPayBill;
+window.toggleInsights=toggleInsights;
 
 /* ═══════════════════════════════════════
    INTELIGÊNCIA FINANCEIRA
@@ -987,8 +988,12 @@ function renderInsightsList(insights) {
     return;
   }
 
-  container.innerHTML = insights.map(ins => `
-    <div class="insight-item insight-${ins.type}">
+  const VISIBLE = 2;
+  const hasMore = insights.length > VISIBLE;
+  const hidden = insights.length - VISIBLE;
+
+  container.innerHTML = insights.map((ins, i) => `
+    <div class="insight-item insight-${ins.type}${i >= VISIBLE ? ' insight-hidden' : ''}">
       <div class="insight-icon">${ins.icon}</div>
       <div class="insight-body">
         <div class="insight-title">${ins.title}</div>
@@ -996,7 +1001,32 @@ function renderInsightsList(insights) {
         ${ins.billId ? `<button class="insight-pay-btn" onclick="insightPayBill('${ins.billId}', this)">Já paguei ✓</button>` : ''}
       </div>
     </div>
-  `).join('');
+  `).join('') + (hasMore ? `
+    <button class="insights-show-more" id="btn-insights-toggle" onclick="toggleInsights(this)" data-hidden="${hidden}">
+      <span class="insights-show-more-badge">${hidden}</span>
+      <span class="insights-show-more-text">análise${hidden > 1 ? 's' : ''} oculta${hidden > 1 ? 's' : ''}</span>
+      <svg class="insights-show-more-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  ` : '');
+}
+
+function toggleInsights(btn) {
+  const hidden = document.querySelectorAll('#insights-list .insight-hidden');
+  const isExpanded = hidden.length === 0;
+  if (isExpanded) {
+    document.querySelectorAll('#insights-list .insight-item').forEach((el, i) => {
+      if (i >= 2) el.classList.add('insight-hidden');
+    });
+    const count = parseInt(btn.dataset.hidden);
+    btn.querySelector('.insights-show-more-badge').textContent = count;
+    btn.querySelector('.insights-show-more-text').textContent = `análise${count > 1 ? 's' : ''} oculta${count > 1 ? 's' : ''}`;
+    btn.querySelector('.insights-show-more-arrow').style.transform = '';
+  } else {
+    hidden.forEach(el => el.classList.remove('insight-hidden'));
+    btn.querySelector('.insights-show-more-badge').textContent = '✓';
+    btn.querySelector('.insights-show-more-text').textContent = 'ver menos';
+    btn.querySelector('.insights-show-more-arrow').style.transform = 'rotate(180deg)';
+  }
 }
 
 async function insightPayBill(id, btn) {
