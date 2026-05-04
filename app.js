@@ -738,8 +738,10 @@ function renderCategoryChart() {
         },
         tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)} (${Math.round(c.raw/total*100)}%)`}},
         datalabels:{
-          color:'#0d0d0d',
+          color:'#ffffff',
           font:{weight:'bold',size:13},
+          textShadowBlur:6,
+          textShadowColor:'rgba(0,0,0,0.6)',
           formatter:(value)=>{
             const pct=Math.round(value/total*100);
             return pct>=5?`${pct}%`:'';
