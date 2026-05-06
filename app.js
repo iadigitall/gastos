@@ -1060,7 +1060,12 @@ const TOUR_STEPS = [
   {
     targetId: 'debt-card',
     title: 'Painel Principal',
-    desc: 'Aqui você vê o resumo completo do seu mês: gastos totais, limite disponível e a barra de progresso. Você recebe um alerta ao atingir 70% do limite. O botão Fechar Mês arquiva tudo no histórico no fim do mês — use-o para começar o próximo mês do zero.'
+    desc: 'Aqui você vê o resumo completo do seu mês: gastos totais, limite disponível e a barra de progresso. Você recebe um alerta ao atingir 70% do limite.'
+  },
+  {
+    targetId: 'btn-close-month-mobile',
+    title: 'Fechar Mês',
+    desc: 'No fim do mês, toque aqui para arquivar tudo. Seus gastos e contas vão para o Histórico e o mês começa do zero. Contas não pagas ficam registradas como pendentes. Use sempre no último dia do mês.'
   },
   {
     targetId: 'btn-add-expense-header',
