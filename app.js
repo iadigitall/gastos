@@ -665,8 +665,11 @@ function navigateTo(viewName) {
 }
 
 function setupModals() {
-  on('btn-add-bill','click',()=>{document.getElementById('form-bill').reset();document.getElementById('bill-due').value=todayStr();openModal('modal-add-bill');setTimeout(()=>document.getElementById('bill-name').focus(),300);});
-  on('btn-add-fixed-bill','click',()=>{document.getElementById('form-fixed-bill').reset();openModal('modal-add-fixed-bill');setTimeout(()=>document.getElementById('fixed-name').focus(),300);});
+  on('btn-add-bill','click',()=>{ openModal('modal-add-type'); });
+  on('btn-add-fixed-bill','click',()=>{ openModal('modal-add-type'); });
+  on('add-type-expense','click',()=>{ closeModal('modal-add-type'); navigateTo('add-expense'); });
+  on('add-type-bill','click',()=>{ closeModal('modal-add-type'); document.getElementById('form-bill').reset(); document.getElementById('bill-due').value=todayStr(); openModal('modal-add-bill'); setTimeout(()=>document.getElementById('bill-name').focus(),300); });
+  on('add-type-fixed','click',()=>{ closeModal('modal-add-type'); document.getElementById('form-fixed-bill').reset(); openModal('modal-add-fixed-bill'); setTimeout(()=>document.getElementById('fixed-name').focus(),300); });
   on('btn-toggle-hide','click',toggleHideValues);
   const formEditFixed=document.getElementById('form-edit-fixed-day');
   if(formEditFixed) formEditFixed.addEventListener('submit',saveEditFixedBill);
@@ -1127,6 +1130,8 @@ function _tourShowRing(index) {
   document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
   const oldInterceptor = document.getElementById('tour-interceptor');
   if (oldInterceptor) oldInterceptor.remove();
+  const oldHint = document.getElementById('tour-tap-hint');
+  if (oldHint) oldHint.remove();
   const backdrop = document.getElementById('tour-backdrop');
   const card = document.getElementById('tour-card');
   if (backdrop) backdrop.style.display = 'none';
@@ -1152,10 +1157,22 @@ function _tourShowRing(index) {
       interceptor.remove();
       _tourOpenCard(index);
     });
+
+    const hint = document.createElement('div');
+    hint.id = 'tour-tap-hint';
+    hint.textContent = '👆 Toque aqui';
+    const hintTop = rect.height > 80
+      ? rect.top + rect.height / 2 - 18
+      : rect.bottom + 8;
+    hint.style.top  = Math.min(hintTop, window.innerHeight - 50) + 'px';
+    hint.style.left = (rect.left + rect.width / 2) + 'px';
+    document.body.appendChild(hint);
   }, 350);
 }
 
 function _tourOpenCard(index) {
+  const hint = document.getElementById('tour-tap-hint');
+  if (hint) hint.remove();
   const step = TOUR_STEPS[index];
   document.getElementById('tour-title').textContent = step.title;
   document.getElementById('tour-desc').textContent  = step.desc;
@@ -1183,6 +1200,8 @@ function _tourEnd() {
   document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
   const interceptor = document.getElementById('tour-interceptor');
   if (interceptor) interceptor.remove();
+  const hint = document.getElementById('tour-tap-hint');
+  if (hint) hint.remove();
   const backdrop = document.getElementById('tour-backdrop');
   if (backdrop) backdrop.style.display = 'none';
   const card = document.getElementById('tour-card');
