@@ -629,9 +629,8 @@ function setupNavigation() {
   on('btn-back-fixed','click',()=>navigateTo('bills'));
   // Ações
   on('btn-add-expense','click',()=>navigateTo('add-expense'));
-  on('btn-add-expense-header','click',()=>navigateTo('add-expense'));
+  on('btn-add-expense-header','click',()=>openModal('modal-add-type'));
   on('btn-go-bills','click',()=>navigateTo('bills'));
-  on('btn-manage-fixed-hdr','click',()=>navigateTo('fixed-bills'));
   // Fechar mês
   on('btn-close-month','click',openCloseMonthModal);
   on('btn-close-month-mobile','click',openCloseMonthModal);
@@ -1065,13 +1064,8 @@ const TOUR_STEPS = [
   },
   {
     targetId: 'btn-add-expense-header',
-    title: 'Adicionar Gasto',
-    desc: 'Toque aqui para registrar uma despesa. Informe o que foi, o valor, a data e escolha a categoria: alimentação, transporte, lazer, saúde ou outros. Cada gasto é descontado automaticamente do seu limite mensal.'
-  },
-  {
-    targetId: 'btn-manage-fixed-hdr',
-    title: 'Contas Fixas',
-    desc: 'Cadastre aqui suas contas recorrentes: aluguel, internet, streaming, parcelas. Uma vez cadastrada, a conta aparece automaticamente em Contas a Pagar todo mês. Você pode definir o número de parcelas — quando acabar, some sozinha.'
+    title: 'Adicionar',
+    desc: 'Toque aqui para adicionar qualquer tipo de lançamento. Você escolhe entre: Despesa (alimentação, transporte, lazer...), Conta Comum (conta avulsa do mês) ou Conta Fixa (recorrente todo mês, como aluguel e internet).'
   },
   {
     targetId: 'nav-tour-bills',
