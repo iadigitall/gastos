@@ -1204,15 +1204,19 @@ html, body {
 
 /* ─── BOTÃO FECHAR MÊS (mobile, dentro do card) ─── */
 .btn-close-month-card {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  width: 100%; padding: 10px;
-  background: transparent; border: 1px solid var(--border);
-  border-radius: 10px; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px;
+  background: rgba(163,255,71,0.06);
+  border: 1.5px solid rgba(163,255,71,0.35);
+  border-radius: 10px; color: var(--text);
   font-size: 13px; font-weight: 600; cursor: pointer;
   font-family: inherit; transition: all 0.2s;
-  margin-top: 14px;
+  margin-top: 14px; letter-spacing: 0.01em;
 }
-.btn-close-month-card:active { border-color: var(--muted); color: var(--text); }
+.btn-close-month-card:active {
+  background: rgba(163,255,71,0.12);
+  border-color: rgba(163,255,71,0.65);
+}
 
 /* ═══════════════════════════════════════
    INTELIGÊNCIA FINANCEIRA — FLUTUANTE
