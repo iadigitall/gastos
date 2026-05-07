@@ -1252,10 +1252,24 @@ function startSplash(onComplete) {
 }
 
 function triggerAuthCardAnimation() {
-  const card = document.querySelector('.auth-card');
+  const wrap = document.querySelector('.auth-card-wrap');
   const logo = document.querySelector('.auth-logo-wrap');
-  if (card) { card.classList.remove('card-animate'); void card.offsetWidth; card.classList.add('card-animate'); }
-  if (logo) { logo.classList.remove('logo-animate'); void logo.offsetWidth; logo.classList.add('logo-animate'); }
+  const tagline = document.querySelector('.auth-tagline');
+  if (logo) {
+    logo.classList.remove('auth-pre-hide', 'logo-animate');
+    void logo.offsetWidth;
+    logo.classList.add('logo-animate');
+  }
+  if (tagline) {
+    tagline.classList.remove('auth-pre-hide', 'tagline-animate');
+    void tagline.offsetWidth;
+    tagline.classList.add('tagline-animate');
+  }
+  if (wrap) {
+    wrap.classList.remove('auth-pre-hide', 'card-animate');
+    void wrap.offsetWidth;
+    wrap.classList.add('card-animate');
+  }
 }
 
 function showAuthUI() {
@@ -1267,6 +1281,12 @@ function showAuthUI() {
   if (appWrapper) appWrapper.style.display = 'none';
   if (sidebar) sidebar.style.display = 'none';
   if (bottomNav) bottomNav.style.display = 'none';
+  // Na carga inicial (splash ativo), esconde card/logo até a animação disparar
+  if (!_appInitialized) {
+    document.querySelector('.auth-card-wrap')?.classList.add('auth-pre-hide');
+    document.querySelector('.auth-logo-wrap')?.classList.add('auth-pre-hide');
+    document.querySelector('.auth-tagline')?.classList.add('auth-pre-hide');
+  }
 }
 
 function showMainApp() {
