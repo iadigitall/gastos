@@ -924,15 +924,12 @@ html, body {
 .auth-card-wrap {
   width: 100%;
   border-radius: 24px;
-  overflow: hidden;
   box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(163,255,71,0.05);
 }
 
 .auth-card {
   width: 100%;
-  background: rgba(14, 14, 14, 0.30);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(14, 14, 14, 0.88);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 24px;
   padding: 28px 24px 24px;
@@ -1709,28 +1706,12 @@ html, body {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Wrapper aplica 3D (rotateX + scaleX) - sem clip-path, 100% GPU */
 .auth-card-wrap.card-animate {
-  transform-origin: bottom center;
-  will-change: transform, opacity;
-  animation: wrapUnfurl 1.15s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-/* Card interno sobe de baixo como pano sendo puxado */
-.auth-card-wrap.card-animate .auth-card {
-  will-change: transform;
-  animation: cardSlideUp 1.15s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: cardEnter 0.85s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes wrapUnfurl {
-  0%   { transform: perspective(700px) rotateX(16deg) scaleX(0.93); opacity: 0; }
-  10%  { opacity: 1; }
-  65%  { transform: perspective(700px) rotateX(-3deg) scaleX(1.012); }
-  80%  { transform: perspective(700px) rotateX(1.5deg) scaleX(0.997); }
-  91%  { transform: perspective(700px) rotateX(-0.7deg) scaleX(1.002); }
-  100% { transform: perspective(700px) rotateX(0deg) scaleX(1); opacity: 1; }
-}
-@keyframes cardSlideUp {
-  from { transform: translateY(102%); }
-  to   { transform: translateY(0%); }
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(36px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
