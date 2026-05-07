@@ -1228,6 +1228,31 @@ function initAuth() {
       }
     });
   }
+
+  startSplash(() => {
+    const authScreen = document.getElementById('auth-screen');
+    if (authScreen && !authScreen.classList.contains('hidden')) {
+      triggerAuthCardAnimation();
+    }
+  });
+}
+
+function startSplash(onComplete) {
+  const splash = document.getElementById('splash-screen');
+  if (!splash) { onComplete(); return; }
+  setTimeout(() => {
+    splash.classList.add('splash-exit');
+    // Dispara callback enquanto splash ainda está saindo (card anima junto com o fade-out)
+    setTimeout(() => { onComplete(); }, 250);
+    setTimeout(() => { splash.style.display = 'none'; }, 620);
+  }, 2200);
+}
+
+function triggerAuthCardAnimation() {
+  const card = document.querySelector('.auth-card');
+  const logo = document.querySelector('.auth-logo-wrap');
+  if (card) { card.classList.remove('card-animate'); void card.offsetWidth; card.classList.add('card-animate'); }
+  if (logo) { logo.classList.remove('logo-animate'); void logo.offsetWidth; logo.classList.add('logo-animate'); }
 }
 
 function showAuthUI() {
