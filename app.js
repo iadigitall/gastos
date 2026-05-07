@@ -1240,12 +1240,15 @@ function initAuth() {
 function startSplash(onComplete) {
   const splash = document.getElementById('splash-screen');
   if (!splash) { onComplete(); return; }
+  // Aguarda tudo do splash terminar (~4.6s), depois faz o fade-out (0.85s),
+  // depois exibe o vídeo por 2s, só então chama o card
   setTimeout(() => {
     splash.classList.add('splash-exit');
-    // Dispara callback enquanto splash ainda está saindo (card anima junto com o fade-out)
-    setTimeout(() => { onComplete(); }, 250);
-    setTimeout(() => { splash.style.display = 'none'; }, 620);
-  }, 2200);
+    setTimeout(() => {
+      splash.style.display = 'none';
+      setTimeout(() => { onComplete(); }, 2000); // 2s de vídeo antes do card
+    }, 850);
+  }, 4600);
 }
 
 function triggerAuthCardAnimation() {
