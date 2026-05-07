@@ -1240,15 +1240,15 @@ function initAuth() {
 function startSplash(onComplete) {
   const splash = document.getElementById('splash-screen');
   if (!splash) { onComplete(); return; }
-  // iOS Safari: toque no splash durante animação libera autoplay do vídeo
+  // iOS Safari: toque no splash libera autoplay (gesto do usuário)
   splash.addEventListener('touchstart', () => forceVideoPlay(), { once: true, passive: true });
   splash.addEventListener('click',      () => forceVideoPlay(), { once: true });
   setTimeout(() => {
     splash.classList.add('splash-exit');
-    forceVideoPlay(); // retry ao sair do splash
     setTimeout(() => {
       splash.style.display = 'none';
-      setTimeout(() => { onComplete(); }, 2000); // 2s de vídeo antes do card
+      forceVideoPlay(); // vídeo agora visível — iOS permite autoplay de muted
+      setTimeout(() => { onComplete(); }, 2000);
     }, 850);
   }, 4600);
 }
@@ -1547,14 +1547,7 @@ function forceVideoPlay() {
   if (!video) return;
   video.muted = true;
   video.playsInline = true;
-  const tryPlay = () => video.play().catch(() => {});
-  tryPlay();
-  // iOS Safari: retenta em qualquer interação
-  document.addEventListener('touchstart', tryPlay, { once: true, passive: true });
-  document.addEventListener('click',      tryPlay, { once: true });
-  // Retry após pequeno delay (iOS às vezes precisa do DOM estabilizado)
-  setTimeout(tryPlay, 300);
-  setTimeout(tryPlay, 1000);
+  video.play().catch(() => {});
 }
 
 async function loadUserProfile() {
