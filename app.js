@@ -231,7 +231,7 @@ function renderHomeContas() {
     .sort(([, a], [, b]) => (a.vencimento || '9999').localeCompare(b.vencimento || '9999'))
     .slice(0, 3);
   if (!contas.length) {
-    container.innerHTML = `<div class="conta-pill-empty">Nenhuma conta pendente</div>`;
+    container.innerHTML = `<div class="home-empty-state">${ICO.inbox(32)}<p>Nenhuma conta pendente</p><span>Toque em + para adicionar uma conta</span></div>`;
     return;
   }
   container.innerHTML = contas.map(([, c], i) => `
@@ -276,7 +276,7 @@ function renderHomeTransactions() {
     .sort(([, a], [, b]) => (b.criadoEm || 0) - (a.criadoEm || 0))
     .slice(0, 5);
   if (!entries.length) {
-    container.innerHTML = `<div class="transacao-empty">Nenhuma transação ainda</div>`;
+    container.innerHTML = `<div class="home-empty-state">${ICO.cart(32)}<p>Nenhum gasto registrado</p><span>Toque em + para registrar seu primeiro gasto</span></div>`;
     return;
   }
   container.innerHTML = entries.map(([, g]) => {
@@ -1321,7 +1321,9 @@ function setupAuthForms() {
       const email = document.getElementById('signup-email').value.trim();
       const password = document.getElementById('signup-password').value;
       const confirm = document.getElementById('signup-confirm').value;
+      const salaryVal = parseFloat(document.getElementById('signup-salary')?.value);
       if (!name) return showAuthError('Coloca seu nome primeiro');
+      if (!salaryVal || salaryVal <= 0) return showAuthError('Informe seu salário mensal — ele é usado para calcular seus alertas e limites');
       if (!email || !password) return showAuthError('Preencha todos os campos');
       if (password !== confirm) return showAuthError('As senhas não conferem');
       if (password.length < 6) return showAuthError('A senha precisa ter ao menos 6 caracteres');
@@ -1335,6 +1337,21 @@ function setupAuthForms() {
       } catch(err) {
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Criar Conta';
+      }
+    });
+  }
+
+  const forgotBtn = document.getElementById('btn-forgot-password');
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      if (!email) return showAuthError('Digite seu e-mail acima para redefinir a senha');
+      try {
+        await firebase.auth().sendPasswordResetEmail(email);
+        const el = document.getElementById('auth-error');
+        if (el) { el.textContent = 'E-mail enviado! Verifique sua caixa de entrada.'; el.classList.remove('hidden'); el.classList.add('auth-success'); }
+      } catch(err) {
+        showAuthError('E-mail não encontrado. Verifique e tente novamente.');
       }
     });
   }
