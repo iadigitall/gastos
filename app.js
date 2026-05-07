@@ -1359,6 +1359,13 @@ function setupAuthForms() {
   const demoBtn = document.getElementById('btn-try-demo');
   if (demoBtn) demoBtn.addEventListener('click', enterDemoMode);
 
+  const limitInfoBtn = document.getElementById('btn-limit-info');
+  if (limitInfoBtn) {
+    limitInfoBtn.addEventListener('click', () => {
+      document.getElementById('limit-info-tooltip').classList.toggle('hidden');
+    });
+  }
+
   const signupSalary = document.getElementById('signup-salary');
   const signupLimit  = document.getElementById('signup-limit');
   if (signupSalary && signupLimit) {

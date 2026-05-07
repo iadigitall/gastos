@@ -81,7 +81,10 @@
               <input type="number" id="signup-salary" placeholder="Ex: 3000" inputmode="decimal" step="0.01" min="0">
             </div>
             <div class="auth-field">
-              <label>Limite de gastos <span class="auth-opt">(sugerido automaticamente)</span></label>
+              <label>Limite de gastos <span class="auth-opt">(sugerido automaticamente)</span><button type="button" class="info-btn" id="btn-limit-info">i</button></label>
+              <div id="limit-info-tooltip" class="info-tooltip hidden">
+                💡 Sugerimos <strong>80% do seu salário</strong> como limite mensal. É a regra financeira 50/30/20 — reservar os outros 20% para poupança e investimentos. Você pode ajustar o valor como quiser.
+              </div>
               <input type="number" id="signup-limit" placeholder="Preencha o salário acima" inputmode="decimal" step="0.01" min="0">
             </div>
           </div>
