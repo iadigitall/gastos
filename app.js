@@ -872,11 +872,19 @@ function buildSyncInsights() {
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const expenses = Object.values(state.gastos);
   if (dayOfMonth >= 3 && expenses.length >= 2) {
-    const totalGastos = expenses.reduce((s, g) => s + (g.valor || 0), 0);
+    const vals = expenses.map(g => g.valor || 0).sort((a, b) => a - b);
+    const mid = Math.floor(vals.length / 2);
+    const median = vals.length % 2 !== 0 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+    const threshold = median * 2.5;
+    const regular = expenses.filter(g => (g.valor || 0) <= threshold);
+    const onetime = expenses.filter(g => (g.valor || 0) > threshold);
+    const regularTotal = regular.reduce((s, g) => s + (g.valor || 0), 0);
+    const onetimeTotal = onetime.reduce((s, g) => s + (g.valor || 0), 0);
     const totalContas = Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
-    const projected = Math.round((totalGastos / dayOfMonth) * daysInMonth + totalContas);
+    const projected = Math.round((regularTotal / dayOfMonth) * daysInMonth + onetimeTotal + totalContas);
     const limiteVal = state.limiteGastos || 1000;
     const pctProj = Math.round((projected / limiteVal) * 100);
+    const totalGastos = vals.reduce((s, v) => s + v, 0);
     if (projected > totalGastos + totalContas) {
       insights.push({
         type: projected > limiteVal ? 'danger' : pctProj >= 80 ? 'warning' : 'info',
