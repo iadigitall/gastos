@@ -858,8 +858,15 @@ html, body {
   color: var(--green); font-size: 11px; font-weight: 700;
   text-align: center; padding: 8px; letter-spacing: 0.8px;
   text-transform: uppercase; display: none;
+  height: 34px;
 }
 #demo-banner.visible { display: block; }
+
+/* Empurra tudo pra baixo quando o banner demo está visível */
+#demo-banner.visible ~ #auth-screen           { top: 34px; }
+#demo-banner.visible ~ .sidebar               { top: 34px; }
+#demo-banner.visible ~ .app-wrapper .app-header { top: 34px; }
+#demo-banner.visible ~ .app-wrapper .view     { top: calc(var(--header-h) + 34px); }
 
 #auth-screen {
   position: fixed; inset: 0; z-index: 1000;
