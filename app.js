@@ -1283,11 +1283,16 @@ function showAuthUI() {
   if (appWrapper) appWrapper.style.display = 'none';
   if (sidebar) sidebar.style.display = 'none';
   if (bottomNav) bottomNav.style.display = 'none';
-  // Na carga inicial (splash ativo), esconde card/logo até a animação disparar
   if (!_appInitialized) {
+    // Primeira carga: esconde até a animação do splash disparar
     document.querySelector('.auth-card-wrap')?.classList.add('auth-pre-hide');
     document.querySelector('.auth-logo-wrap')?.classList.add('auth-pre-hide');
     document.querySelector('.auth-tagline')?.classList.add('auth-pre-hide');
+  } else {
+    // Logout: garante que tudo está visível (remove qualquer classe de ocultação)
+    document.querySelector('.auth-card-wrap')?.classList.remove('auth-pre-hide', 'card-animate');
+    document.querySelector('.auth-logo-wrap')?.classList.remove('auth-pre-hide', 'logo-animate');
+    document.querySelector('.auth-tagline')?.classList.remove('auth-pre-hide', 'tagline-animate');
   }
 }
 
@@ -1464,6 +1469,7 @@ function logout() {
   state._limitAlertShown = false; state._limitExceededAlertShown = false; state.hideValues = false; state._profileName = '';
   state._profileFoto = null; state._pendingPhoto = null;
   _motivationalShown = false;
+  _tourEnd();
   updateHeaderAvatar(null);
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.classList.remove('visible');
@@ -1543,14 +1549,11 @@ function initAuthCanvas() {
 
 function forceVideoPlay() {
   const video = document.getElementById('auth-bg-video');
-  if (!video) return;
-  if (!video.paused) return; // já tocando
+  if (!video || !video.paused) return;
   video.muted = true;
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
-  video.load(); // iOS Safari precisa de load() antes de play()
-  const p = video.play();
-  if (p) p.catch(() => {});
+  video.play().catch(() => {});
 }
 
 async function loadUserProfile() {
