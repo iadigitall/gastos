@@ -1,6 +1,6 @@
 :root {
   --green:    #A3FF47; /* Bright lime green */
-  --pink:     #FFA5A5; /* Soft coral pink */
+  --pink:     #B83A3A;
   --amber:    #F59E0B;
   --danger:   #FF4444;
   --bg:       #111111; /* Very dark gray/black */
@@ -63,7 +63,7 @@ html, body {
   background: var(--green);
   color: #000;
   border: none;
-  box-shadow: 0 4px 15px rgba(163, 255, 71, 0.3);
+  box-shadow: 0 4px 20px rgba(163, 255, 71, 0.55), 0 0 0 1px rgba(163,255,71,0.2);
 }
 .sidebar-btn-bottom { margin-top: auto; border: none; color: var(--muted); background: transparent; }
 .sidebar-btn-bottom:hover { background: transparent; color: #fff; }
@@ -195,6 +195,7 @@ html, body {
   border: 1px solid var(--green);
   border-radius: 16px;
   padding: 24px;
+  box-shadow: 0 0 28px rgba(163,255,71,0.08), inset 0 0 40px rgba(163,255,71,0.02);
 }
 .debt-inner {
   display: flex; align-items: stretch; margin-bottom: 24px;
@@ -219,6 +220,7 @@ html, body {
 .progress-bar {
   height: 100%; background: var(--green); border-radius: 99px;
   transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 8px rgba(163,255,71,0.7);
 }
 .progress-info { font-size: 12px; color: var(--muted); font-weight: 500; }
 .debt-vsep {
@@ -235,7 +237,7 @@ html, body {
 }
 .debt-right-val { font-size: 15px; font-weight: 600; }
 .expense-val { color: var(--pink); }
-.pending-val { color: var(--green); }
+.pending-val { color: var(--green); text-shadow: 0 0 16px rgba(163,255,71,0.5); }
 .debt-actions { display: flex; gap: 16px; }
 .pill-btn {
   flex: 1; padding: 14px; border-radius: 30px;
@@ -245,8 +247,8 @@ html, body {
   border: none;
 }
 .pill-btn:active { opacity: 0.8; }
-.pill-green { background: var(--green); color: #000; }
-.pill-pink  { background: var(--pink); color: #000; }
+.pill-green { background: linear-gradient(135deg, #c8ff6e, #A3FF47); color: #000; box-shadow: 0 4px 28px rgba(163,255,71,0.7), 0 0 16px rgba(163,255,71,0.35), 0 0 0 1px rgba(163,255,71,0.3); }
+.pill-pink  { background: linear-gradient(135deg, #cc4444, #B83A3A); color: #fff; box-shadow: 0 4px 28px rgba(184,58,58,0.7), 0 0 16px rgba(184,58,58,0.35), 0 0 0 1px rgba(184,58,58,0.3); }
 
 /* ─── SECTION CARDS ─── */
 .section-card {
@@ -470,12 +472,14 @@ html, body {
 }
 .category-btn.active {
   background: rgba(34,197,94,0.12); color: var(--green); border-color: var(--green);
+  box-shadow: 0 0 12px rgba(163,255,71,0.28);
 }
 .btn-primary {
   width: 100%; padding: 15px; border: none;
   border-radius: 14px; background: var(--green);
   color: #000; font-size: 15px; font-weight: 800; cursor: pointer;
   margin-top: 8px; transition: opacity 0.15s;
+  box-shadow: 0 4px 24px rgba(163,255,71,0.38);
 }
 .btn-primary:active { opacity: 0.8; }
 .btn-primary:disabled { opacity: 0.4; cursor: default; }
@@ -492,9 +496,9 @@ html, body {
 .bill-item.paid { opacity: 0.4; }
 .bill-status-dot {
   width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-  background: var(--amber); box-shadow: 0 0 8px var(--amber);
+  background: var(--amber); box-shadow: 0 0 10px var(--amber), 0 0 20px rgba(245,158,11,0.45);
 }
-.bill-item.paid .bill-status-dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.bill-item.paid .bill-status-dot { background: var(--green); box-shadow: 0 0 10px var(--green), 0 0 20px rgba(163,255,71,0.45); }
 .bill-info { flex: 1; min-width: 0; }
 .bill-name {
   font-size: 18px; font-weight: 700;
@@ -905,7 +909,7 @@ html, body {
 
 .auth-logo-icon svg {
   width: 60px; height: 60px;
-  filter: drop-shadow(0 0 24px rgba(163,255,71,0.45));
+  filter: drop-shadow(0 0 28px rgba(163,255,71,0.65)) drop-shadow(0 0 8px rgba(163,255,71,0.4));
 }
 
 .auth-logo-text {
@@ -974,6 +978,7 @@ html, body {
   font-size: 15px; font-weight: 800; cursor: pointer;
   transition: opacity 0.15s, transform 0.1s; font-family: inherit;
   letter-spacing: 0.2px; margin-top: 4px;
+  box-shadow: 0 4px 28px rgba(163,255,71,0.45);
 }
 .auth-submit-btn:hover { opacity: 0.92; }
 .auth-submit-btn:active { transform: scale(0.98); }
@@ -1070,7 +1075,7 @@ html, body {
   font-size: 12px; color: var(--muted); margin: 2px 0 6px;
 }
 .debt-limit-label { color: var(--muted); }
-.limit-tag { color: var(--green); font-weight: 600; }
+.limit-tag { color: var(--green); font-weight: 600; text-shadow: 0 0 10px rgba(163,255,71,0.4); }
 
 .progress-bar.danger { background: var(--danger) !important; }
 
@@ -1279,8 +1284,9 @@ html, body {
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(163,255,71,0.25), 0 2px 8px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 28px rgba(163,255,71,0.42), 0 2px 8px rgba(0,0,0,0.6);
   transition: box-shadow 0.2s, transform 0.2s;
+  text-shadow: 0 0 12px rgba(163,255,71,0.6);
 }
 .floating-insights-btn:active {
   transform: scale(0.96);
@@ -1289,8 +1295,8 @@ html, body {
   animation: float-pulse 2.5s ease-in-out infinite;
 }
 @keyframes float-pulse {
-  0%,100% { box-shadow: 0 4px 20px rgba(163,255,71,0.2); }
-  50%      { box-shadow: 0 4px 28px rgba(163,255,71,0.5); }
+  0%,100% { box-shadow: 0 4px 24px rgba(163,255,71,0.38); }
+  50%      { box-shadow: 0 4px 36px rgba(163,255,71,0.7), 0 0 0 4px rgba(163,255,71,0.08); }
 }
 
 /* Modal / painel deslizante */
@@ -1605,10 +1611,12 @@ html, body {
 
 .spl-icon {
   margin-bottom: 32px;
+  border-radius: 20px;
+  box-shadow: 0 0 32px rgba(163,255,71,0.6), 0 0 64px rgba(163,255,71,0.3);
 }
 .spl-icon svg {
   width: 72px; height: 72px;
-  filter: drop-shadow(0 0 30px rgba(163,255,71,0.45));
+  display: block;
 }
 
 /* ícone: fundo → linha → pontos (totalmente sequencial) */

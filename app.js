@@ -866,12 +866,12 @@ function buildSyncInsights() {
     });
   }
 
-  // projeção do mês (só a partir do dia 5, com 3+ gastos)
+  // projeção do mês (a partir do dia 3, com 2+ gastos)
   const now = new Date();
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const expenses = Object.values(state.gastos);
-  if (dayOfMonth >= 5 && expenses.length >= 3) {
+  if (dayOfMonth >= 3 && expenses.length >= 2) {
     const totalGastos = expenses.reduce((s, g) => s + (g.valor || 0), 0);
     const totalContas = Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
     const projected = Math.round((totalGastos / dayOfMonth) * daysInMonth + totalContas);
