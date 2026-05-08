@@ -1539,15 +1539,18 @@ function initAuthCanvas() {
     requestAnimationFrame(draw);
   }
   draw();
-  forceVideoPlay();
 }
 
 function forceVideoPlay() {
   const video = document.getElementById('auth-bg-video');
   if (!video) return;
+  if (!video.paused) return; // já tocando
   video.muted = true;
-  video.playsInline = true;
-  video.play().catch(() => {});
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+  video.load(); // iOS Safari precisa de load() antes de play()
+  const p = video.play();
+  if (p) p.catch(() => {});
 }
 
 async function loadUserProfile() {
