@@ -31,5 +31,5 @@ if (typeof firebase !== 'undefined') {
 }
 `;
 
-fs.writeFileSync('./financas/firebase-config.js', content);
+fs.writeFileSync('./firebase-config.js', content);
 console.log('firebase-config.js gerado com sucesso.');
