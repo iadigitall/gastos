@@ -31,6 +31,7 @@ const CATEGORIAS = {
 };
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
 let db = null, toastTimer = null, currentMonthListener = null;
+let _pendingVerification = false, _verifyUser = null;
 const _addingFixed = new Set(), _appliedFixed = new Set();
 const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#60A5FA', lazer:'#F59E0B', saude:'#F87171', outros:'#A78BFA' };
 let chartCategories = null, chartMonthly = null;
@@ -1230,7 +1231,7 @@ function initAuth() {
       if (user) {
         state.currentUser = user;
         state.demoMode = false;
-        showMainApp();
+        if (!_pendingVerification) showMainApp();
       } else if (!state.demoMode) {
         showAuthUI();
       }
@@ -1397,6 +1398,10 @@ function setupAuthForms() {
         const limit = parseFloat(document.getElementById('signup-limit')?.value) || 1000;
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
         await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name, salario: salary, limiteGastos: limit });
+        _verifyUser = cred.user;
+        _pendingVerification = true;
+        try { await firebase.auth().sendEmailVerification(cred.user); } catch(e) {}
+        showVerifyPending(email);
       } catch(err) {
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Criar Conta';
@@ -1418,6 +1423,24 @@ function setupAuthForms() {
       }
     });
   }
+
+  on('btn-resend-verify', 'click', async () => {
+    const btn = document.getElementById('btn-resend-verify');
+    if (!_verifyUser || !btn) return;
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      await firebase.auth().sendEmailVerification(_verifyUser);
+      btn.textContent = '✓ Reenviado!';
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Reenviar e-mail'; }, 4000);
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Reenviar e-mail';
+    }
+  });
+
+  on('btn-continue-app', 'click', () => {
+    _pendingVerification = false;
+    showMainApp();
+  });
 
   document.querySelectorAll('.pw-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1494,6 +1517,17 @@ function logout() {
   if (logoutBtn) logoutBtn.classList.remove('visible');
   showAuthUI();
   initAuthCanvas();
+}
+
+function showVerifyPending(email) {
+  document.getElementById('form-login').classList.add('hidden');
+  document.getElementById('form-signup').classList.add('hidden');
+  document.querySelector('.auth-tabs').classList.add('hidden');
+  const el = document.getElementById('auth-error');
+  if (el) el.classList.add('hidden');
+  const emailDisplay = document.getElementById('verify-email-display');
+  if (emailDisplay) emailDisplay.textContent = email;
+  document.getElementById('verify-pending').classList.remove('hidden');
 }
 
 function showAuthError(msg) {

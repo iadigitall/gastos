@@ -140,6 +140,17 @@
           <button type="submit" class="auth-submit-btn" id="btn-signup-submit">Criar Conta</button>
         </form>
 
+        <!-- TELA: verificação de e-mail -->
+        <div id="verify-pending" class="hidden">
+          <div class="verify-wrap">
+            <div class="verify-icon">📩</div>
+            <p class="verify-title">Confirme seu e-mail</p>
+            <p class="verify-desc">Enviamos um link para <strong id="verify-email-display"></strong>.<br>Verifique também a pasta de spam.</p>
+            <button id="btn-resend-verify" class="auth-resend-btn">Reenviar e-mail</button>
+            <button id="btn-continue-app" class="auth-submit-btn">Continuar para o app</button>
+          </div>
+        </div>
+
         <div class="auth-divider"><span>ou</span></div>
 
         <button id="btn-try-demo" class="auth-demo-btn">
