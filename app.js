@@ -29,9 +29,40 @@ const CATEGORIAS = {
   saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
   outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null, _firstLoad: true };
 let db = null, toastTimer = null, currentMonthListener = null;
 let _pendingVerification = false, _verifyUser = null;
+
+function vibrate(ms) { try { navigator.vibrate?.(ms); } catch(e) {} }
+
+function animateToValue(el, newVal) {
+  if (!el) return;
+  if (state.hideValues) { el.textContent = formatCurrency(newVal); return; }
+  const from = parseFloat(el.dataset.rawValue || '0') || 0;
+  el.dataset.rawValue = String(newVal);
+  if (Math.abs(from - newVal) < 0.01) { el.textContent = formatCurrency(newVal); return; }
+  const duration = 550, start = performance.now();
+  const tick = (now) => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = formatCurrency(from + (newVal - from) * eased);
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = formatCurrency(newVal);
+  };
+  requestAnimationFrame(tick);
+}
+
+const _TOAST_ICONS = {
+  success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  error:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+  warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+};
+function _toastType(msg) {
+  if (/erro|falha|error/i.test(msg)) return 'error';
+  if (/atenção|limite|estourado|acima|comprometido|⚠/i.test(msg)) return 'warning';
+  if (/adicionad|pag|fechad|salv|criado|removid|atualiz|restaur|Mês|cadastrado|enviado|copiado/i.test(msg)) return 'success';
+  return 'default';
+}
 const _addingFixed = new Set(), _appliedFixed = new Set();
 const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#60A5FA', lazer:'#F59E0B', saude:'#F87171', outros:'#A78BFA' };
 let chartCategories = null, chartMonthly = null;
@@ -56,6 +87,7 @@ function initFirebase() {
       document.getElementById('offline-banner').classList.toggle('hidden', snap.val() === true);
     });
     subscribeToMonth(state.mesAtual);
+    renderDashboard();
     subscribeToFixedBills();
   } catch (err) {
     console.warn('Firebase:', err.message);
@@ -79,6 +111,7 @@ function subscribeToMonth(key) {
   if (currentMonthListener) uRef(`meses/${currentMonthListener}`).off('value');
   currentMonthListener = key;
   uRef(`meses/${key}`).on('value', snap => {
+    state._firstLoad = false;
     const data = snap.val() || {};
     state.gastos = data.gastos || {}; state.contas = data.contas || {}; state.fixasIgnoradas = data.fixasIgnoradas || {};
     saveToLocalStorage(); renderAll();
@@ -181,6 +214,14 @@ function updateHeaderMonth() {
 }
 
 function renderDashboard() {
+  if (state._firstLoad && state.firebaseOk) {
+    const sk = `<span class="skeleton sk-value"></span>`;
+    const skMini = `<span class="skeleton sk-mini"></span>`;
+    const el = document.getElementById('total-debt'); if(el) el.innerHTML = sk;
+    const ep = document.getElementById('stat-expenses'); if(ep) ep.innerHTML = skMini;
+    const pp = document.getElementById('stat-pending'); if(pp) pp.innerHTML = skMini;
+    return;
+  }
   const gastos=Object.values(state.gastos), contas=Object.values(state.contas);
   const totalGastos=gastos.reduce((s,g)=>s+(g.valor||0),0);
   const totalContas=contas.reduce((s,c)=>s+(c.valor||0),0);
@@ -190,7 +231,7 @@ function renderDashboard() {
   const totalGeral=totalGastos+totalContas;
   const limite = state.limiteGastos || 1000;
   const pct=Math.min(100,Math.round((saldoDevedor/limite)*100));
-  document.getElementById('total-debt').textContent=formatCurrency(saldoDevedor);
+  animateToValue(document.getElementById('total-debt'), saldoDevedor);
   document.getElementById('paid-amount').textContent=formatCurrency(totalPago);
   document.getElementById('total-amount').textContent=formatCurrency(totalGeral);
   const bar = document.getElementById('progress-bar');
@@ -210,7 +251,7 @@ function renderDashboard() {
       const excTxt=document.getElementById('limit-exceeded-text');
       const excPct=Math.round((saldoDevedor/limite)*100);
       if(excTxt) excTxt.textContent=`Você gastou ${excPct}% do limite — pare de gastar agora!`;
-      if(!state._limitExceededAlertShown){state._limitExceededAlertShown=true;showToast('🚨 Limite estourado! Pare de gastar agora!',5000);}
+      if(!state._limitExceededAlertShown){state._limitExceededAlertShown=true;vibrate(200);showToast('Limite estourado! Pare de gastar agora!',5000);}
     } else { limitExcAlert.classList.add('hidden'); }
   }
   bar.classList.toggle('over-limit', saldoDevedor>limite);
@@ -225,8 +266,8 @@ function renderDashboard() {
       } else { salAlert.classList.add('hidden'); }
     } else { salAlert.classList.add('hidden'); }
   }
-  const elExp=document.getElementById('stat-expenses'); if(elExp)elExp.textContent=formatCurrency(totalGastos);
-  const elPen=document.getElementById('stat-pending'); if(elPen)elPen.textContent=formatCurrency(totalPendente);
+  animateToValue(document.getElementById('stat-expenses'), totalGastos);
+  animateToValue(document.getElementById('stat-pending'), totalPendente);
   document.getElementById('debt-card').classList.toggle('zeroed',saldoDevedor===0&&totalGeral>0);
   const ccTotal=document.getElementById('cc-total'); if(ccTotal) ccTotal.textContent=formatCurrency(saldoDevedor);
 }
@@ -335,7 +376,7 @@ async function handleAddExpense(e) {
   try {
     if(db) { await uRef(`meses/${state.mesAtual}/gastos`).push(entry); }
     else { state.gastos[genId()]=entry; saveToLocalStorage(); renderAll(); }
-    showToast('Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
+    vibrate(30); showToast('Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
   } catch(err) { showToast('Erro ao salvar. Tente de novo.'); }
   finally { btn.disabled=false; btn.textContent='Confirmar Gasto'; }
 }
@@ -396,7 +437,7 @@ async function payBill(id) {
   try {
     if(db) await uRef(`meses/${state.mesAtual}/contas/${id}`).update({paga:true,pagaEm:Date.now()});
     else{if(state.contas[id]){state.contas[id].paga=true;state.contas[id].pagaEm=Date.now();}saveToLocalStorage();renderAll();}
-    showToast('Conta marcada como paga!');
+    vibrate(50); showToast('Conta marcada como paga!');
   } catch(err){showToast('Erro ao marcar como paga');if(btn){btn.textContent='Pagar';btn.classList.remove('pay-anim','done');btn.disabled=false;}}
 }
 
@@ -696,10 +737,13 @@ function openModal(id){document.getElementById(id).classList.remove('hidden');}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 
 function showToast(msg,duration=2600,position='bottom'){
-  const t=document.getElementById('toast'); t.textContent=msg;
-  t.classList.remove('hidden','toast-motivational');
-  t.classList.toggle('toast-top',position==='top');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.classList.add('hidden');t.classList.remove('toast-top');},duration);
+  const t=document.getElementById('toast');
+  const type=_toastType(msg);
+  t.className=`toast toast-${type}${position==='top'?' toast-top':''}`;
+  const icon=_TOAST_ICONS[type]?`<span class="toast-icon-wrap">${_TOAST_ICONS[type]}</span>`:'';
+  t.innerHTML=`${icon}<span>${escHtml(msg)}</span>`;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.add('hidden'),duration);
 }
 function showMotivationalToast(msg){
   const t=document.getElementById('toast'); t.textContent=msg;
