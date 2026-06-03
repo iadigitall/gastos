@@ -96,6 +96,11 @@ function subscribeToFixedBills() {
 
 async function applyFixedBillsToCurrentMonth() {
   if (!db) return;
+  try {
+    const uid = state.currentUser?.uid || '';
+    const closed = JSON.parse(localStorage.getItem(`nd_closed_${uid}`) || '[]');
+    if (closed.includes(state.mesAtual)) return;
+  } catch(e) {}
   for (const [fixaId, fixa] of Object.entries(state.contasFixas)) {
     if (fixa.ativa === false) continue;
     if (_appliedFixed.has(fixaId)) continue;
@@ -482,6 +487,12 @@ async function handleCloseMonth() {
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
     state.gastos={};state.contas={};
     _historicoCache = null; _historicoPending = null;
+    // Persiste o mês fechado no localStorage para não re-aplicar contas fixas após reload
+    try {
+      const uid = state.currentUser?.uid || '';
+      const closed = JSON.parse(localStorage.getItem(`nd_closed_${uid}`) || '[]');
+      if (!closed.includes(key)) { closed.push(key); localStorage.setItem(`nd_closed_${uid}`, JSON.stringify(closed)); }
+    } catch(e) {}
     closeModal('modal-close-month');showToast('Mês fechado!');navigateTo('home');renderAll();
   } catch(err){showToast('Erro ao fechar o mês');}
 }
