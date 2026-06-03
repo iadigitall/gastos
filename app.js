@@ -1515,6 +1515,7 @@ function getAuthErrorMsg(code) {
     'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento',
     'auth/weak-password': 'Senha muito fraca',
     'auth/invalid-credential': 'Email ou senha incorretos',
+    'auth/invalid-login-credentials': 'Email ou senha incorretos',
     'auth/network-request-failed': 'Sem conexão. Verifique sua internet',
     'auth/unauthorized-domain': 'Domínio não autorizado. Contate o suporte',
     'auth/operation-not-allowed': 'Login por email desativado. Contate o suporte',
