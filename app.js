@@ -1295,7 +1295,8 @@ function showAuthUI() {
   // Reseta tela de verificação
   const verifyEl = document.getElementById('verify-pending');
   if (verifyEl) verifyEl.style.display = 'none';
-  document.querySelector('.auth-tabs')?.classList.remove('hidden');
+  const authTabs = document.querySelector('.auth-tabs');
+  if (authTabs) authTabs.style.display = '';
   document.getElementById('form-login')?.classList.remove('hidden');
   document.getElementById('form-signup')?.classList.add('hidden');
   _pendingVerification = false; _verifyUser = null;
@@ -1531,7 +1532,8 @@ function logout() {
 function showVerifyPending(email) {
   document.getElementById('form-login').classList.add('hidden');
   document.getElementById('form-signup').classList.add('hidden');
-  document.querySelector('.auth-tabs').classList.add('hidden');
+  const tabs = document.querySelector('.auth-tabs');
+  if (tabs) tabs.style.display = 'none';
   const el = document.getElementById('auth-error');
   if (el) el.classList.add('hidden');
   const emailDisplay = document.getElementById('verify-email-display');
