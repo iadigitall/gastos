@@ -1292,6 +1292,13 @@ function showAuthUI() {
   if (appWrapper) appWrapper.style.display = 'none';
   if (sidebar) sidebar.style.display = 'none';
   if (bottomNav) bottomNav.style.display = 'none';
+  // Reseta tela de verificação
+  const verifyEl = document.getElementById('verify-pending');
+  if (verifyEl) verifyEl.style.display = 'none';
+  document.querySelector('.auth-tabs')?.classList.remove('hidden');
+  document.getElementById('form-login')?.classList.remove('hidden');
+  document.getElementById('form-signup')?.classList.add('hidden');
+  _pendingVerification = false; _verifyUser = null;
   if (!_appInitialized) {
     // Primeira carga: esconde até a animação do splash disparar
     document.querySelector('.auth-card-wrap')?.classList.add('auth-pre-hide');
@@ -1394,15 +1401,17 @@ function setupAuthForms() {
       const btn = document.getElementById('btn-signup-submit');
       btn.disabled = true; btn.textContent = 'Criando...';
       try {
+        _pendingVerification = true;
         const salary = parseFloat(document.getElementById('signup-salary')?.value) || 0;
         const limit = parseFloat(document.getElementById('signup-limit')?.value) || 1000;
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name, salario: salary, limiteGastos: limit });
         _verifyUser = cred.user;
-        _pendingVerification = true;
+        await firebase.database().ref(`users/${cred.user.uid}/profile`).set({ nome: name, salario: salary, limiteGastos: limit });
         try { await firebase.auth().sendEmailVerification(cred.user); } catch(e) {}
+        btn.disabled = false; btn.textContent = 'Criar Conta';
         showVerifyPending(email);
       } catch(err) {
+        _pendingVerification = false;
         showAuthError(getAuthErrorMsg(err.code));
         btn.disabled = false; btn.textContent = 'Criar Conta';
       }
