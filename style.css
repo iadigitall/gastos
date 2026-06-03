@@ -27,7 +27,7 @@ html, body {
 body::before {
   content: '';
   position: fixed; inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(163,255,71,0.13) 0%, rgba(163,255,71,0.04) 45%, transparent 68%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(163,255,71,0.13) 0%, rgba(163,255,71,0.04) 45%, transparent 68%);
   pointer-events: none; z-index: 0;
 }
 
