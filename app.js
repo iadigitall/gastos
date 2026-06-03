@@ -132,17 +132,21 @@ async function applyFixedBillsToCurrentMonth() {
 
 function saveToLocalStorage() {
   if (state.demoMode) return;
-  try { localStorage.setItem(`nd_${state.mesAtual}`, JSON.stringify({ gastos: state.gastos, contas: state.contas })); } catch(_) {}
+  const uid = state.currentUser?.uid || '';
+  try { localStorage.setItem(`nd_${uid}_${state.mesAtual}`, JSON.stringify({ gastos: state.gastos, contas: state.contas })); } catch(_) {}
 }
 function loadFromLocalStorage() {
-  try { const d = JSON.parse(localStorage.getItem(`nd_${state.mesAtual}`) || '{}'); state.gastos = d.gastos||{}; state.contas = d.contas||{}; } catch(_) {}
+  const uid = state.currentUser?.uid || '';
+  try { const d = JSON.parse(localStorage.getItem(`nd_${uid}_${state.mesAtual}`) || '{}'); state.gastos = d.gastos||{}; state.contas = d.contas||{}; } catch(_) {}
 }
 function saveFixedBillsToLocalStorage() {
   if (state.demoMode) return;
-  try { localStorage.setItem('nd_contasFixas', JSON.stringify(state.contasFixas)); } catch(_) {}
+  const uid = state.currentUser?.uid || '';
+  try { localStorage.setItem(`nd_fixas_${uid}`, JSON.stringify(state.contasFixas)); } catch(_) {}
 }
 function loadFixedBillsFromLocalStorage() {
-  try { state.contasFixas = JSON.parse(localStorage.getItem('nd_contasFixas') || '{}'); } catch(_) {}
+  const uid = state.currentUser?.uid || '';
+  try { state.contasFixas = JSON.parse(localStorage.getItem(`nd_fixas_${uid}`) || '{}'); } catch(_) {}
 }
 
 function getCurrentMonthKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
