@@ -605,26 +605,42 @@ body::before {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── BOTTOM NAV (mobile) ─── */
+/* ─── BOTTOM NAV — Dynamic Island ─── */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  height: var(--nav-h); background: var(--card); border-top: 1px solid var(--border);
+  position: fixed;
+  bottom: 20px;
+  left: 50%; transform: translateX(-50%);
+  width: auto; height: auto;
+  background: rgba(8,8,16,0.88);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 7px;
+  gap: 2px;
   display: none; align-items: center;
-  padding-bottom: env(safe-area-inset-bottom, 0); z-index: 100;
+  z-index: 100;
 }
 .nav-btn {
-  flex: 1; background: none; border: none; color: var(--muted);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 5px; cursor: pointer; transition: color 0.2s; padding: 0 0 2px;
+  width: 60px; height: 48px;
+  flex: unset; position: relative;
+  background: none; border: none;
+  color: rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border-radius: 50px;
+  transition: color 0.2s;
+}
+.nav-btn::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 50px;
+  background: rgba(163,255,71,0.1);
+  opacity: 0; transition: opacity 0.2s;
 }
 .nav-btn.active { color: var(--green); }
-.nav-icon-wrap {
-  width: 46px; height: 30px; border-radius: 15px;
-  display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-}
-.nav-btn.active .nav-icon-wrap { background: rgba(34,197,94,0.15); }
-.nav-svg { width: 20px; height: 20px; }
-.nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
+.nav-btn.active::before { opacity: 1; }
+.nav-icon-wrap { display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+.nav-svg { width: 22px; height: 22px; }
+.nav-label { display: none; }
 
 /* ─── MODALS ─── */
 .modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: flex-end; justify-content: center; }
@@ -780,7 +796,7 @@ body::before {
   }
   .sidebar { display: none; }
   .app-logo-mobile { display: block; font-size: 20px; font-weight: 800; color: var(--green); }
-  .app-wrapper { margin-left: 0; padding-top: var(--header-h); padding-bottom: var(--nav-h); }
+  .app-wrapper { margin-left: 0; padding-top: var(--header-h); padding-bottom: 96px; }
   
   .app-header { 
     left: 0; padding: 0 16px; 
@@ -793,7 +809,7 @@ body::before {
   .calendar-btn-wrap { display: none; }
   .header-avatar svg { width: 28px; height: 28px; }
 
-  .view { padding: 0; padding-bottom: calc(var(--nav-h) + 20px); left: 0; }
+  .view { padding: 0; padding-bottom: 110px; left: 0; }
   .view-content { padding: 16px; width: 100%; }
 
   .bottom-nav { display: flex; }
@@ -818,7 +834,7 @@ body::before {
 
   .debt-value { font-size: 32px; }
 
-  .toast { bottom: calc(var(--nav-h) + 14px); }
+  .toast { bottom: 100px; }
 
   /* Ajustes das telas internas no mobile */
   .past-month-grid { grid-template-columns: 1fr; gap: 16px; }

@@ -481,7 +481,6 @@ async function handleCloseMonth() {
     if(db){await uRef(`historico/${key}`).set(arquivo);await uRef(`meses/${key}`).remove();}
     else{try{localStorage.setItem(`nd_hist_${key}`,JSON.stringify(arquivo));localStorage.removeItem(`nd_${key}`);}catch(_){}}
     state.gastos={};state.contas={};
-    _appliedFixed.clear();
     _historicoCache = null; _historicoPending = null;
     closeModal('modal-close-month');showToast('Mês fechado!');navigateTo('home');renderAll();
   } catch(err){showToast('Erro ao fechar o mês');}
@@ -1127,7 +1126,8 @@ function _tourInjectDOM() {
 }
 
 function startTour() {
-  if (localStorage.getItem('tourDone') === '1') return;
+  const uid = state.currentUser?.uid || 'demo';
+  if (localStorage.getItem(`tourDone_${uid}`) === '1') return;
   _tourInjectDOM();
   _tourStep = 0;
   _tourShowRing(0);
@@ -1213,7 +1213,8 @@ function _tourEnd() {
   if (backdrop) backdrop.style.display = 'none';
   const card = document.getElementById('tour-card');
   if (card) card.style.display = 'none';
-  localStorage.setItem('tourDone', '1');
+  const uid = state.currentUser?.uid || 'demo';
+  localStorage.setItem(`tourDone_${uid}`, '1');
 }
 
 /* ═══════════════════════════════════════
@@ -1521,7 +1522,11 @@ function logout() {
   state._limitAlertShown = false; state._limitExceededAlertShown = false; state.hideValues = false; state._profileName = '';
   state._profileFoto = null; state._pendingPhoto = null;
   _motivationalShown = false;
-  _tourEnd();
+  // Limpa DOM do tour sem marcar como concluído (cada usuário tem seu próprio estado)
+  document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
+  ['tour-interceptor','tour-tap-hint'].forEach(id => document.getElementById(id)?.remove());
+  const tb = document.getElementById('tour-backdrop'); if(tb) tb.style.display = 'none';
+  const tc = document.getElementById('tour-card'); if(tc) tc.style.display = 'none';
   updateHeaderAvatar(null);
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.classList.remove('visible');
