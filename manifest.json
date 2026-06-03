@@ -2,7 +2,7 @@
   "name": "Minhas Finanças",
   "short_name": "Finanças",
   "description": "Controle de gastos e contas mensais",
-  "start_url": "/Gastos/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0D0D0D",
   "theme_color": "#0D0D0D",
@@ -17,7 +17,7 @@
       "name": "Adicionar Gasto",
       "short_name": "Gasto",
       "description": "Lançar um novo gasto rapidamente",
-      "url": "/Gastos/?shortcut=add-expense",
+      "url": "/?shortcut=add-expense",
       "icons": [{ "src": "icons/icon-add.svg", "sizes": "96x96" }]
     }
   ]
