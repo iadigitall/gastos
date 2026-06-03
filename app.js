@@ -1225,7 +1225,7 @@ function initAuth() {
   initAuthCanvas();
   setupAuthForms();
 
-  if (typeof firebase !== 'undefined' && firebase.auth) {
+  if (typeof firebase !== 'undefined' && firebase.auth && firebase.apps.length) {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         state.currentUser = user;
@@ -1419,6 +1419,17 @@ function setupAuthForms() {
     });
   }
 
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.querySelector('.eye-on').style.display = show ? 'none' : '';
+      btn.querySelector('.eye-off').style.display = show ? '' : 'none';
+    });
+  });
+
   const demoBtn = document.getElementById('btn-try-demo');
   if (demoBtn) demoBtn.addEventListener('click', enterDemoMode);
 
@@ -1497,7 +1508,7 @@ function clearAuthError() {
 
 function getAuthErrorMsg(code) {
   const msgs = {
-    'auth/user-not-found': 'Email não encontrado',
+    'auth/user-not-found': 'Não existe cadastro com esse email',
     'auth/wrong-password': 'Senha incorreta',
     'auth/email-already-in-use': 'Este email já está cadastrado',
     'auth/invalid-email': 'Email inválido',
@@ -1505,8 +1516,10 @@ function getAuthErrorMsg(code) {
     'auth/weak-password': 'Senha muito fraca',
     'auth/invalid-credential': 'Email ou senha incorretos',
     'auth/network-request-failed': 'Sem conexão. Verifique sua internet',
+    'auth/unauthorized-domain': 'Domínio não autorizado. Contate o suporte',
+    'auth/operation-not-allowed': 'Login por email desativado. Contate o suporte',
   };
-  return msgs[code] || 'Erro ao autenticar. Tente novamente.';
+  return msgs[code] || `Erro ao autenticar. Tente novamente. (${code || 'desconhecido'})`;
 }
 
 function initAuthCanvas() {

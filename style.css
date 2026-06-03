@@ -979,6 +979,16 @@ html, body {
 .auth-field input:focus { border-color: var(--green); }
 .auth-field input::placeholder { color: #3A3A3A; }
 
+.pw-wrap { position: relative; display: flex; align-items: center; }
+.pw-wrap input { padding-right: 46px; }
+.pw-toggle {
+  position: absolute; right: 12px;
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; padding: 4px; display: flex; align-items: center;
+  transition: color 0.15s;
+}
+.pw-toggle:hover { color: var(--text); }
+
 .auth-submit-btn {
   width: 100%; padding: 16px; border: none; border-radius: 14px;
   background: var(--green); color: #000;
