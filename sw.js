@@ -1,10 +1,9 @@
-const CACHE = 'financas-v77';
+const CACHE = 'financas-v78';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
-  './firebase-config.js',
   './manifest.json',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
