@@ -1527,7 +1527,7 @@ function showVerifyPending(email) {
   if (el) el.classList.add('hidden');
   const emailDisplay = document.getElementById('verify-email-display');
   if (emailDisplay) emailDisplay.textContent = email;
-  document.getElementById('verify-pending').classList.remove('hidden');
+  document.getElementById('verify-pending').style.display = 'block';
 }
 
 function showAuthError(msg) {
