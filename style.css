@@ -1868,7 +1868,7 @@ body::before {
 ═══════════════════════════════════════ */
 .auth-card-wrap.auth-pre-hide,
 .auth-logo-wrap.auth-pre-hide,
-.auth-tagline.auth-pre-hide { opacity: 0; }
+.auth-tagline.auth-pre-hide { opacity: 0; visibility: hidden; }
 
 .auth-tagline {
   position: absolute; bottom: 28px; left: 0; right: 0;

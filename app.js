@@ -1317,7 +1317,7 @@ function startSplash(onComplete) {
     setTimeout(() => {
       splash.style.display = 'none';
       forceVideoPlay(); // vídeo agora visível — iOS permite autoplay de muted
-      setTimeout(() => { onComplete(); }, 2000);
+      setTimeout(() => { onComplete(); }, 50);
     }, 850);
   }, 4600);
 }
