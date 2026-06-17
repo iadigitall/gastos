@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHeaderMonth();
   registerServiceWorker();
   setupOnlineStatus();
+  initVideoAutoplay();
   initAuth();
 });
 
@@ -1682,9 +1683,26 @@ function forceVideoPlay() {
   const video = document.getElementById('auth-bg-video');
   if (!video || !video.paused) return;
   video.muted = true;
+  video.defaultMuted = true;
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
   video.play().catch(() => {});
+}
+
+function initVideoAutoplay() {
+  const video = document.getElementById('auth-bg-video');
+  if (!video) return;
+  video.muted = true;
+  video.defaultMuted = true;
+  // Tenta play assim que o vídeo tiver dados suficientes
+  video.addEventListener('canplay', () => forceVideoPlay(), { once: true });
+  video.addEventListener('loadeddata', () => forceVideoPlay(), { once: true });
+  // Captura qualquer toque em qualquer parte da tela
+  document.addEventListener('touchstart', () => forceVideoPlay(), { once: true, passive: true });
+  document.addEventListener('touchend',   () => forceVideoPlay(), { once: true, passive: true });
+  document.addEventListener('click',      () => forceVideoPlay(), { once: true });
+  // Tenta imediatamente
+  forceVideoPlay();
 }
 
 async function loadUserProfile() {
