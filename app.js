@@ -849,9 +849,10 @@ function renderCategoryChart() {
   if(canvas)canvas.style.display='';
   if(chartCategories){chartCategories.destroy();chartCategories=null;}
   if(!canvas)return;
-  const labels = ALL_CATS.map(k=>CATEGORIAS[k].label);
-  const data   = ALL_CATS.map(k=>totals[k]||0);
-  const colors = ALL_CATS.map(k=>CAT_COLORS[k]);
+  const usedCats = ALL_CATS.filter(k=>(totals[k]||0)>0);
+  const labels = usedCats.map(k=>CATEGORIAS[k].label);
+  const data   = usedCats.map(k=>totals[k]);
+  const colors = usedCats.map(k=>CAT_COLORS[k]);
   chartCategories=new Chart(canvas,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#0d0d0d',hoverOffset:6}]},
@@ -859,7 +860,10 @@ function renderCategoryChart() {
       responsive:true,
       maintainAspectRatio:false,
       plugins:{
-        legend:{display:false},
+        legend:{
+          position:'bottom',
+          labels:{color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true,pointStyle:'circle'}
+        },
         tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)} (${Math.round(c.raw/total*100)}%)`}},
         datalabels:{
           color:'#ffffff',
