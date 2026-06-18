@@ -20,14 +20,36 @@ const ICO = {
   settings:  (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 4.6a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
   trash:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
   edit:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  home:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  wifi:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg>`,
+  fork:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v0zm0 0v7"/></svg>`,
+  store:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><path d="M3 9l2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>`,
+  coffee:    (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`,
+  fuel:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>`,
+  film:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>`,
+  pill:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5L3.5 13.5a5 5 0 0 1 7.07-7.07l7 7a5 5 0 0 1-7.07 7.07z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>`,
+  book:      (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+  dumbbell:  (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/><line x1="8" y1="11.5" x2="11.5" y2="8"/><line x1="12.5" y1="15.5" x2="16" y2="12"/><rect x="2" y="10" width="4" height="4" rx="1"/><rect x="7" y="5" width="4" height="4" rx="1"/><rect x="13" y="15" width="4" height="4" rx="1"/><rect x="18" y="10" width="4" height="4" rx="1"/></svg>`,
+  grid4:     (s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
 };
 
 const CATEGORIAS = {
-  alimentacao: { icon: (s=26)=>ICO.cart(s),  label: 'Alimentação' },
-  transporte:  { icon: (s=26)=>ICO.car(s),   label: 'Transporte' },
-  lazer:       { icon: (s=26)=>ICO.music(s), label: 'Lazer' },
-  saude:       { icon: (s=26)=>ICO.heart(s), label: 'Saúde' },
-  outros:      { icon: (s=26)=>ICO.box(s),   label: 'Outros' },
+  alimentacao:  { icon: (s=26)=>ICO.cart(s),     label: 'Alimentação' },
+  mercado:      { icon: (s=26)=>ICO.store(s),     label: 'Mercado' },
+  restaurante:  { icon: (s=26)=>ICO.fork(s),      label: 'Restaurante' },
+  padaria:      { icon: (s=26)=>ICO.coffee(s),    label: 'Padaria' },
+  transporte:   { icon: (s=26)=>ICO.car(s),       label: 'Transporte' },
+  combustivel:  { icon: (s=26)=>ICO.fuel(s),      label: 'Combustível' },
+  lazer:        { icon: (s=26)=>ICO.film(s),      label: 'Lazer' },
+  streaming:    { icon: (s=26)=>ICO.music(s),     label: 'Streaming' },
+  saude:        { icon: (s=26)=>ICO.heart(s),     label: 'Saúde' },
+  farmacia:     { icon: (s=26)=>ICO.pill(s),      label: 'Farmácia' },
+  aluguel:      { icon: (s=26)=>ICO.home(s),      label: 'Aluguel' },
+  internet:     { icon: (s=26)=>ICO.wifi(s),      label: 'Internet' },
+  educacao:     { icon: (s=26)=>ICO.book(s),      label: 'Educação' },
+  roupas:       { icon: (s=26)=>ICO.bag(s),       label: 'Roupas' },
+  academia:     { icon: (s=26)=>ICO.dumbbell(s),  label: 'Academia' },
+  outros:       { icon: (s=26)=>ICO.grid4(s),     label: 'Outros' },
 };
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null, _firstLoad: true };
 let db = null, toastTimer = null, currentMonthListener = null;
@@ -64,7 +86,12 @@ function _toastType(msg) {
   return 'default';
 }
 const _addingFixed = new Set(), _appliedFixed = new Set();
-const CAT_COLORS = { alimentacao:'#A3FF47', transporte:'#60A5FA', lazer:'#F59E0B', saude:'#F87171', outros:'#A78BFA' };
+const CAT_COLORS = {
+  alimentacao: '#A3FF47', mercado:     '#34D399', restaurante: '#FB923C', padaria:    '#E879F9',
+  transporte:  '#60A5FA', combustivel: '#EF4444', lazer:       '#F59E0B', streaming:  '#A78BFA',
+  saude:       '#F87171', farmacia:    '#4ADE80', aluguel:     '#818CF8', internet:   '#38BDF8',
+  educacao:    '#FBBF24', roupas:      '#F472B6', academia:    '#84CC16', outros:     '#9CA3AF',
+};
 let chartCategories = null, chartMonthly = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -348,10 +375,7 @@ function renderHomeTransactions() {
 }
 
 function setupForms() {
-  document.querySelectorAll('.category-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    document.querySelectorAll('.category-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); state.selectedCategory=btn.dataset.cat;
-  }));
+  renderCategoryGrid();
   document.getElementById('form-expense').addEventListener('submit',handleAddExpense);
   document.getElementById('form-bill').addEventListener('submit',handleAddBill);
   document.getElementById('form-fixed-bill').addEventListener('submit',handleAddFixedBill);
@@ -361,7 +385,7 @@ function resetDates() { const t=todayStr(); const e=document.getElementById('exp
 function resetExpenseForm() {
   document.getElementById('expense-desc').value=''; document.getElementById('expense-value').value='';
   document.getElementById('expense-date').value=todayStr(); state.selectedCategory='alimentacao';
-  document.querySelectorAll('.category-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat==='alimentacao'));
+  renderCategoryGrid();
 }
 
 async function handleAddExpense(e) {
@@ -755,9 +779,25 @@ function setupOnlineStatus(){window.addEventListener('online',()=>showToast('Con
 function registerServiceWorker(){if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
 
+/* ─── CATEGORY GRID ─── */
+function renderCategoryGrid() {
+  const grid = document.querySelector('.category-grid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(CATEGORIAS).map(([key, cat]) =>
+    `<button type="button" class="category-btn${key === state.selectedCategory ? ' active' : ''}" data-cat="${key}">
+       ${cat.icon(14)} ${cat.label}
+     </button>`
+  ).join('');
+  grid.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', () => {
+    grid.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.selectedCategory = btn.dataset.cat;
+  }));
+}
+
 /* ─── CHARTS ─── */
 function renderCategoryChart() {
-  const ALL_CATS = ['alimentacao','transporte','lazer','saude','outros'];
+  const ALL_CATS = Object.keys(CATEGORIAS);
   const totals={};
   for(const g of Object.values(state.gastos)){const c=g.categoria||'outros';totals[c]=(totals[c]||0)+(g.valor||0);}
   const total = ALL_CATS.reduce((s,k)=>s+(totals[k]||0),0);
