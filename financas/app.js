@@ -779,20 +779,56 @@ function setupOnlineStatus(){window.addEventListener('online',()=>showToast('Con
 function registerServiceWorker(){if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}
 function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
 
-/* ─── CATEGORY GRID ─── */
+/* ─── CATEGORY DROPDOWN ─── */
 function renderCategoryGrid() {
   const grid = document.querySelector('.category-grid');
   if (!grid) return;
-  grid.innerHTML = Object.entries(CATEGORIAS).map(([key, cat]) =>
-    `<button type="button" class="category-btn${key === state.selectedCategory ? ' active' : ''}" data-cat="${key}">
-       ${cat.icon(14)} ${cat.label}
-     </button>`
-  ).join('');
-  grid.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', () => {
-    grid.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    state.selectedCategory = btn.dataset.cat;
-  }));
+  const chevron = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+  const selCat = CATEGORIAS[state.selectedCategory];
+  grid.innerHTML = `
+    <div class="cat-dropdown" id="cat-dropdown">
+      <button type="button" class="cat-trigger" id="cat-trigger">
+        <span class="cat-trigger-icon">${selCat.icon(18)}</span>
+        <span class="cat-trigger-label">${selCat.label}</span>
+        <span class="cat-trigger-chevron">${chevron}</span>
+      </button>
+      <div class="cat-list hidden" id="cat-list">
+        ${Object.entries(CATEGORIAS).map(([key, cat]) =>
+          `<button type="button" class="cat-item${key === state.selectedCategory ? ' active' : ''}" data-cat="${key}">
+            <span class="cat-item-icon">${cat.icon(16)}</span>
+            <span>${cat.label}</span>
+          </button>`
+        ).join('')}
+      </div>
+    </div>`;
+
+  const trigger  = grid.querySelector('#cat-trigger');
+  const list     = grid.querySelector('#cat-list');
+  const dropdown = grid.querySelector('#cat-dropdown');
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = !list.classList.contains('hidden');
+    list.classList.toggle('hidden', open);
+    dropdown.classList.toggle('open', !open);
+  });
+
+  list.querySelectorAll('.cat-item').forEach(item => {
+    item.addEventListener('click', () => {
+      state.selectedCategory = item.dataset.cat;
+      list.classList.add('hidden');
+      dropdown.classList.remove('open');
+      renderCategoryGrid();
+    });
+  });
+
+  document.addEventListener('click', function closeDrop(e) {
+    if (!dropdown.contains(e.target)) {
+      list.classList.add('hidden');
+      dropdown.classList.remove('open');
+      document.removeEventListener('click', closeDrop);
+    }
+  });
 }
 
 /* ─── CHARTS ─── */
@@ -823,21 +859,7 @@ function renderCategoryChart() {
       responsive:true,
       maintainAspectRatio:false,
       plugins:{
-        legend:{
-          position:'bottom',
-          labels:{
-            color:'#f0f0f5',padding:14,font:{size:12},usePointStyle:true,
-            generateLabels: chart => ALL_CATS.map((k,i)=>({
-              text:`${CATEGORIAS[k].label}  ${Math.round((totals[k]||0)/total*100)}%`,
-              fillStyle:colors[i],
-              strokeStyle:colors[i],
-              fontColor:colors[i],
-              pointStyle:'circle',
-              hidden:false,
-              index:i
-            }))
-          }
-        },
+        legend:{display:false},
         tooltip:{callbacks:{label:c=>` ${formatCurrency(c.raw)} (${Math.round(c.raw/total*100)}%)`}},
         datalabels:{
           color:'#ffffff',
