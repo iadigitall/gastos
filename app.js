@@ -853,6 +853,8 @@ function renderCategoryChart() {
   const labels = usedCats.map(k=>CATEGORIAS[k].label);
   const data   = usedCats.map(k=>totals[k]);
   const colors = usedCats.map(k=>CAT_COLORS[k]);
+  const legendRows = Math.ceil(usedCats.length / 3);
+  if (canvas.parentElement) canvas.parentElement.style.height = `${200 + Math.max(legendRows, 1) * 30}px`;
   chartCategories=new Chart(canvas,{
     type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#0d0d0d',hoverOffset:6}]},
