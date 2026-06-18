@@ -1658,6 +1658,8 @@ function logout() {
   updateHeaderAvatar(null);
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) logoutBtn.classList.remove('visible');
+  // Limpa dados financeiros do localStorage ao sair
+  Object.keys(localStorage).filter(k => k.startsWith('nd_')).forEach(k => localStorage.removeItem(k));
   showAuthUI();
   initAuthCanvas();
 }
