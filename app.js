@@ -1121,7 +1121,7 @@ function renderInsightsList(insights) {
   }
 
   if (!insights.length) {
-    container.innerHTML = `<div class="insights-empty">${hasData ? 'Tudo em ordem — continue assim! 👍' : 'Registre seus primeiros gastos para ver análises aqui'}</div>`;
+    container.innerHTML = `<div class="insights-empty">${hasData ? 'Nenhum alerta no momento. Suas finanças estão sob controle.' : 'Adicione gastos e contas para começar a ver sua análise financeira.'}</div>`;
     return;
   }
 
