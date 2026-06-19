@@ -33,6 +33,15 @@ body::before {
     radial-gradient(ellipse 80% 60% at 50% 50%, rgba(163,255,71,0.04) 0%, transparent 70%);
   pointer-events: none; z-index: 0;
 }
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 2;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px;
+}
 
 /* ─── OFFLINE BANNER ─── */
 #offline-banner {
@@ -205,10 +214,26 @@ body::before {
 .debt-card {
   background: rgba(163,255,71,0.04);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(163,255,71,0.22);
+  border: none;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 0 48px rgba(163,255,71,0.08), 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(163,255,71,0.1);
+  position: relative;
+  box-shadow: 0 0 64px rgba(163,255,71,0.12), 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(163,255,71,0.12);
+}
+.debt-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(163,255,71,0.55) 0%,
+    rgba(163,255,71,0.10) 40%,
+    rgba(163,255,71,0.05) 60%,
+    rgba(163,255,71,0.30) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 .debt-inner {
   display: flex; align-items: stretch; margin-bottom: 24px;
@@ -222,11 +247,12 @@ body::before {
 }
 .lbl-arrow { color: var(--muted); font-size: 16px; margin-left: 4px; }
 .debt-value {
-  font-size: 42px; font-weight: 800;
-  background: linear-gradient(135deg, #A3FF47 0%, #ffffff 70%);
+  font-size: 58px; font-weight: 800;
+  background: linear-gradient(135deg, #A3FF47 0%, #d4ffaa 45%, #ffffff 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -1.5px; line-height: 1.2;
+  letter-spacing: -2.5px; line-height: 1.1;
+  filter: drop-shadow(0 0 20px rgba(163,255,71,0.35));
 }
 .debt-prog-wrap { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
 .progress-track {
@@ -974,7 +1000,7 @@ body::before {
 
   .mobile-only { display: block; }
 
-  .debt-value { font-size: 30px; -webkit-text-fill-color: transparent; }
+  .debt-value { font-size: 44px; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
 
   .toast { bottom: 100px; }
 
