@@ -133,10 +133,11 @@ async function parseGastoIA(text) {
 Mensagem: "${text}"
 
 Retorne APENAS JSON, sem explicação:
-- Se for gasto: {"valor":50.00,"descricao":"almoço","categoria":"alimentação"}
+- Se for gasto: {"valor":50.00,"descricao":"almoço no restaurante","categoria":"restaurante"}
 - Se não for gasto: {"valor":null}
 
-Categorias válidas: alimentação, transporte, lazer, saúde, casa, educação, outros`
+Categorias válidas (use exatamente uma dessas chaves):
+alimentacao, mercado, restaurante, padaria, transporte, combustivel, lazer, streaming, saude, farmacia, aluguel, internet, educacao, roupas, academia, outros`
         }]
       })
     });
