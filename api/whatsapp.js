@@ -93,12 +93,21 @@ async function sendWhatsApp(to, message) {
   const evolutionUrl = process.env.EVOLUTION_API_URL;
   const evolutionKey = process.env.EVOLUTION_API_KEY;
   const instanceName = process.env.EVOLUTION_INSTANCE;
-  if (!evolutionUrl || !evolutionKey || !instanceName) return;
-  await fetch(`${evolutionUrl}/message/sendText/${instanceName}`, {
+  console.log('sendWhatsApp vars:', { evolutionUrl, instanceName, hasKey: !!evolutionKey });
+  if (!evolutionUrl || !evolutionKey || !instanceName) {
+    console.log('sendWhatsApp: env vars ausentes, abortando');
+    return;
+  }
+  const url = `${evolutionUrl}/message/sendText/${instanceName}`;
+  const body = JSON.stringify({ number: to, text: message });
+  console.log('sendWhatsApp POST:', url, body.slice(0, 100));
+  const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': evolutionKey },
-    body: JSON.stringify({ number: to, text: message }),
+    body,
   });
+  const respText = await resp.text();
+  console.log('sendWhatsApp response:', resp.status, respText.slice(0, 200));
 }
 
 module.exports = async function handler(req, res) {
