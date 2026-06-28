@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
     const event = body.event || '';
     if (event !== 'messages.upsert') return res.status(200).json({ ok: true });
 
-    const msgData = body.data?.message;
+    const msgData = body.data;
     if (!msgData || msgData.key?.fromMe) return res.status(200).json({ ok: true });
 
     const from = msgData.key?.remoteJid?.replace('@s.whatsapp.net', '').replace(/\D/g, '');
