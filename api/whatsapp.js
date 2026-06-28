@@ -42,44 +42,49 @@ async function getUserData(db, uid) {
   };
 }
 
+function fmt(n) { return Number(n || 0).toFixed(2); }
+
 function resumoMes(data) {
+  console.log('resumoMes data.mes:', JSON.stringify(data.mes).slice(0, 200));
+  console.log('resumoMes data.profile:', JSON.stringify(data.profile).slice(0, 200));
+
   const gastos = Object.values(data.mes.gastos || {});
   const contas = Object.values(data.mes.contas || {});
-  const totalGastos = gastos.reduce((s, g) => s + (g.valor || 0), 0);
-  const totalContas = contas.reduce((s, c) => s + (c.valor || 0), 0);
+  const totalGastos = gastos.reduce((s, g) => s + Number(g.valor || 0), 0);
+  const totalContas = contas.reduce((s, c) => s + Number(c.valor || 0), 0);
   const contasPendentes = contas.filter(c => !c.paga);
 
   const porCategoria = {};
   for (const g of gastos) {
     const cat = g.categoria || 'outros';
-    porCategoria[cat] = (porCategoria[cat] || 0) + (g.valor || 0);
+    porCategoria[cat] = (porCategoria[cat] || 0) + Number(g.valor || 0);
   }
   const topCat = Object.entries(porCategoria).sort(([, a], [, b]) => b - a).slice(0, 3);
 
-  const salario = data.profile.salario || 0;
-  const limite = data.profile.limiteGastos || 0;
+  const salario = Number(data.profile.salario || 0);
+  const limite = Number(data.profile.limiteGastos || 0);
   const nome = data.profile.nome || 'usuário';
   const total = totalGastos + totalContas;
   const pctSalario = salario > 0 ? Math.round((total / salario) * 100) : null;
 
   let msg = `Olá, *${nome}*! 👋\n\n`;
   msg += `📅 *${data.mesAtual.replace('-', '/')}*\n`;
-  msg += `💸 Gastos: *R$ ${totalGastos.toFixed(2)}*\n`;
-  msg += `📋 Contas: *R$ ${totalContas.toFixed(2)}*\n`;
-  msg += `📊 Total: *R$ ${total.toFixed(2)}*`;
+  msg += `💸 Gastos: *R$ ${fmt(totalGastos)}*\n`;
+  msg += `📋 Contas: *R$ ${fmt(totalContas)}*\n`;
+  msg += `📊 Total: *R$ ${fmt(total)}*`;
   if (pctSalario !== null) msg += ` (${pctSalario}% do salário)`;
   msg += '\n';
   if (limite > 0) {
     const pctLimite = Math.round((total / limite) * 100);
-    msg += `🎯 Limite: R$ ${limite.toFixed(2)} — ${pctLimite}% usado\n`;
+    msg += `🎯 Limite: R$ ${fmt(limite)} — ${pctLimite}% usado\n`;
   }
   if (topCat.length) {
     msg += `\n🏆 *Top categorias:*\n`;
-    for (const [cat, val] of topCat) msg += `  ${cat}: R$ ${val.toFixed(2)}\n`;
+    for (const [cat, val] of topCat) msg += `  ${cat}: R$ ${fmt(val)}\n`;
   }
   if (contasPendentes.length) {
     msg += `\n⚠️ *${contasPendentes.length} conta(s) pendente(s):*\n`;
-    for (const c of contasPendentes.slice(0, 3)) msg += `  ${c.nome} — R$ ${(c.valor || 0).toFixed(2)}\n`;
+    for (const c of contasPendentes.slice(0, 3)) msg += `  ${c.nome} — R$ ${fmt(c.valor)}\n`;
   }
   return msg.trim();
 }
@@ -132,21 +137,21 @@ module.exports = async function handler(req, res) {
         reply = '✅ Nenhuma conta pendente este mês!';
       } else {
         reply = `📋 *Contas pendentes (${contas.length}):*\n`;
-        for (const c of contas) reply += `• ${c.nome} — R$ ${(c.valor || 0).toFixed(2)}\n`;
+        for (const c of contas) reply += `• ${c.nome} — R$ ${fmt(c.valor)}\n`;
       }
     } else if (/gasto|categori/.test(text)) {
       const gastos = Object.values(data.mes.gastos || {});
       const porCat = {};
       for (const g of gastos) {
         const cat = g.categoria || 'outros';
-        porCat[cat] = (porCat[cat] || 0) + (g.valor || 0);
+        porCat[cat] = (porCat[cat] || 0) + Number(g.valor || 0);
       }
       const sorted = Object.entries(porCat).sort(([, a], [, b]) => b - a);
       if (!sorted.length) {
         reply = 'Nenhum gasto registrado este mês ainda.';
       } else {
         reply = `💸 *Gastos por categoria:*\n`;
-        for (const [cat, val] of sorted) reply += `• ${cat}: R$ ${val.toFixed(2)}\n`;
+        for (const [cat, val] of sorted) reply += `• ${cat}: R$ ${fmt(val)}\n`;
       }
     } else if (/ajuda|help|oi|ola|olá/.test(text)) {
       reply = `Olá! 👋 Comandos disponíveis:\n\n*resumo* — saldo e totais do mês\n*contas* — contas pendentes\n*gastos* — gastos por categoria`;
