@@ -13,15 +13,22 @@ function initFirebase() {
   });
 }
 
+function normPhone(phone) {
+  const d = String(phone || '').replace(/\D/g, '').replace(/^55/, '');
+  // Normaliza número BR de 11 dígitos (DDD+9+8) para 10 dígitos (DDD+8)
+  if (d.length === 11) return d.slice(0, 2) + d.slice(3);
+  return d;
+}
+
 async function findUserByPhone(db, phone) {
-  const normalized = phone.replace(/^55/, '');
-  console.log('Buscando telefone:', phone, '→ normalizado:', normalized);
+  const normalized = normPhone(phone);
+  console.log('Buscando telefone:', phone, '→ normPhone:', normalized);
   const snap = await db.ref('users').once('value');
   const users = snap.val();
   if (!users) { console.log('Nenhum usuario no Firebase'); return null; }
   for (const [uid, userData] of Object.entries(users)) {
-    const tel = String(userData?.profile?.telefone || '').replace(/\D/g, '').replace(/^55/, '');
-    console.log(`uid: ${uid} | telefone no perfil: "${userData?.profile?.telefone}" → normalizado: "${tel}"`);
+    const tel = normPhone(userData?.profile?.telefone);
+    console.log(`uid: ${uid} | tel Firebase: "${userData?.profile?.telefone}" → normPhone: "${tel}"`);
     if (tel && tel === normalized) return { uid, profile: userData.profile };
   }
   return null;
