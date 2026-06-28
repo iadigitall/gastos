@@ -145,7 +145,25 @@ module.exports = async function handler(req, res) {
     const data = await getUserData(db, user.uid);
     let reply = '';
 
-    if (/resumo|saldo|total|quanto/.test(text)) {
+    if (/^lan[cç]ar?\s+/i.test(text)) {
+      const CATS = ['alimentação','transporte','lazer','saúde','saude','casa','educação','educacao','outros'];
+      const parts = text.replace(/^lan[cç]ar?\s+/i, '').trim().split(/\s+/);
+      const valor = parseFloat((parts[0] || '').replace(',', '.'));
+      if (!valor || valor <= 0) {
+        reply = '❌ Formato inválido. Exemplo:\n*lancar 50 almoço alimentação*';
+      } else {
+        const lastWord = parts[parts.length - 1].normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        const catMatch = CATS.find(c => c.normalize('NFD').replace(/[̀-ͯ]/g, '') === lastWord);
+        const categoria = catMatch ? parts[parts.length - 1] : 'outros';
+        const descParts = catMatch ? parts.slice(1, -1) : parts.slice(1);
+        const descricao = descParts.join(' ') || 'Gasto via WhatsApp';
+        const data_br = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+        const mesAtual = data_br.slice(0, 7);
+        const entry = { descricao, valor, categoria, data: data_br, criadoEm: Date.now() };
+        await db.ref(`users/${user.uid}/meses/${mesAtual}/gastos`).push(entry);
+        reply = `✅ Gasto salvo!\n💸 *R$ ${fmt(valor)}* — ${descricao}\n📂 Categoria: ${categoria}`;
+      }
+    } else if (/resumo|saldo|total|quanto/.test(text)) {
       reply = resumoMes(data);
     } else if (/conta|pagar|venc/.test(text)) {
       const contas = Object.values(data.mes.contas || {}).filter(c => !c.paga);
@@ -170,7 +188,7 @@ module.exports = async function handler(req, res) {
         for (const [cat, val] of sorted) reply += `• ${cat}: R$ ${fmt(val)}\n`;
       }
     } else if (/ajuda|help|oi|ola|olá/.test(text)) {
-      reply = `Olá! 👋 Comandos disponíveis:\n\n*resumo* — saldo e totais do mês\n*contas* — contas pendentes\n*gastos* — gastos por categoria`;
+      reply = `Olá! 👋 Comandos disponíveis:\n\n*resumo* — saldo e totais do mês\n*contas* — contas pendentes\n*gastos* — gastos por categoria\n*lancar [valor] [descrição] [categoria]* — registrar gasto\n\nEx: _lancar 50 almoço alimentação_`;
     } else {
       reply = `Não entendi. Tente: *resumo*, *contas* ou *gastos*.`;
     }
