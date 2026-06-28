@@ -14,12 +14,13 @@ function initFirebase() {
 }
 
 async function findUserByPhone(db, phone) {
+  const normalized = phone.replace(/^55/, '');
   const snap = await db.ref('users').once('value');
   const users = snap.val();
   if (!users) return null;
   for (const [uid, userData] of Object.entries(users)) {
-    const tel = (userData?.profile?.telefone || '').replace(/\D/g, '');
-    if (tel && tel === phone) return { uid, profile: userData.profile };
+    const tel = (userData?.profile?.telefone || '').replace(/\D/g, '').replace(/^55/, '');
+    if (tel && tel === normalized) return { uid, profile: userData.profile };
   }
   return null;
 }
