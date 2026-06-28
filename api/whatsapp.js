@@ -143,10 +143,12 @@ alimentacao, mercado, restaurante, padaria, transporte, combustivel, lazer, stre
     });
     const json = await resp.json();
     const raw = json.content?.[0]?.text?.trim() || '';
-    const parsed = JSON.parse(raw);
+    console.log('parseGastoIA raw:', raw);
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
     if (!parsed.valor || parsed.valor <= 0) return null;
     return { valor: Number(parsed.valor), descricao: parsed.descricao || 'Gasto', categoria: parsed.categoria || 'outros' };
-  } catch { return null; }
+  } catch (e) { console.log('parseGastoIA erro:', e.message); return null; }
 }
 
 module.exports = async function handler(req, res) {
