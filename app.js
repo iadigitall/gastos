@@ -51,7 +51,7 @@ const CATEGORIAS = {
   academia:     { icon: (s=26)=>ICO.dumbbell(s),  label: 'Academia' },
   outros:       { icon: (s=26)=>ICO.grid4(s),     label: 'Outros' },
 };
-const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null, _firstLoad: true };
+const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null, _firstLoad: true, _telefone: '' };
 let db = null, toastTimer = null, currentMonthListener = null;
 let _pendingVerification = false, _verifyUser = null;
 
@@ -227,6 +227,7 @@ function renderAll() {
   renderCategoryChart();
   renderMonthlyChart();
   renderInsights();
+  carregarPlanoCache();
 }
 
 function updateHeaderMonth() {
@@ -402,6 +403,7 @@ async function handleAddExpense(e) {
     if(db) { await uRef(`meses/${state.mesAtual}/gastos`).push(entry); }
     else { state.gastos[genId()]=entry; saveToLocalStorage(); renderAll(); }
     vibrate(30); showToast('Gasto adicionado!'); navigateTo('home'); resetExpenseForm();
+    detectarGastoAnomalo(entry);
   } catch(err) { showToast('Erro ao salvar. Tente de novo.'); }
   finally { btn.disabled=false; btn.textContent='Confirmar Gasto'; }
 }
@@ -756,6 +758,7 @@ function setupModals() {
   if(formEditBill) formEditBill.addEventListener('submit',saveEditBill);
   on('btn-confirm-close','click',handleCloseMonth);
   on('btn-confirm-delete','click',executeDelete);
+  on('btn-anomalia-insights','click',()=>{ closeModal('modal-anomalia'); navigateTo('home'); setTimeout(()=>document.getElementById('insights-list')?.scrollIntoView({behavior:'smooth',block:'start'}),200); });
   document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
 }
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
@@ -1098,6 +1101,107 @@ async function buildHistoricoInsights() {
   }
 
   return insights;
+}
+
+async function detectarGastoAnomalo(entrada) {
+  try {
+    const historico = await getHistoricoCache();
+    const keys = Object.keys(historico).sort();
+    if (keys.length < 2) return;
+
+    const catAccum = {};
+    let validMonths = 0;
+    for (const key of keys) {
+      const h = historico[key];
+      if (!h.gastos || !Object.keys(h.gastos).length) continue;
+      validMonths++;
+      for (const g of Object.values(h.gastos)) {
+        const cat = g.categoria || 'outros';
+        catAccum[cat] = (catAccum[cat] || 0) + (g.valor || 0);
+      }
+    }
+    if (validMonths < 2) return;
+
+    const categoria = entrada.categoria || 'outros';
+    const avgCategoria = (catAccum[categoria] || 0) / validMonths;
+    if (avgCategoria < 50) return;
+
+    // exclui o novo gasto pelo criadoEm exato para evitar dupla contagem (modo offline)
+    const totalExistente = Object.values(state.gastos)
+      .filter(g => (g.categoria || 'outros') === categoria && g.criadoEm !== entrada.criadoEm)
+      .reduce((s, g) => s + (g.valor || 0), 0);
+    const totalCategoria = totalExistente + entrada.valor;
+
+    const fator = totalCategoria / avgCategoria;
+    if (fator < 1.8) return;
+
+    const catLabel = CATEGORIAS[categoria]?.label || categoria;
+    const pct = Math.round((fator - 1) * 100);
+    document.getElementById('anomalia-title').textContent = `${catLabel} ${pct}% acima da média`;
+    document.getElementById('anomalia-detail').textContent =
+      `Você já gastou ${formatCurrency(totalCategoria)} em ${catLabel} este mês. Sua média histórica é ${formatCurrency(Math.round(avgCategoria))}.`;
+    openModal('modal-anomalia');
+  } catch (_) {}
+}
+
+function renderPlanoIA(plano) {
+  const container = document.getElementById('plano-ia-content');
+  if (!container) return;
+  const linhas = plano.split('\n').filter(l => l.trim());
+  const html = linhas.map(l => {
+    const s = l.trim();
+    if (s.startsWith('**') && s.endsWith('**')) return `<div class="plano-section-title">${s.replace(/\*\*/g,'')}</div>`;
+    if (/^\d+\./.test(s) || s.startsWith('•') || s.startsWith('-')) return `<div class="plano-item">${s}</div>`;
+    return `<div class="plano-text">${s}</div>`;
+  }).join('');
+  container.innerHTML = `<div class="plano-ia-result">${html}</div><button class="btn-gerar-plano btn-regenerar" onclick="gerarPlanoIA()">Regenerar plano</button>`;
+}
+
+function carregarPlanoCache() {
+  const uid = state.currentUser?.uid;
+  if (!uid) return;
+  try {
+    const raw = localStorage.getItem(`nd_plano_${uid}`);
+    if (!raw) return;
+    const { plano, geradoEm } = JSON.parse(raw);
+    const horas24 = 24 * 60 * 60 * 1000;
+    if (Date.now() - geradoEm < horas24 && plano) renderPlanoIA(plano);
+  } catch (_) {}
+}
+
+async function gerarPlanoIA() {
+  const container = document.getElementById('plano-ia-content');
+  if (!container) return;
+  container.innerHTML = `<div class="plano-loading">${ICO.bell(16)} Gerando seu plano personalizado...</div>`;
+
+  const gastosPorCategoria = {};
+  for (const g of Object.values(state.gastos)) {
+    const cat = g.categoria || 'outros';
+    gastosPorCategoria[cat] = (gastosPorCategoria[cat] || 0) + (g.valor || 0);
+  }
+  const historico = await getHistoricoCache();
+  const historicoResumo = Object.entries(historico)
+    .sort(([a],[b]) => a.localeCompare(b)).slice(-5)
+    .map(([mes, h]) => ({ mes, total: (h.totalGastos || 0) + (h.totalContas || 0) }));
+  const totalGastos = Object.values(state.gastos).reduce((s, g) => s + (g.valor || 0), 0);
+  const totalContas = Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
+  const contasFixas = Object.values(state.contasFixas).map(f => `${f.nome} R$${f.valor}`);
+
+  try {
+    const res = await fetch('/api/plano', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ salario: state.salario, limite: state.limiteGastos, totalGastos, totalContas, gastosPorCategoria, historicoResumo, contasFixas })
+    });
+    if (!res.ok) throw new Error('api_error');
+    const { plano } = await res.json();
+    const uid = state.currentUser?.uid || '';
+    if (uid) localStorage.setItem(`nd_plano_${uid}`, JSON.stringify({ plano, geradoEm: Date.now() }));
+    renderPlanoIA(plano);
+  } catch (_) {
+    container.innerHTML = `<div class="plano-ia-vazio"><p class="plano-ia-desc">Não foi possível gerar o plano agora.</p><button class="btn-gerar-plano" onclick="gerarPlanoIA()">Tentar de novo</button></div>`;
+    showToast('Erro ao gerar plano. Verifique sua conexão.');
+  }
 }
 
 function renderInsightsList(insights) {
@@ -1648,7 +1752,7 @@ function logout() {
   state.currentUser = null;
   state.salario = 0; state.limiteGastos = 1000;
   state._limitAlertShown = false; state._limitExceededAlertShown = false; state.hideValues = false; state._profileName = '';
-  state._profileFoto = null; state._pendingPhoto = null;
+  state._profileFoto = null; state._pendingPhoto = null; state._telefone = '';
   _motivationalShown = false;
   // Limpa DOM do tour sem marcar como concluído (cada usuário tem seu próprio estado)
   document.querySelectorAll('.tour-pulse').forEach(el => el.classList.remove('tour-pulse'));
@@ -1785,6 +1889,7 @@ async function loadUserProfile() {
     state._profileName = profile.nome || '';
     state.salario = profile.salario || 0;
     state.limiteGastos = profile.limiteGastos || 1000;
+    state._telefone = profile.telefone || '';
     state._limitAlertShown = false;
     if (el) el.textContent = state._profileName ? `Oi, ${state._profileName}!` : 'Oi!';
     if (profile.foto) { state._profileFoto = profile.foto; updateHeaderAvatar(profile.foto); }
@@ -1837,9 +1942,11 @@ function renderProfile() {
   const nameInput   = document.getElementById('profile-name');
   const salaryInput = document.getElementById('profile-salary');
   const limitInput  = document.getElementById('profile-limit');
+  const phoneInput  = document.getElementById('profile-phone');
   if (nameInput)   nameInput.value   = state._profileName || '';
   if (salaryInput) salaryInput.value = state.salario || '';
   if (limitInput)  limitInput.value  = state.limiteGastos || '';
+  if (phoneInput)  phoneInput.value  = state._telefone || '';
 
   const nameDisplay  = document.getElementById('profile-name-display');
   const emailDisplay = document.getElementById('profile-email-display');
@@ -1902,11 +2009,13 @@ async function saveProfile() {
   const btn = document.getElementById('btn-save-profile');
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
-  const nome    = (document.getElementById('profile-name')?.value   || '').trim();
-  const salario = parseFloat(document.getElementById('profile-salary')?.value) || 0;
-  const limite  = parseFloat(document.getElementById('profile-limit')?.value)  || 1000;
+  const nome     = (document.getElementById('profile-name')?.value   || '').trim();
+  const salario  = parseFloat(document.getElementById('profile-salary')?.value) || 0;
+  const limite   = parseFloat(document.getElementById('profile-limit')?.value)  || 1000;
+  const telefone = (document.getElementById('profile-phone')?.value || '').replace(/\D/g, '');
 
-  const data = { nome, salario, limiteGastos: limite };
+  const data = { nome, salario, limiteGastos: limite, telefone };
+  state._telefone = telefone;
   if (state._pendingPhoto) data.foto = state._pendingPhoto;
 
   try {

@@ -368,6 +368,20 @@
             <div id="insights-list"></div>
           </div>
 
+          <!-- Plano Personalizado IA -->
+          <div class="section-card" id="section-plano-ia">
+            <div class="section-header">
+              <span class="section-title">Plano Personalizado</span>
+              <span class="badge-ia">IA</span>
+            </div>
+            <div id="plano-ia-content">
+              <div class="plano-ia-vazio">
+                <p class="plano-ia-desc">Análise baseada nos seus dados reais de gastos e histórico</p>
+                <button class="btn-gerar-plano" onclick="gerarPlanoIA()">Gerar meu plano</button>
+              </div>
+            </div>
+          </div>
+
           <!-- Cartões -->
           <div class="section-card">
             <div class="section-header">
@@ -543,6 +557,11 @@
             <div class="form-group">
               <label for="profile-name">Como quer ser chamado?</label>
               <input type="text" id="profile-name" placeholder="Seu nome" autocomplete="given-name">
+            </div>
+            <div class="form-group">
+              <label for="profile-phone">WhatsApp (com DDD)</label>
+              <input type="tel" id="profile-phone" placeholder="Ex: 11999998888" inputmode="numeric" autocomplete="tel">
+              <small class="form-hint">Para receber alertas e consultar seus dados via WhatsApp</small>
             </div>
           </div>
 
@@ -792,6 +811,21 @@
           <button type="button" class="btn-delete-inline" onclick="deleteFromEditBill()">Excluir conta</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="modal-anomalia" class="modal hidden">
+    <div class="modal-backdrop" data-close="modal-anomalia"></div>
+    <div class="modal-content">
+      <div class="anomalia-icon-wrap">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3 id="anomalia-title" class="anomalia-title"></h3>
+      <p id="anomalia-detail" class="modal-body-text" style="text-align:center"></p>
+      <div class="modal-actions">
+        <button data-close="modal-anomalia" class="btn-secondary">Ok, entendi</button>
+        <button id="btn-anomalia-insights" class="btn-warning">Ver análise</button>
+      </div>
     </div>
   </div>
 

@@ -838,6 +838,32 @@ body::after {
   font-size: 13px; color: var(--danger); font-weight: 500; line-height: 1.5;
 }
 .warning-box.hidden { display: none; }
+.anomalia-icon-wrap { display: flex; justify-content: center; padding: 4px 0 0; }
+.anomalia-title { font-size: 18px; font-weight: 800; text-align: center; letter-spacing: -0.3px; color: var(--amber); }
+.btn-warning { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--amber); color: #111; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* ─── PLANO IA ─── */
+.badge-ia {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--green), #5BFF00);
+  color: #111; padding: 2px 7px; border-radius: 99px;
+}
+.plano-ia-vazio { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0 4px; }
+.plano-ia-desc { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.5; }
+.btn-gerar-plano {
+  width: 100%; padding: 13px; border: none; border-radius: 12px;
+  background: var(--green); color: #111; font-size: 14px; font-weight: 700;
+  cursor: pointer; letter-spacing: -0.2px;
+  box-shadow: 0 0 20px rgba(163,255,71,0.25);
+  transition: opacity 0.15s;
+}
+.btn-gerar-plano:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-gerar-plano.btn-regenerar { background: transparent; border: 1px solid var(--border); color: var(--muted); box-shadow: none; font-size: 13px; padding: 10px; margin-top: 4px; }
+.plano-ia-result { display: flex; flex-direction: column; gap: 10px; }
+.plano-section-title { font-size: 13px; font-weight: 800; color: var(--green); letter-spacing: 0.2px; margin-top: 4px; }
+.plano-item { font-size: 13px; color: var(--text); line-height: 1.55; padding-left: 4px; }
+.plano-text { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+.plano-loading { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); padding: 4px 0; }
 
 /* ─── FIXED BILLS VIEW ─── */
 .view-subtitle {
