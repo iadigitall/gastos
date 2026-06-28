@@ -38,8 +38,8 @@ async function getUserData(db, uid) {
   const mesAtual = new Date().toISOString().slice(0, 7);
   const [profileSnap, mesesSnap, fixasSnap] = await Promise.all([
     db.ref(`users/${uid}/profile`).once('value'),
-    db.ref(`meses/${uid}/${mesAtual}`).once('value'),
-    db.ref(`contasFixas/${uid}`).once('value'),
+    db.ref(`users/${uid}/meses/${mesAtual}`).once('value'),
+    db.ref(`users/${uid}/contasFixas`).once('value'),
   ]);
   return {
     profile: profileSnap.val() || {},
