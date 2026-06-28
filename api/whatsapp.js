@@ -20,7 +20,7 @@ async function findUserByPhone(db, phone) {
   const users = snap.val();
   if (!users) { console.log('Nenhum usuario no Firebase'); return null; }
   for (const [uid, userData] of Object.entries(users)) {
-    const tel = (userData?.profile?.telefone || '').replace(/\D/g, '').replace(/^55/, '');
+    const tel = String(userData?.profile?.telefone || '').replace(/\D/g, '').replace(/^55/, '');
     console.log(`uid: ${uid} | telefone no perfil: "${userData?.profile?.telefone}" → normalizado: "${tel}"`);
     if (tel && tel === normalized) return { uid, profile: userData.profile };
   }
