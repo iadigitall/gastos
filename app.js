@@ -34,22 +34,22 @@ const ICO = {
 };
 
 const CATEGORIAS = {
-  alimentacao:  { icon: (s=26)=>ICO.cart(s),     label: 'Alimentação' },
-  mercado:      { icon: (s=26)=>ICO.store(s),     label: 'Mercado' },
-  restaurante:  { icon: (s=26)=>ICO.fork(s),      label: 'Restaurante' },
-  padaria:      { icon: (s=26)=>ICO.coffee(s),    label: 'Padaria' },
-  transporte:   { icon: (s=26)=>ICO.car(s),       label: 'Transporte' },
-  combustivel:  { icon: (s=26)=>ICO.fuel(s),      label: 'Combustível' },
-  lazer:        { icon: (s=26)=>ICO.film(s),      label: 'Lazer' },
-  streaming:    { icon: (s=26)=>ICO.music(s),     label: 'Streaming' },
-  saude:        { icon: (s=26)=>ICO.heart(s),     label: 'Saúde' },
-  farmacia:     { icon: (s=26)=>ICO.pill(s),      label: 'Farmácia' },
-  aluguel:      { icon: (s=26)=>ICO.home(s),      label: 'Aluguel' },
-  internet:     { icon: (s=26)=>ICO.wifi(s),      label: 'Internet' },
-  educacao:     { icon: (s=26)=>ICO.book(s),      label: 'Educação' },
-  roupas:       { icon: (s=26)=>ICO.bag(s),       label: 'Roupas' },
-  academia:     { icon: (s=26)=>ICO.dumbbell(s),  label: 'Academia' },
-  outros:       { icon: (s=26)=>ICO.grid4(s),     label: 'Outros' },
+  alimentacao:  { icon: ()=>'🍽️',  label: 'Alimentação' },
+  mercado:      { icon: ()=>'🛒',   label: 'Mercado' },
+  restaurante:  { icon: ()=>'🍴',   label: 'Restaurante' },
+  padaria:      { icon: ()=>'🥐',   label: 'Padaria' },
+  transporte:   { icon: ()=>'🚌',   label: 'Transporte' },
+  combustivel:  { icon: ()=>'⛽',   label: 'Combustível' },
+  lazer:        { icon: ()=>'🎬',   label: 'Lazer' },
+  streaming:    { icon: ()=>'🎵',   label: 'Streaming' },
+  saude:        { icon: ()=>'🩺',   label: 'Saúde' },
+  farmacia:     { icon: ()=>'💊',   label: 'Farmácia' },
+  aluguel:      { icon: ()=>'🏠',   label: 'Aluguel' },
+  internet:     { icon: ()=>'📶',   label: 'Internet' },
+  educacao:     { icon: ()=>'📚',   label: 'Educação' },
+  roupas:       { icon: ()=>'👕',   label: 'Roupas' },
+  academia:     { icon: ()=>'💪',   label: 'Academia' },
+  outros:       { icon: ()=>'📦',   label: 'Outros' },
 };
 const state = { mesAtual: '', gastos: {}, contas: {}, contasFixas: {}, fixasIgnoradas: {}, selectedCategory: 'alimentacao', pendingDeleteId: null, pendingDeleteType: null, firebaseOk: false, demoMode: false, currentUser: null, salario: 0, limiteGastos: 1000, _limitAlertShown: false, _limitExceededAlertShown: false, hideValues: false, _profileName: '', _profileFoto: null, _pendingPhoto: null, _firstLoad: true, _telefone: '' };
 let db = null, toastTimer = null, currentMonthListener = null;
