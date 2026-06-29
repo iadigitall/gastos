@@ -365,7 +365,7 @@ function renderHomeTransactions() {
       <span class="transacao-icon cat-${g.categoria || 'outros'}">${cat.icon(26)}</span>
       <div class="transacao-info">
         <div class="transacao-desc">${escHtml(g.descricao)}</div>
-        <div class="transacao-sub">${cat.label}</div>
+        <div class="transacao-sub">${cat.label}${g.origem==='whatsapp'?' · 📱 WhatsApp':''}</div>
       </div>
       <div class="transacao-right">
         <div class="transacao-date">${formatDate(g.data)}</div>
@@ -540,7 +540,7 @@ function renderHistory() {
   entries.sort(([,a],[,b])=>(b.criadoEm||0)-(a.criadoEm||0));
   container.innerHTML=`<div class="history-inner">${entries.map(([id,g])=>{
     const cat=CATEGORIAS[g.categoria]||CATEGORIAS.outros;
-    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon(26)}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">${ICO.trash(16)}</button></div>`;
+    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon(26)}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label}${g.origem==='whatsapp'?' · 📱':''} · ${formatDate(g.data)}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">${ICO.trash(16)}</button></div>`;
   }).join('')}</div>`;
 }
 
