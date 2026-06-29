@@ -119,10 +119,8 @@ async function sendWhatsApp(to, message) {
 
 async function parseGastoIA(text) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  console.log('parseGastoIA: apiKey=', apiKey ? 'SET' : 'MISSING', '| text=', text.slice(0, 50));
-  if (!apiKey) return null;
+  if (!apiKey) return { gasto: null, debug: 'apiKey ausente' };
   try {
-    console.log('parseGastoIA: chamando Claude...');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
@@ -145,12 +143,11 @@ alimentacao, mercado, restaurante, padaria, transporte, combustivel, lazer, stre
     });
     const json = await resp.json();
     const raw = json.content?.[0]?.text?.trim() || '';
-    console.log('parseGastoIA raw:', raw);
     const clean = raw.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(clean);
-    if (!parsed.valor || parsed.valor <= 0) return null;
-    return { valor: Number(parsed.valor), descricao: parsed.descricao || 'Gasto', categoria: parsed.categoria || 'outros' };
-  } catch (e) { console.log('parseGastoIA erro:', e.message); return null; }
+    if (!parsed.valor || parsed.valor <= 0) return { gasto: null, debug: `Claude: ${clean.slice(0, 80)}` };
+    return { gasto: { valor: Number(parsed.valor), descricao: parsed.descricao || 'Gasto', categoria: parsed.categoria || 'outros' }, debug: '' };
+  } catch (e) { return { gasto: null, debug: `erro: ${e.message} | status: ${e.status || '?'}` }; }
 }
 
 module.exports = async function handler(req, res) {
@@ -209,7 +206,7 @@ module.exports = async function handler(req, res) {
       reply = `Olá! 👋 Sou seu assistente financeiro.\n\nPode me falar naturalmente:\n• _"gastei 50 no almoço"_\n• _"paguei 30 de uber"_\n• _"deu 89 na farmácia"_\n\nOu use os comandos:\n*resumo* — saldo do mês\n*contas* — contas pendentes\n*gastos* — gastos por categoria`;
     } else {
       // Tenta interpretar como gasto em linguagem natural via IA
-      const gasto = await parseGastoIA(text);
+      const { gasto, debug } = await parseGastoIA(text);
       if (gasto) {
         const data_br = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
         const mesAtual = data_br.slice(0, 7);
@@ -217,7 +214,7 @@ module.exports = async function handler(req, res) {
         await db.ref(`users/${user.uid}/meses/${mesAtual}/gastos`).push(entry);
         reply = `✅ *Gasto salvo!*\n💸 R$ ${fmt(gasto.valor)} — ${gasto.descricao}\n📂 ${gasto.categoria}`;
       } else {
-        reply = `Não entendi. Pode falar naturalmente, tipo:\n_"gastei 50 no almoço"_\n\nOu mande *ajuda* para ver os comandos.`;
+        reply = `Não entendi.\nDebug: ${debug}`;
       }
     }
 
