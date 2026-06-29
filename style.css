@@ -1047,8 +1047,8 @@ body::after {
   .past-month-card { padding: 20px; }
   .past-month-title { font-size: 20px; margin-bottom: 16px; }
 
-  .view-header { flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-  .view-header h2 { font-size: 20px; min-width: 100%; order: -1; margin-bottom: 8px; }
+  .view-header { gap: 12px; margin-bottom: 20px; padding: 20px 20px 0; }
+  .view-header h2 { font-size: 20px; }
   .btn-back { width: 38px; height: 38px; }
   .btn-icon-sm { width: 36px; height: 36px; font-size: 16px; }
 
