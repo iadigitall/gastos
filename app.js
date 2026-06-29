@@ -1159,6 +1159,16 @@ function renderPlanoIA(plano) {
   container.innerHTML = `<div class="plano-ia-result">${html}</div><button class="btn-gerar-plano btn-regenerar" onclick="gerarPlanoIA()">Regenerar plano</button>`;
 }
 
+function togglePlanoIA() {
+  const content = document.getElementById('plano-ia-content');
+  const icon = document.getElementById('plano-toggle-icon');
+  const btn = document.getElementById('btn-plano-toggle');
+  if (!content) return;
+  const collapsed = content.classList.toggle('collapsed');
+  icon.setAttribute('points', collapsed ? '6 9 12 15 18 9' : '18 15 12 9 6 15');
+  btn.setAttribute('aria-label', collapsed ? 'Expandir plano' : 'Recolher plano');
+}
+
 function carregarPlanoCache() {
   const uid = state.currentUser?.uid;
   if (!uid) return;

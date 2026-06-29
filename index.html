@@ -373,9 +373,12 @@
 
           <!-- Plano Personalizado IA -->
           <div class="section-card" id="section-plano-ia">
-            <div class="section-header">
+            <div class="section-header" onclick="togglePlanoIA()" style="cursor:pointer;user-select:none;">
               <span class="section-title">Plano Personalizado</span>
               <span class="badge-ia">IA</span>
+              <button class="btn-plano-toggle" id="btn-plano-toggle" aria-label="Recolher plano">
+                <svg id="plano-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
             </div>
             <div id="plano-ia-content">
               <div class="plano-ia-vazio">

@@ -855,6 +855,18 @@ body::after {
 .btn-warning { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--amber); color: #111; font-size: 14px; font-weight: 700; cursor: pointer; }
 
 /* ─── PLANO IA ─── */
+.btn-plano-toggle {
+  margin-left: auto; background: none; border: none; padding: 4px;
+  color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; transition: color 0.15s;
+}
+.btn-plano-toggle:hover { color: var(--text); }
+#plano-ia-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+  max-height: 2000px; opacity: 1;
+}
+#plano-ia-content.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
 .badge-ia {
   font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
   background: linear-gradient(135deg, var(--green), #5BFF00);
