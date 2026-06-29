@@ -123,24 +123,23 @@ function parseGastoSimples(text) {
   const valor = parseFloat(valorMatch[1].replace(',', '.'));
   if (!valor || valor <= 0) return null;
 
-  const t = text.toLowerCase();
+  const t = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   let categoria = 'outros';
-  if (/almoç|jant|restaur|lanche|pizza|hamburguer|ifood|comi|comida/.test(t)) categoria = 'restaurante';
+  if (/almoc|jant|restaur|lanche|pizza|hamburguer|ifood|comi(?!go)/.test(t)) categoria = 'restaurante';
   else if (/mercado|supermercado|feira|hortifruti/.test(t)) categoria = 'mercado';
-  else if (/padaria|café|cafe|pão|pao/.test(t)) categoria = 'padaria';
-  else if (/uber|99|taxi|táxi|ônibus|metro|gasolina|posto|combustiv/.test(t)) categoria = 'combustivel';
-  else if (/transport|passagem|brt|metrô/.test(t)) categoria = 'transporte';
-  else if (/remedio|remédio|farmacia|farmácia|medicamento|remedinho/.test(t)) categoria = 'farmacia';
-  else if (/médico|medico|consulta|hospital|saúde|saude|plano de saúde/.test(t)) categoria = 'saude';
+  else if (/padaria|cafe|pao/.test(t)) categoria = 'padaria';
+  else if (/uber|99|taxi|onibus|gasolina|posto|combustiv|etanol/.test(t)) categoria = 'combustivel';
+  else if (/transport|passagem|brt|metro|meeiro/.test(t)) categoria = 'transporte';
+  else if (/remed|farmac|medicam|drogaria|remedinho/.test(t)) categoria = 'farmacia';
+  else if (/medico|consulta|hospital|saude|plano de saude|dentista/.test(t)) categoria = 'saude';
   else if (/academia|gym|personal/.test(t)) categoria = 'academia';
   else if (/netflix|spotify|amazon|prime|disney|streaming|assinatura/.test(t)) categoria = 'streaming';
-  else if (/roupa|tênis|tenis|sapato|calçado|camisa|calça|vestido|blusa|bermuda/.test(t)) categoria = 'roupas';
-  else if (/aluguel|condominio|condomínio/.test(t)) categoria = 'aluguel';
-  else if (/internet|wifi|wi-fi|plano|celular|claro|vivo|tim/.test(t)) categoria = 'internet';
-  else if (/escola|faculdade|curso|livro|educação|educacao/.test(t)) categoria = 'educacao';
-  else if (/cinema|show|ingresso|parque|lazer|diversão/.test(t)) categoria = 'lazer';
-  else if (/mercado|compra|supermercado/.test(t)) categoria = 'mercado';
-  else if (/comida|alimenta/.test(t)) categoria = 'alimentacao';
+  else if (/roupa|tenis|sapato|calcado|camisa|calca|vestido|blusa|bermuda/.test(t)) categoria = 'roupas';
+  else if (/aluguel|condominio/.test(t)) categoria = 'aluguel';
+  else if (/internet|wifi|wi-fi|celular|claro|vivo|tim/.test(t)) categoria = 'internet';
+  else if (/escola|faculdade|curso|livro|educac/.test(t)) categoria = 'educacao';
+  else if (/cinema|show|ingresso|parque|lazer|diversao/.test(t)) categoria = 'lazer';
+  else if (/compra|alimenta/.test(t)) categoria = 'alimentacao';
 
   const descricao = text
     .replace(/r?\$?\s*\d+(?:[.,]\d+)?\s*(?:reais?|reias?|contos?|pila)?/gi, '')
