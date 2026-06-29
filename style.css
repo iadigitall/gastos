@@ -845,6 +845,12 @@ body::after {
 }
 .warning-box.hidden { display: none; }
 .anomalia-icon-wrap { display: flex; justify-content: center; padding: 4px 0 0; }
+.wa-bot-icon { display: flex; justify-content: center; margin-bottom: 4px; filter: drop-shadow(0 4px 16px rgba(37,211,102,0.4)); }
+.wa-bot-features { list-style: none; padding: 12px 0; display: flex; flex-direction: column; gap: 10px; }
+.wa-bot-features li { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.8); padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; }
+.wa-bot-tip { font-size: 12px; color: rgba(255,255,255,0.35); text-align: center; margin-top: 4px; }
+.btn-wa-open { background: #25d366; color: #fff; border: none; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.btn-wa-open:hover { background: #20b858; }
 .anomalia-title { font-size: 18px; font-weight: 800; text-align: center; letter-spacing: -0.3px; color: var(--amber); }
 .btn-warning { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--amber); color: #111; font-size: 14px; font-weight: 700; cursor: pointer; }
 
