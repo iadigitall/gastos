@@ -755,41 +755,41 @@ body::after {
 /* ─── BOTTOM NAV — Dynamic Island ─── */
 .bottom-nav {
   position: fixed;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%; transform: translateX(-50%);
   width: auto; height: auto;
-  background: rgba(8,8,16,0.88);
-  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  background: rgba(10,12,18,0.7);
+  backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);
   border-radius: 100px;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-  padding: 7px;
-  gap: 2px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
+  padding: 8px 10px;
+  gap: 4px;
   display: none; align-items: center;
   z-index: 100;
 }
 .nav-btn {
-  width: 68px; height: 54px;
+  width: 64px; height: 56px;
   flex: unset; position: relative;
   background: none; border: none;
-  color: rgba(255,255,255,0.3);
-  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   cursor: pointer; border-radius: 50px;
   transition: color 0.2s; text-decoration: none;
 }
-.nav-whatsapp { color: rgba(37,211,102,0.5); }
+.nav-whatsapp { color: rgba(37,211,102,0.45); }
 .nav-whatsapp:hover { color: #25d366; }
 .nav-btn::before {
   content: ''; position: absolute; inset: 0;
   border-radius: 50px;
-  background: rgba(163,255,71,0.1);
+  background: rgba(163,255,71,0.08);
   opacity: 0; transition: opacity 0.2s;
 }
 .nav-btn.active { color: var(--green); }
 .nav-btn.active::before { opacity: 1; }
 .nav-icon-wrap { display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
-.nav-svg { width: 24px; height: 24px; }
-.nav-label { display: none; }
+.nav-svg { width: 22px; height: 22px; }
+.nav-label { display: block; font-size: 10px; font-weight: 600; letter-spacing: .02em; position: relative; z-index: 1; }
 
 /* ─── MODALS ─── */
 .modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: flex-end; justify-content: center; }
