@@ -1165,7 +1165,7 @@ function togglePlanoIA() {
   const btn = document.getElementById('btn-plano-toggle');
   if (!content) return;
   const collapsed = content.classList.toggle('collapsed');
-  icon.setAttribute('points', collapsed ? '6 9 12 15 18 9' : '18 15 12 9 6 15');
+  icon.querySelector('polyline').setAttribute('points', collapsed ? '6 9 12 15 18 9' : '18 15 12 9 6 15');
   btn.setAttribute('aria-label', collapsed ? 'Expandir plano' : 'Recolher plano');
 }
 
