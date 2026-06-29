@@ -119,8 +119,10 @@ async function sendWhatsApp(to, message) {
 
 async function parseGastoIA(text) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
+  console.log('parseGastoIA: apiKey=', apiKey ? 'SET' : 'MISSING', '| text=', text.slice(0, 50));
   if (!apiKey) return null;
   try {
+    console.log('parseGastoIA: chamando Claude...');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
