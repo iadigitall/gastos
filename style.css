@@ -775,8 +775,10 @@ body::after {
   color: rgba(255,255,255,0.3);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; border-radius: 50px;
-  transition: color 0.2s;
+  transition: color 0.2s; text-decoration: none;
 }
+.nav-whatsapp { color: rgba(37,211,102,0.5); }
+.nav-whatsapp:hover { color: #25d366; }
 .nav-btn::before {
   content: ''; position: absolute; inset: 0;
   border-radius: 50px;
