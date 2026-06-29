@@ -1171,6 +1171,60 @@ function carregarPlanoCache() {
   } catch (_) {}
 }
 
+function gerarPlanoLocal({ salario, limite, totalGastos, totalContas, gastosPorCategoria, historicoResumo, contasFixas }) {
+  const fmtR = v => formatCurrency(v).replace('R$ ', 'R$ ');
+  const total = totalGastos + totalContas;
+  const saldo = (salario || 0) - total;
+  const pct = limite ? Math.round((total / limite) * 100) : null;
+  const linhas = [];
+
+  linhas.push('Análise do mês atual');
+
+  if (salario) {
+    if (saldo >= 0) linhas.push(`✅ Sobram ${fmtR(saldo)} após todos os gastos deste mês.`);
+    else linhas.push(`⚠️ Gastos superam a renda em ${fmtR(Math.abs(saldo))} — revise com urgência.`);
+  }
+  if (pct !== null) {
+    if (pct < 70) linhas.push(`✅ Você usou ${pct}% do limite — situação tranquila.`);
+    else if (pct < 90) linhas.push(`⚠️ ${pct}% do limite consumido — atenção aos próximos gastos.`);
+    else linhas.push(`🚨 ${pct}% do limite — evite novos gastos variáveis agora.`);
+  }
+
+  const topCats = Object.entries(gastosPorCategoria).sort(([,a],[,b]) => b - a).slice(0, 3);
+  if (topCats.length) {
+    linhas.push('Onde você mais gastou:');
+    topCats.forEach(([cat, val]) => {
+      const p = total > 0 ? Math.round((val / total) * 100) : 0;
+      const label = CATEGORIAS[cat]?.label || cat;
+      linhas.push(`• ${label}: ${fmtR(val)} (${p}% do total)`);
+    });
+  }
+
+  if (contasFixas.length) linhas.push(`🏠 ${contasFixas.length} conta(s) fixa(s) somando ${fmtR(totalContas)}`);
+
+  if (historicoResumo.length >= 2) {
+    const [anterior, atual] = historicoResumo.slice(-2);
+    const diff = atual.total - anterior.total;
+    if (Math.abs(diff) > 50) {
+      const pDiff = Math.round((Math.abs(diff) / anterior.total) * 100);
+      if (diff > 0) linhas.push(`📈 Gastos ${pDiff}% maiores que o mês anterior.`);
+      else linhas.push(`📉 Gastos ${pDiff}% menores que o mês anterior — ótimo!`);
+    }
+  }
+
+  linhas.push('Recomendações para este mês:');
+  if (topCats[0]) linhas.push(`• Revise os gastos em ${CATEGORIAS[topCats[0][0]]?.label || topCats[0][0]} — maior categoria`);
+  if (salario && saldo > 0) {
+    const pPoupanca = Math.round((saldo / salario) * 100);
+    if (pPoupanca >= 20) linhas.push(`• Guarde os ${fmtR(saldo)} restantes como reserva de emergência`);
+    else linhas.push(`• Tente guardar pelo menos 20% da renda (${fmtR(salario * 0.2)})`);
+  }
+  if (pct !== null && pct > 80) linhas.push('• Pause compras não essenciais até o próximo mês');
+  if (!salario) linhas.push('• Cadastre seu salário no perfil para análise mais completa');
+
+  return linhas.join('\n');
+}
+
 async function gerarPlanoIA() {
   const container = document.getElementById('plano-ia-content');
   if (!container) return;
@@ -1188,12 +1242,13 @@ async function gerarPlanoIA() {
   const totalGastos = Object.values(state.gastos).reduce((s, g) => s + (g.valor || 0), 0);
   const totalContas = Object.values(state.contas).reduce((s, c) => s + (c.valor || 0), 0);
   const contasFixas = Object.values(state.contasFixas).map(f => `${f.nome} R$${f.valor}`);
+  const payload = { salario: state.salario, limite: state.limiteGastos, totalGastos, totalContas, gastosPorCategoria, historicoResumo, contasFixas };
 
   try {
     const res = await fetch('/api/plano', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ salario: state.salario, limite: state.limiteGastos, totalGastos, totalContas, gastosPorCategoria, historicoResumo, contasFixas })
+      body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error('api_error');
     const { plano } = await res.json();
@@ -1201,8 +1256,10 @@ async function gerarPlanoIA() {
     if (uid) localStorage.setItem(`nd_plano_${uid}`, JSON.stringify({ plano, geradoEm: Date.now() }));
     renderPlanoIA(plano);
   } catch (_) {
-    container.innerHTML = `<div class="plano-ia-vazio"><p class="plano-ia-desc">Não foi possível gerar o plano agora.</p><button class="btn-gerar-plano" onclick="gerarPlanoIA()">Tentar de novo</button></div>`;
-    showToast('Erro ao gerar plano. Verifique sua conexão.');
+    const plano = gerarPlanoLocal(payload);
+    const uid = state.currentUser?.uid || '';
+    if (uid) localStorage.setItem(`nd_plano_${uid}`, JSON.stringify({ plano, geradoEm: Date.now() }));
+    renderPlanoIA(plano);
   }
 }
 
