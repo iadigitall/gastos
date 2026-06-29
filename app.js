@@ -540,8 +540,9 @@ function renderHistory() {
   entries.sort(([,a],[,b])=>(b.criadoEm||0)-(a.criadoEm||0));
   container.innerHTML=`<div class="history-inner">${entries.map(([id,g])=>{
     const cat=CATEGORIAS[g.categoria]||CATEGORIAS.outros;
-    const waMeta = g.origem==='whatsapp' ? ` · 📱 ${g.criadoEm ? new Date(g.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''}` : '';
-    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon(26)}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}${waMeta}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">${ICO.trash(16)}</button></div>`;
+    const hora = g.criadoEm ? new Date(g.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+    const waIcon = g.origem==='whatsapp' ? ' · 📱' : '';
+    return`<div class="history-item"><span class="history-cat-icon cat-${g.categoria||'outros'}">${cat.icon(26)}</span><div class="history-info"><div class="history-desc">${escHtml(g.descricao)}</div><div class="history-meta">${cat.label} · ${formatDate(g.data)}${hora ? ' · '+hora : ''}${waIcon}</div></div><div class="history-value">-${formatCurrency(g.valor)}</div><button class="btn-delete-expense" onclick="confirmDeleteExpense('${escHtml(id)}','${escHtml(g.descricao)}')">${ICO.trash(16)}</button></div>`;
   }).join('')}</div>`;
 }
 
