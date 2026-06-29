@@ -117,10 +117,42 @@ async function sendWhatsApp(to, message) {
   console.log('sendWhatsApp response:', resp.status, respText.slice(0, 200));
 }
 
+function parseGastoSimples(text) {
+  const valorMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:reais?|reias?|contos?|pila|mangos?|real)?/i);
+  if (!valorMatch) return null;
+  const valor = parseFloat(valorMatch[1].replace(',', '.'));
+  if (!valor || valor <= 0) return null;
+
+  const t = text.toLowerCase();
+  let categoria = 'outros';
+  if (/almoç|jant|restaur|lanche|pizza|hamburguer|ifood|comi|comida/.test(t)) categoria = 'restaurante';
+  else if (/mercado|supermercado|feira|hortifruti/.test(t)) categoria = 'mercado';
+  else if (/padaria|café|cafe|pão|pao/.test(t)) categoria = 'padaria';
+  else if (/uber|99|taxi|táxi|ônibus|metro|gasolina|posto|combustiv/.test(t)) categoria = 'combustivel';
+  else if (/transport|passagem|brt|metrô/.test(t)) categoria = 'transporte';
+  else if (/remedio|remédio|farmacia|farmácia|medicamento|remedinho/.test(t)) categoria = 'farmacia';
+  else if (/médico|medico|consulta|hospital|saúde|saude|plano de saúde/.test(t)) categoria = 'saude';
+  else if (/academia|gym|personal/.test(t)) categoria = 'academia';
+  else if (/netflix|spotify|amazon|prime|disney|streaming|assinatura/.test(t)) categoria = 'streaming';
+  else if (/roupa|tênis|tenis|sapato|calçado|camisa|calça|vestido|blusa|bermuda/.test(t)) categoria = 'roupas';
+  else if (/aluguel|condominio|condomínio/.test(t)) categoria = 'aluguel';
+  else if (/internet|wifi|wi-fi|plano|celular|claro|vivo|tim/.test(t)) categoria = 'internet';
+  else if (/escola|faculdade|curso|livro|educação|educacao/.test(t)) categoria = 'educacao';
+  else if (/cinema|show|ingresso|parque|lazer|diversão/.test(t)) categoria = 'lazer';
+  else if (/mercado|compra|supermercado/.test(t)) categoria = 'mercado';
+  else if (/comida|alimenta/.test(t)) categoria = 'alimentacao';
+
+  const descricao = text
+    .replace(/r?\$?\s*\d+(?:[.,]\d+)?\s*(?:reais?|reias?|contos?|pila)?/gi, '')
+    .replace(/^(acabei de |fui (n[ao] |ao? )|passei (n[ao] |ao? )|comprei |gastei |paguei |deu |custou |to pagando |paguei )/i, '')
+    .replace(/\s+/g, ' ').trim().slice(0, 50) || 'Gasto';
+
+  return { gasto: { valor, descricao, categoria }, debug: '' };
+}
+
 async function parseGastoIA(text) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const envKeys = Object.keys(process.env).filter(k => k.includes('ANTH') || k.includes('API') || k.includes('FIREBASE') || k.includes('EVOL'));
-  if (!apiKey) return { gasto: null, debug: `apiKey ausente. Vars: ${envKeys.join(', ') || 'nenhuma'}` };
+  if (!apiKey) return parseGastoSimples(text);
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -146,9 +178,9 @@ alimentacao, mercado, restaurante, padaria, transporte, combustivel, lazer, stre
     const raw = json.content?.[0]?.text?.trim() || '';
     const clean = raw.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(clean);
-    if (!parsed.valor || parsed.valor <= 0) return { gasto: null, debug: `Claude: ${clean.slice(0, 80)}` };
+    if (!parsed.valor || parsed.valor <= 0) return parseGastoSimples(text);
     return { gasto: { valor: Number(parsed.valor), descricao: parsed.descricao || 'Gasto', categoria: parsed.categoria || 'outros' }, debug: '' };
-  } catch (e) { return { gasto: null, debug: `erro: ${e.message} | status: ${e.status || '?'}` }; }
+  } catch (e) { return parseGastoSimples(text); }
 }
 
 module.exports = async function handler(req, res) {
@@ -207,7 +239,7 @@ module.exports = async function handler(req, res) {
       reply = `Olá! 👋 Sou seu assistente financeiro.\n\nPode me falar naturalmente:\n• _"gastei 50 no almoço"_\n• _"paguei 30 de uber"_\n• _"deu 89 na farmácia"_\n\nOu use os comandos:\n*resumo* — saldo do mês\n*contas* — contas pendentes\n*gastos* — gastos por categoria`;
     } else {
       // Tenta interpretar como gasto em linguagem natural via IA
-      const { gasto, debug } = await parseGastoIA(text);
+      const { gasto } = await parseGastoIA(text);
       if (gasto) {
         const data_br = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
         const mesAtual = data_br.slice(0, 7);
@@ -215,7 +247,7 @@ module.exports = async function handler(req, res) {
         await db.ref(`users/${user.uid}/meses/${mesAtual}/gastos`).push(entry);
         reply = `✅ *Gasto salvo!*\n💸 R$ ${fmt(gasto.valor)} — ${gasto.descricao}\n📂 ${gasto.categoria}`;
       } else {
-        reply = `Não entendi.\nDebug: ${debug}`;
+        reply = `Não entendi. Tente incluir o valor, tipo:\n_"comprei um remédio e gastei 5 reais"_`;
       }
     }
 
