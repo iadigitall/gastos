@@ -418,11 +418,27 @@ body::after {
   border-bottom: 1px solid var(--border);
 }
 .transacao-item:last-child { border-bottom: none; }
-.transacao-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  font-size: 30px; line-height: 1;
+.transacao-icon, .history-cat-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
 }
+.transacao-icon svg, .history-cat-icon svg { filter: drop-shadow(0 2px 6px currentColor); }
+.transacao-icon.cat-alimentacao, .history-cat-icon.cat-alimentacao { color: #a3ff47; }
+.transacao-icon.cat-mercado,     .history-cat-icon.cat-mercado     { color: #4ade80; }
+.transacao-icon.cat-restaurante, .history-cat-icon.cat-restaurante { color: #fb923c; }
+.transacao-icon.cat-padaria,     .history-cat-icon.cat-padaria     { color: #fbbf24; }
+.transacao-icon.cat-transporte,  .history-cat-icon.cat-transporte  { color: #38bdf8; }
+.transacao-icon.cat-combustivel, .history-cat-icon.cat-combustivel { color: #f97316; }
+.transacao-icon.cat-lazer,       .history-cat-icon.cat-lazer       { color: #f472b6; }
+.transacao-icon.cat-streaming,   .history-cat-icon.cat-streaming   { color: #a78bfa; }
+.transacao-icon.cat-saude,       .history-cat-icon.cat-saude       { color: #f87171; }
+.transacao-icon.cat-farmacia,    .history-cat-icon.cat-farmacia    { color: #34d399; }
+.transacao-icon.cat-aluguel,     .history-cat-icon.cat-aluguel     { color: #60a5fa; }
+.transacao-icon.cat-internet,    .history-cat-icon.cat-internet    { color: #818cf8; }
+.transacao-icon.cat-educacao,    .history-cat-icon.cat-educacao    { color: #fcd34d; }
+.transacao-icon.cat-roupas,      .history-cat-icon.cat-roupas      { color: #e879f9; }
+.transacao-icon.cat-academia,    .history-cat-icon.cat-academia    { color: #2dd4bf; }
+.transacao-icon.cat-outros,      .history-cat-icon.cat-outros      { color: #94a3b8; }
 .transacao-info { flex: 1; min-width: 0; }
 .transacao-desc {
   font-size: 18px; font-weight: 700;
@@ -693,11 +709,6 @@ body::after {
   padding: 20px 0; display: flex; align-items: center; gap: 18px;
 }
 .history-item:last-child { border-bottom: none; }
-.history-cat-icon {
-  flex-shrink: 0; width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px; line-height: 1;
-}
 .history-info { flex: 1; min-width: 0; }
 .history-desc {
   font-size: 18px; font-weight: 700;
