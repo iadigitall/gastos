@@ -240,7 +240,7 @@ module.exports = async function handler(req, res) {
       if (gasto) {
         const data_br = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
         const mesAtual = data_br.slice(0, 7);
-        const entry = { descricao: gasto.descricao, valor: gasto.valor, categoria: gasto.categoria, data: data_br, criadoEm: Date.now() };
+        const entry = { descricao: gasto.descricao, valor: gasto.valor, categoria: gasto.categoria, data: data_br, criadoEm: Date.now(), origem: 'whatsapp' };
         await db.ref(`users/${user.uid}/meses/${mesAtual}/gastos`).push(entry);
         reply = `✅ *Gasto salvo!*\n💸 R$ ${fmt(gasto.valor)} — ${gasto.descricao}\n📂 ${gasto.categoria}`;
       } else {
