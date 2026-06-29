@@ -141,12 +141,10 @@ function parseGastoSimples(text) {
   else if (/cinema|show|ingresso|parque|lazer|diversao/.test(t)) categoria = 'lazer';
   else if (/compra|alimenta/.test(t)) categoria = 'alimentacao';
 
-  const descricao = text
-    .replace(/r?\$?\s*\d+(?:[.,]\d+)?\s*(?:reais?|reias?|contos?|pila)?/gi, '')
-    .replace(/^(acabei de |fui (n[ao] |ao? )|passei (n[ao] |ao? )|comprei |gastei |paguei |deu |custou |to pagando |paguei )/i, '')
-    .replace(/\s+/g, ' ').trim().slice(0, 50) || 'Gasto';
+  const LABELS = { restaurante:'Restaurante', mercado:'Mercado', padaria:'Padaria', combustivel:'Combustível', transporte:'Transporte', farmacia:'Farmácia', saude:'Saúde', academia:'Academia', streaming:'Streaming', roupas:'Roupas', aluguel:'Aluguel', internet:'Internet', educacao:'Educação', lazer:'Lazer', alimentacao:'Alimentação', outros:'Outros' };
+  const descricao = LABELS[categoria] || 'Gasto';
 
-  return { gasto: { valor, descricao, categoria }, debug: '' };
+  return { gasto: { valor, descricao, categoria, origem: 'whatsapp' }, debug: '' };
 }
 
 async function parseGastoIA(text) {
